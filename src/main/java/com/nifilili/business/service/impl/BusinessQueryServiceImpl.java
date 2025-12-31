@@ -6,6 +6,7 @@ import com.nifilili.business.dto.response.SectionResponse;
 import com.nifilili.business.repository.*;
 import com.nifilili.business.service.BusinessQueryService;
 import com.nifilili.common.exception.ResourceNotFoundException;
+import com.nifilili.config.repository.SectionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,8 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
     private final BusinessRepository businessRepository;
     private final BusinessCategoryRepository businessCategoryRepository;
     private final BusinessSectionDataRepository businessDataRepository;
+
+    private final SectionRepository sectionRepository;
 
     /* ---------------------------------------------------
        API 1: GET BUSINESS BY ID
@@ -96,6 +99,7 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
             responses.add(
                     SectionResponse.builder()
                             .sectionId(entry.getKey())
+                            .sectionName(sectionRepository.findById(entry.getKey()).get().getName())
                             .values(values)
                             .build()
             );

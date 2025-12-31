@@ -1,6 +1,7 @@
 package com.nifilili.business.service;
 
 import com.nifilili.business.dto.request.CreateBusinessRequest;
+import com.nifilili.business.dto.request.SaveBusinessAttributeRequest;
 import com.nifilili.business.dto.request.SaveSectionDataRequest;
 import com.nifilili.business.dto.request.UpdateBusinessProfileRequest;
 
@@ -15,6 +16,8 @@ public interface BusinessOnboardingService {
     void updateCategories(Long businessId, List<Long> categoryIds);
 
     void saveSectionData(Long businessId, Long sectionId, SaveSectionDataRequest request);
+
+    void saveAttributeData(Long businessId, SaveBusinessAttributeRequest request);
 
     void submitForKyc(Long businessId);
 

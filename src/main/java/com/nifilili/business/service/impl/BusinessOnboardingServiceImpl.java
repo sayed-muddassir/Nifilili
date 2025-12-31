@@ -1,12 +1,11 @@
 package com.nifilili.business.service.impl;
 
-import com.nifilili.business.domain.Business;
-import com.nifilili.business.domain.BusinessCategory;
-import com.nifilili.business.domain.BusinessSectionData;
-import com.nifilili.business.domain.SectionGroup;
+import com.nifilili.business.domain.*;
 import com.nifilili.business.dto.request.CreateBusinessRequest;
+import com.nifilili.business.dto.request.SaveBusinessAttributeRequest;
 import com.nifilili.business.dto.request.SaveSectionDataRequest;
 import com.nifilili.business.dto.request.UpdateBusinessProfileRequest;
+import com.nifilili.business.mapper.BusinessAttributeMapper;
 import com.nifilili.business.repository.*;
 import com.nifilili.business.service.BusinessOnboardingService;
 import com.nifilili.common.enums.BusinessSource;
@@ -15,8 +14,10 @@ import com.nifilili.common.enums.KycStatus;
 import com.nifilili.common.exception.InvalidBusinessStateException;
 import com.nifilili.common.exception.ResourceNotFoundException;
 //import com.nifilili.common.security.SecurityUtil;
+import com.nifilili.config.domain.AttributeDefinition;
 import com.nifilili.config.domain.Section;
 import com.nifilili.config.domain.SectionField;
+import com.nifilili.config.repository.AttributeDefinitionRepository;
 import com.nifilili.config.repository.SectionFieldRepository;
 import com.nifilili.config.repository.SectionRepository;
 import com.nifilili.kyc.service.BusinessKycService;
@@ -167,6 +168,34 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
         businessSectionDataRepository.save(data);
     }
 
+    private final BusinessAttributeRepository repository;
+    private final AttributeDefinitionRepository definitionRepository;
+    private final BusinessAttributeMapper mapper;
+
+    @Override
+    public void saveAttributeData(Long businessId, SaveBusinessAttributeRequest request) {
+
+        AttributeDefinition def = definitionRepository
+                .findById(request.getAttributeId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Attribute not found"));
+
+        validateAttributeData(def, request.getAttributeValue());
+
+        repository.deleteByBusinessIdAndAttributeId(
+                businessId,
+                request.getAttributeId()
+        );
+
+        BusinessAttribute attribute = new BusinessAttribute(
+                businessId,
+                request.getAttributeId(),
+                request.getAttributeValue()
+        );
+
+        repository.save(attribute);
+    }
+
     /* --------------------------------------------------------
        STEP 5: SUBMIT FOR KYC
        -------------------------------------------------------- */
@@ -226,6 +255,54 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
                 throw new InvalidBusinessStateException(
                         "Missing required field: " + field.getName());
             }
+        }
+    }
+
+    private void validateAttributeData(AttributeDefinition def, Object value) {
+
+        if (value == null && def.isRequired()) {
+            throw new IllegalArgumentException("Attribute is required");
+        }
+
+        switch (def.getType().toUpperCase()) {
+
+            case "BOOLEAN" -> {
+                if (!(value instanceof Boolean)) {
+                    throw new IllegalArgumentException("Expected boolean");
+                }
+            }
+
+            case "NUMBER" -> {
+                if (!(value instanceof Number)) {
+                    throw new IllegalArgumentException("Expected number");
+                }
+            }
+
+            case "TEXT" -> {
+                if (!(value instanceof String s) || s.isBlank()) {
+                    throw new IllegalArgumentException("Expected non-empty text");
+                }
+            }
+
+            case "DROPDOWN" -> {
+                if (!(value instanceof String)
+                        || !def.getOptions().contains(value)) {
+                    throw new IllegalArgumentException("Invalid dropdown value");
+                }
+            }
+
+            case "CHECKBOX" -> {
+                if (!(value instanceof Iterable<?> list)) {
+                    throw new IllegalArgumentException("Expected list");
+                }
+                for (Object v : list) {
+                    if (!def.getOptions().contains(v)) {
+                        throw new IllegalArgumentException("Invalid checkbox option");
+                    }
+                }
+            }
+
+            default -> throw new IllegalArgumentException("Unsupported attribute type");
         }
     }
 }

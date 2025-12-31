@@ -1,9 +1,6 @@
 package com.nifilili.business.controller.ownerapi;
 
-import com.nifilili.business.dto.request.CreateBusinessRequest;
-import com.nifilili.business.dto.request.SaveSectionDataRequest;
-import com.nifilili.business.dto.request.UpdateBusinessCategoriesRequest;
-import com.nifilili.business.dto.request.UpdateBusinessProfileRequest;
+import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.CreateBusinessResponse;
 import com.nifilili.business.dto.response.SubmitBusinessResponse;
 import com.nifilili.business.service.BusinessOnboardingService;
@@ -12,12 +9,11 @@ import com.nifilili.common.enums.KycStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/my/business")
+@RequestMapping("/api/v1/business")
 @RequiredArgsConstructor
 public class BusinessOnboardingController {
 
@@ -86,29 +82,22 @@ public class BusinessOnboardingController {
     }
 
     /**
-     * STEP 5: Submit business for KYC verification
+     * STEP 5: Save dynamic attributes data
      */
-    @PostMapping("/{businessId}/submit")
-    public ResponseEntity<SubmitBusinessResponse> submitBusinessForKyc(
-            @PathVariable Long businessId
+    @PostMapping("{businessId}/attributes")
+    public ResponseEntity<Void> saveAttributeData(
+            @PathVariable Long businessId,
+            @RequestBody SaveBusinessAttributeRequest request
     ) {
-        businessOnboardingService.submitForKyc(businessId);
-
-        SubmitBusinessResponse response = new SubmitBusinessResponse(
-                businessId,
-                BusinessStatus.PENDING,
-                KycStatus.PENDING,
-                "Business submitted for verification. Our team will review it shortly."
-        );
-
-        return ResponseEntity.ok(response);
+        businessOnboardingService.saveAttributeData(businessId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
-     * STEP 6: Get business by ID
+     * STEP 6: Submit business for KYC verification
      */
-    @GetMapping("/{businessId}")
-    public ResponseEntity<SubmitBusinessResponse> getBusinessById(
+    @PostMapping("/{businessId}/submit")
+    public ResponseEntity<SubmitBusinessResponse> submitBusinessForKyc(
             @PathVariable Long businessId
     ) {
         businessOnboardingService.submitForKyc(businessId);

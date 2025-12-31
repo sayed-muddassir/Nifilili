@@ -19,4 +19,5 @@ public class Section extends BaseEntity {
     private String prompt;
     private boolean required;
     private boolean allowMultiple;
+    private boolean groupable;
 }

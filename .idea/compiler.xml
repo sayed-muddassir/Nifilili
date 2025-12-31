@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.m2/personal/repository/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
+          <entry name="$USER_HOME$/.m2/personal/repository/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
         </processorPath>
         <module name="project" />
       </profile>
