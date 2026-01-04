@@ -7,6 +7,11 @@ import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.Instant;
+import java.util.Map;
 
 @Entity
 @Table(name = "business_attributes")
@@ -21,5 +26,13 @@ public class BusinessAttribute extends BaseEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "attribute_value", columnDefinition = "jsonb")
-    private Object attributeValue;
+    private Map<String, Object> attributeValue;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    protected Instant createdAt;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    protected Instant updatedAt;
 }

@@ -38,4 +38,5 @@ public class BusinessResponse {
     private Integer reviewCount;
 
     private List<SectionResponse> sections;
+    private List<BusinessAttributeResponse> attributes;
 }

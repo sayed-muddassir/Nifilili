@@ -6,7 +6,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
+import lombok.Getter;
 
+@Getter
 @MappedSuperclass
 public abstract class BaseEntity extends AuditableEntity {
 
@@ -21,7 +23,4 @@ public abstract class BaseEntity extends AuditableEntity {
         }
     }
 
-    public Long getId() {
-        return id;
-    }
 }

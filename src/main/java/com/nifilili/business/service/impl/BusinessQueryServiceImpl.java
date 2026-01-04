@@ -1,11 +1,14 @@
 package com.nifilili.business.service.impl;
 
 import com.nifilili.business.domain.*;
+import com.nifilili.business.dto.response.BusinessAttributeResponse;
 import com.nifilili.business.dto.response.BusinessResponse;
 import com.nifilili.business.dto.response.SectionResponse;
 import com.nifilili.business.repository.*;
 import com.nifilili.business.service.BusinessQueryService;
+import com.nifilili.common.enums.BusinessStatus;
 import com.nifilili.common.exception.ResourceNotFoundException;
+import com.nifilili.config.repository.AttributeDefinitionRepository;
 import com.nifilili.config.repository.SectionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,8 +28,10 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
     private final BusinessRepository businessRepository;
     private final BusinessCategoryRepository businessCategoryRepository;
     private final BusinessSectionDataRepository businessDataRepository;
+    private final BusinessAttributeRepository businessAttributeRepository;
 
     private final SectionRepository sectionRepository;
+    private final AttributeDefinitionRepository attributeDefinitionRepository;
 
     /* ---------------------------------------------------
        API 1: GET BUSINESS BY ID
@@ -38,6 +43,9 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Business not found"));
 
+        if(!BusinessStatus.PUBLISHED.equals(business.getStatus())) {
+            throw new ResourceNotFoundException("Business not published yet");
+        }
         List<Long> categoryIds = businessCategoryRepository
                 .findByBusinessId(businessId)
                 .stream()
@@ -47,7 +55,10 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
         List<SectionResponse> sections =
                 buildSectionResponses(businessId);
 
-        return mapToResponse(business, categoryIds, sections);
+        List<BusinessAttributeResponse> attributes =
+                buildAttributeResponses(businessId);
+
+        return mapToResponse(business, categoryIds, sections, attributes);
     }
 
     /* ---------------------------------------------------
@@ -68,7 +79,7 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                     List<SectionResponse> sections =
                             buildSectionResponses(business.getId());
 
-                    return mapToResponse(business, categoryIds, sections);
+                    return mapToResponse(business, categoryIds, sections, null);
                 });
     }
 
@@ -108,10 +119,30 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
         return responses;
     }
 
+    private List<BusinessAttributeResponse> buildAttributeResponses(Long businessId) {
+        List<BusinessAttribute> data =
+                businessAttributeRepository.findByBusinessId(businessId);
+
+        List<BusinessAttributeResponse> responses = new ArrayList<>();
+
+        for (BusinessAttribute attribute : data) {
+            responses.add(
+                    BusinessAttributeResponse.builder()
+                            .attributeId(attribute.getAttributeId())
+                            .name(attributeDefinitionRepository.findById(attribute.getAttributeId()).get().getName())
+                            .attributeValue(attribute.getAttributeValue())
+                            .build(
+            ));
+        }
+
+        return responses;
+    }
+
     private BusinessResponse mapToResponse(
             Business business,
             List<Long> categoryIds,
-            List<SectionResponse> sections
+            List<SectionResponse> sections,
+            List<BusinessAttributeResponse> attributes
     ) {
 
         return BusinessResponse.builder()
@@ -134,6 +165,7 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                 .averageRating(business.getAverageRating())
                 .reviewCount(business.getReviewCount())
                 .sections(sections)
+                .attributes(attributes)
                 .build();
     }
 }

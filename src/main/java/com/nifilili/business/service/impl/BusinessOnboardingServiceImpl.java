@@ -20,13 +20,13 @@ import com.nifilili.config.domain.SectionField;
 import com.nifilili.config.repository.AttributeDefinitionRepository;
 import com.nifilili.config.repository.SectionFieldRepository;
 import com.nifilili.config.repository.SectionRepository;
-import com.nifilili.kyc.service.BusinessKycService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,8 +44,6 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
     private final SectionGroupRepository sectionGroupRepository;
     private final SectionRepository sectionRepository;
     private final SectionFieldRepository sectionFieldRepository;
-
-    private final BusinessKycService businessKycService;
 
     /* --------------------------------------------------------
        STEP 1: CREATE BUSINESS
@@ -94,8 +92,8 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
         ensureEditable(business);
 
         business.setBusinessSummary(request.getBusinessSummary());
-//        business.setContacts(request.getContacts());
-//        business.setBusinessHours(request.getBusinessHours());
+        business.setContacts(request.getContacts());
+        business.setBusinessHours(request.getBusinessHours());
         business.setLatitude(request.getLatitude());
         business.setLongitude(request.getLongitude());
 
@@ -190,28 +188,12 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
         BusinessAttribute attribute = new BusinessAttribute(
                 businessId,
                 request.getAttributeId(),
-                request.getAttributeValue()
+                Map.of("value", request.getAttributeValue()),
+                Instant.now(),
+                Instant.now()
         );
 
         repository.save(attribute);
-    }
-
-    /* --------------------------------------------------------
-       STEP 5: SUBMIT FOR KYC
-       -------------------------------------------------------- */
-    @Override
-    public void submitForKyc(Long businessId) {
-
-        Business business = loadOwnedBusiness(businessId);
-        ensureEditable(business);
-
-        // Delegated checks
-        businessKycService.validateSubmissionEligibility(businessId);
-
-        business.setStatus(BusinessStatus.PENDING);
-        businessRepository.save(business);
-
-        businessKycService.createOrUpdateKyc(businessId, KycStatus.PENDING);
     }
 
     /* --------------------------------------------------------

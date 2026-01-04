@@ -19,8 +19,6 @@ public interface BusinessOnboardingService {
 
     void saveAttributeData(Long businessId, SaveBusinessAttributeRequest request);
 
-    void submitForKyc(Long businessId);
-
 
 }
 

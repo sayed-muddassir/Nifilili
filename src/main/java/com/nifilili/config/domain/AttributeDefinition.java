@@ -7,7 +7,10 @@ import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -34,4 +37,12 @@ public class AttributeDefinition extends BaseEntity {
 
     @Column(columnDefinition = "text")
     private String prompt;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    protected Instant createdAt;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    protected Instant updatedAt;
 }
