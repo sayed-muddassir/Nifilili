@@ -7,7 +7,7 @@ public class SectionValidationException extends RuntimeException {
     private final List<String> errors;
 
     public SectionValidationException(List<String> errors) {
-        super("Section validation failed");
+        super("SectionDefinition validation failed");
         this.errors = errors;
     }
 

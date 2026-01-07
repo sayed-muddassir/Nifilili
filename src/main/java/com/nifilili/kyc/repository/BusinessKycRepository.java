@@ -1,6 +1,6 @@
 package com.nifilili.kyc.repository;
 
-import com.nifilili.common.enums.KycStatus;
+import com.nifilili.core.enums.KycStatus;
 import com.nifilili.kyc.domain.BusinessKyc;
 import com.nifilili.kyc.repository.projection.AdminKycListProjection;
 import org.springframework.data.domain.Page;

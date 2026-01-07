@@ -1,6 +1,6 @@
 package com.nifilili.kyc.dto.response;
 
-import com.nifilili.common.enums.KycStatus;
+import com.nifilili.core.enums.KycStatus;
 import lombok.Data;
 
 import java.util.List;

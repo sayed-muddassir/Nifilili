@@ -1,6 +1,6 @@
 package com.nifilili.business.validation;
 
-import com.nifilili.config.domain.SectionField;
+import com.nifilili.business.domain.SectionField;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

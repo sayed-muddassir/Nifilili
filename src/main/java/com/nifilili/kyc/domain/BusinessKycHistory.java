@@ -1,7 +1,7 @@
 package com.nifilili.kyc.domain;
 
-import com.nifilili.common.entity.BaseEntity;
-import com.nifilili.common.enums.KycStatus;
+import com.nifilili.core.entity.BaseEntity;
+import com.nifilili.core.enums.KycStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

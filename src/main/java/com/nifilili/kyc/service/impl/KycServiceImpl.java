@@ -1,16 +1,21 @@
 package com.nifilili.kyc.service.impl;
 
-import com.nifilili.common.enums.BusinessStatus;
-import com.nifilili.common.enums.KycStatus;
-import com.nifilili.common.exception.ResourceNotFoundException;
+import com.nifilili.business.events.BusinessDocumentReviewRequested;
+import com.nifilili.business.events.BusinessPublishRequested;
+import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.KycStatus;
+import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.business.domain.Business;
 import com.nifilili.business.repository.BusinessRepository;
 import com.nifilili.kyc.domain.*;
 import com.nifilili.kyc.dto.request.ReviewKycRequest;
-import com.nifilili.kyc.dto.request.UploadBusinessDocumentRequest;
+import com.nifilili.business.dto.request.UploadBusinessDocumentRequest;
 import com.nifilili.kyc.repository.*;
 import com.nifilili.kyc.service.KycService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
+import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +24,7 @@ import java.time.Instant;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@PreAuthorize(value = "hasRole('ADMIN')")
 public class KycServiceImpl implements KycService {
 
     private final BusinessRepository businessRepository;
@@ -27,22 +33,27 @@ public class KycServiceImpl implements KycService {
     private final BusinessKycHistoryRepository historyRepository;
 
     @Override
-    public void uploadDocument(Long businessId, UploadBusinessDocumentRequest request) {
+    public void uploadDocument(BusinessDocumentReviewRequested event) {
+        Long businessId = event.businessId();
+        UploadBusinessDocumentRequest request = event.request();
 
         BusinessDocument document = new BusinessDocument(
                 businessId,
                 request.getDocumentDefinitionId(),
                 request.getFileUrl(),
                 request.getFileName(),
-                "PENDING",
-                null
+                Instant.now(),
+                Instant.now()
         );
 
         documentRepository.save(document);
     }
 
     @Override
-    public void submit(Long businessId, String message) {
+    @EventListener
+    public void submit(BusinessPublishRequested event) {
+        Long businessId = event.businessId();
+        String message = event.message();
 
         Business business = businessRepository.findById(businessId)
                 .orElseThrow(() -> new ResourceNotFoundException("Business not found"));

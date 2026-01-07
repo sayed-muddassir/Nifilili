@@ -1,6 +1,6 @@
 package com.nifilili.business.domain;
 
-import com.nifilili.common.entity.BaseEntity;
+import com.nifilili.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;

@@ -10,7 +10,4 @@ public class BusinessDocumentResponse {
 
     private String fileName;
     private String fileUrl;
-
-    private String status;
-    private String rejectionReason;
 }

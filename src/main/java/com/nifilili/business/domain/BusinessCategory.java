@@ -1,6 +1,6 @@
 package com.nifilili.business.domain;
 
-import com.nifilili.common.entity.BaseEntity;
+import com.nifilili.core.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;

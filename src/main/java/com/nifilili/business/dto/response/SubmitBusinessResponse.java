@@ -1,7 +1,7 @@
 package com.nifilili.business.dto.response;
 
-import com.nifilili.common.enums.BusinessStatus;
-import com.nifilili.common.enums.KycStatus;
+import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.KycStatus;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

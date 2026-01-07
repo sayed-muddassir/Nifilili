@@ -1,6 +1,6 @@
 package com.nifilili.business.dto.response;
 
-import com.nifilili.common.enums.BusinessStatus;
+import com.nifilili.core.enums.BusinessStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

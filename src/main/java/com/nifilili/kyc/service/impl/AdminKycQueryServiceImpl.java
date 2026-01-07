@@ -1,10 +1,10 @@
 package com.nifilili.kyc.service.impl;
 
-import com.nifilili.common.enums.KycStatus;
-import com.nifilili.common.exception.ResourceNotFoundException;
-import com.nifilili.kyc.domain.BusinessDocument;
+import com.nifilili.core.enums.KycStatus;
+import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.kyc.domain.BusinessKyc;
 import com.nifilili.kyc.dto.response.*;
+import com.nifilili.kyc.mapper.BusinessDocumentMapper;
 import com.nifilili.kyc.repository.BusinessDocumentRepository;
 import com.nifilili.kyc.repository.BusinessKycRepository;
 import com.nifilili.kyc.repository.projection.AdminKycListProjection;
@@ -23,6 +23,7 @@ public class AdminKycQueryServiceImpl
 
     private final BusinessKycRepository kycRepository;
     private final BusinessDocumentRepository documentRepository;
+    private final BusinessDocumentMapper businessDocumentMapper;
 
     @Override
     public Page<AdminKycListItemResponse> getByStatus(
@@ -43,7 +44,7 @@ public class AdminKycQueryServiceImpl
         List<BusinessDocumentResponse> documents =
                 documentRepository.findByBusinessId(businessId)
                         .stream()
-                        .map(this::mapDocument)
+                        .map(businessDocumentMapper::toResponse)
                         .toList();
 
         AdminKycDetailResponse response = new AdminKycDetailResponse();
@@ -70,19 +71,6 @@ public class AdminKycQueryServiceImpl
         r.setKycStatus(p.getKycStatus());
         r.setSubmissionCount(p.getSubmissionCount());
         r.setLastUpdatedAt(p.getUpdatedAt());
-        return r;
-    }
-
-    private BusinessDocumentResponse mapDocument(
-            BusinessDocument d
-    ) {
-        BusinessDocumentResponse r = new BusinessDocumentResponse();
-        r.setId(d.getId());
-        r.setDocumentDefinitionId(d.getDocumentDefinitionId());
-        r.setFileName(d.getFileName());
-        r.setFileUrl(d.getFileUrl());
-        r.setStatus(d.getStatus());
-        r.setRejectionReason(d.getRejectionReason());
         return r;
     }
 }

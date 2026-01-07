@@ -1,6 +1,6 @@
 package com.nifilili.kyc.controller.admin;
 
-import com.nifilili.common.enums.KycStatus;
+import com.nifilili.core.enums.KycStatus;
 import com.nifilili.kyc.dto.request.ReviewKycRequest;
 import com.nifilili.kyc.dto.response.AdminKycDetailResponse;
 import com.nifilili.kyc.dto.response.AdminKycListItemResponse;
