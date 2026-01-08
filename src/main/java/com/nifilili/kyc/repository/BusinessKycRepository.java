@@ -16,16 +16,16 @@ public interface BusinessKycRepository
     Optional<BusinessKyc> findByBusinessId(Long businessId);
 
     @Query("""
-        select 
-            b.id as businessId,
-            b.name as businessName,
-            b.verticalId as verticalId,
-            k.kycStatus as kycStatus,
-            k.submissionCount as submissionCount
-        from BusinessKyc k
-        join Business b on b.id = k.businessId
-        where k.kycStatus = :status
-    """)
+                select 
+                    b.id as businessId,
+                    b.name as businessName,
+                    b.verticalId as verticalId,
+                    k.kycStatus as kycStatus,
+                    k.submissionCount as submissionCount
+                from BusinessKyc k
+                join Business b on b.id = k.businessId
+                where k.kycStatus = :status
+            """)
     Page<AdminKycListProjection> findByStatus(
             KycStatus status,
             Pageable pageable

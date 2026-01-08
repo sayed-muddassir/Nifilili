@@ -4,8 +4,6 @@ import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
 import com.nifilili.business.service.*;
 import com.nifilili.core.enums.BusinessStatus;
-import com.nifilili.business.dto.request.SubmitBusinessForReviewRequest;
-import com.nifilili.business.dto.request.UploadBusinessDocumentRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

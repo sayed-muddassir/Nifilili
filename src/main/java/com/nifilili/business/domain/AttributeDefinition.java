@@ -24,28 +24,21 @@ import java.util.List;
 @AllArgsConstructor
 public class AttributeDefinition extends BaseEntity {
 
-    private Long verticalId;
-
-    private String name;        // e.g. has_parking
-    private String label;       // e.g. Has Parking
-
-    private String type;        // Text, number, dropdown, checkbox, boolean
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private List<String> options;
-
-    private boolean required;
-    private boolean allowMultiple;
-
-    @Column(columnDefinition = "text")
-    private String prompt;
-
     @CreatedDate
     @Column(nullable = false, updatable = false)
     protected Instant createdAt;
-
     @LastModifiedDate
     @Column(nullable = false)
     protected Instant updatedAt;
+    private Long verticalId;
+    private String name;        // e.g. has_parking
+    private String label;       // e.g. Has Parking
+    private String type;        // Text, number, dropdown, checkbox, boolean
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<String> options;
+    private boolean required;
+    private boolean allowMultiple;
+    @Column(columnDefinition = "text")
+    private String prompt;
 }

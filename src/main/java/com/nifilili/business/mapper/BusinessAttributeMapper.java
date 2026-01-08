@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface BusinessAttributeMapper {
 
-    @Mapping(target = "name", ignore = true) // populated via join later
+    @Mapping(target = "name", ignore = true)
+        // populated via join later
     BusinessAttributeResponse toResponse(BusinessAttribute entity);
 }

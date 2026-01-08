@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface BusinessCategoryRepository extends JpaRepository<BusinessCategory, Long> {
     void deleteByBusinessId(Long businessId);
+
     List<BusinessCategory> findByBusinessId(Long businessId);
 }

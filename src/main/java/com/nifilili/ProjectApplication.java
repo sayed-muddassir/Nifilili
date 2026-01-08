@@ -8,8 +8,8 @@ import org.springframework.modulith.Modulithic;
 @Modulithic
 public class ProjectApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ProjectApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ProjectApplication.class, args);
+    }
 
 }

@@ -1,11 +1,11 @@
 package com.nifilili.business.service.impl;
 
-import com.nifilili.business.service.VerticalDefinitionService;
 import com.nifilili.business.domain.VerticalDefinition;
 import com.nifilili.business.dto.request.CreateVerticalRequest;
 import com.nifilili.business.dto.response.VerticalResponse;
 import com.nifilili.business.mapper.VerticalMapper;
 import com.nifilili.business.repository.VerticalRepository;
+import com.nifilili.business.service.VerticalDefinitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

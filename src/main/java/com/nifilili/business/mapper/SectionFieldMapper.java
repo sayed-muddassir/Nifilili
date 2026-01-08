@@ -9,7 +9,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface SectionFieldMapper {
 
-    @Mapping(target = "sectionId", ignore = true)// populated via join later
+    @Mapping(target = "sectionId", ignore = true)
+// populated via join later
     SectionField toEntity(CreateSectionFieldRequest request);
 
     SectionFieldResponse toResponse(SectionField entity);

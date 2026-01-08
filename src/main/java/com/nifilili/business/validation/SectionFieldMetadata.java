@@ -8,4 +8,5 @@ public record SectionFieldMetadata(
         boolean required,
         boolean allowMultiple,
         List<String> options
-) {}
+) {
+}

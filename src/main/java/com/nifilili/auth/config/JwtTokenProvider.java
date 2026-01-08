@@ -21,7 +21,7 @@ public class JwtTokenProvider {
     private long jwtExpirationDate;
 
     // generate JWT token
-    public String generateToken(Authentication authentication){
+    public String generateToken(Authentication authentication) {
 
         String username = authentication.getName();
 
@@ -39,12 +39,12 @@ public class JwtTokenProvider {
         return token;
     }
 
-    private Key key(){
+    private Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
     // get username from JWT token
-    public String getUsername(String token){
+    public String getUsername(String token) {
 
         return Jwts.parser()
                 .verifyWith((SecretKey) key())
@@ -55,7 +55,7 @@ public class JwtTokenProvider {
     }
 
     // validate JWT token
-    public boolean validateToken(String token){
+    public boolean validateToken(String token) {
         Jwts.parser()
                 .verifyWith((SecretKey) key())
                 .build()

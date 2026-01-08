@@ -1,11 +1,11 @@
 package com.nifilili.business.service.impl;
 
-import com.nifilili.business.service.CategoryDefinitionService;
 import com.nifilili.business.domain.CategoryDefinition;
 import com.nifilili.business.dto.request.CreateCategoryRequest;
 import com.nifilili.business.dto.response.CategoryResponse;
 import com.nifilili.business.mapper.CategoryMapper;
 import com.nifilili.business.repository.CategoryRepository;
+import com.nifilili.business.service.CategoryDefinitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

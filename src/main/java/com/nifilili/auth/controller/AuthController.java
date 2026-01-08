@@ -7,7 +7,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @AllArgsConstructor
 @RestController
@@ -28,7 +31,7 @@ public class AuthController {
             tags = {"Login [Public]"}
     )
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginDto loginDto){
+    public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginDto loginDto) {
         String token = authService.login(loginDto);
 
         JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();

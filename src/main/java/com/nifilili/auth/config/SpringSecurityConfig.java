@@ -27,7 +27,7 @@ public class SpringSecurityConfig {
     private JwtAuthenticationFilter authenticationFilter;
 
     @Bean
-    public static PasswordEncoder passwordEncoder(){
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -49,7 +49,7 @@ public class SpringSecurityConfig {
                     authorize.anyRequest().authenticated();
                 }).httpBasic(Customizer.withDefaults());
 
-        http.exceptionHandling( exception -> exception
+        http.exceptionHandling(exception -> exception
                 .authenticationEntryPoint(authenticationEntryPoint));
 
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);

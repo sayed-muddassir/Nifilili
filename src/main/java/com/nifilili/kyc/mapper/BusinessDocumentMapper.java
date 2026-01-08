@@ -1,7 +1,7 @@
 package com.nifilili.kyc.mapper;
 
-import com.nifilili.kyc.domain.BusinessDocument;
 import com.nifilili.business.dto.request.UploadBusinessDocumentRequest;
+import com.nifilili.kyc.domain.BusinessDocument;
 import com.nifilili.kyc.dto.response.BusinessDocumentResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

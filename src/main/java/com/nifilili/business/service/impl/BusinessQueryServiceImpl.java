@@ -1,6 +1,9 @@
 package com.nifilili.business.service.impl;
 
-import com.nifilili.business.domain.*;
+import com.nifilili.business.domain.Business;
+import com.nifilili.business.domain.BusinessAttribute;
+import com.nifilili.business.domain.BusinessCategory;
+import com.nifilili.business.domain.BusinessSectionData;
 import com.nifilili.business.dto.response.BusinessAttributeResponse;
 import com.nifilili.business.dto.response.BusinessResponse;
 import com.nifilili.business.dto.response.SectionResponse;
@@ -15,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +46,7 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Business not found"));
 
-        if(!BusinessStatus.PUBLISHED.equals(business.getStatus())) {
+        if (!BusinessStatus.PUBLISHED.equals(business.getStatus())) {
             throw new ResourceNotFoundException("Business not published yet");
         }
         List<Long> categoryIds = businessCategoryRepository
@@ -130,7 +135,7 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                             .name(attributeDefinitionRepository.findById(attribute.getAttributeId()).get().getName())
                             .attributeValue(attribute.getAttributeValue())
                             .build(
-            ));
+                            ));
         }
 
         return responses;

@@ -4,4 +4,5 @@ import com.nifilili.kyc.domain.BusinessKycHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BusinessKycHistoryRepository
-        extends JpaRepository<BusinessKycHistory, Long> {}
+        extends JpaRepository<BusinessKycHistory, Long> {
+}

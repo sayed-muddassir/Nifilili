@@ -24,23 +24,18 @@ import java.util.List;
 @AllArgsConstructor
 public class DocumentDefinition extends BaseEntity {
 
-    private Long verticalId;
-
-    private String name;
-    private String label;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private List<String> allowedExtensions;
-
-    private Integer maxFileSize;
-    private boolean required;
-
     @CreatedDate
     @Column(nullable = false, updatable = false)
     protected Instant createdAt;
-
     @LastModifiedDate
     @Column(nullable = false)
     protected Instant updatedAt;
+    private Long verticalId;
+    private String name;
+    private String label;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<String> allowedExtensions;
+    private Integer maxFileSize;
+    private boolean required;
 }
