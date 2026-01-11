@@ -2,7 +2,10 @@ package com.nifilili.job.domain;
 
 import com.nifilili.core.enums.job.JobApplicationStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,6 +19,9 @@ import java.util.List;
         )
 )
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class JobApplication {
 
     @Id
@@ -47,9 +53,6 @@ public class JobApplication {
 
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JobApplicationAnswer> answers = new ArrayList<>();
-
-    protected JobApplication() {
-    }
 
     @PrePersist
     void onCreate() {

@@ -17,7 +17,13 @@
       <assistant-state connection-id="virtual-postgres-connection" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
-      <assistant-state connection-id="ac05f75a-5ea6-4857-8199-d2b83e9a478d" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
+      <assistant-state connection-id="ac05f75a-5ea6-4857-8199-d2b83e9a478d" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="6397A5E87F7341EBA82C47C69C0CE58B" availability="AVAILABLE" acknowledgement="ENGAGED" selected="true">
+        <chats>
+          <chat id="6397A5E87F7341EBA82C47C69C0CE58B" title="" session-signature="" timestamp="1767866187298">
+            <messages />
+            <context provider="" profile="" model="" action="" interactive="true" />
+          </chat>
+        </chats>
         <tools />
       </assistant-state>
       <assistant-state connection-id="ac05f75a-5ea6-4857-8199-d2b83e9a478d" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
@@ -53,9 +59,6 @@
   </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
-  </component>
-  <component name="DBNavigator.Project.FileConnectionMappingManager">
-    <mapping file-url="file://$PROJECT_DIR$/src/main/resources/db.migration/V1__init_schema.sql" connection-id="ac05f75a-5ea6-4857-8199-d2b83e9a478d" session-id="MAIN" current-schema="nifilili_db" />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />

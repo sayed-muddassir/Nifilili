@@ -2,10 +2,11 @@ package com.nifilili.kyc.service.impl;
 
 import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.UploadBusinessDocumentRequest;
-import com.nifilili.business.events.BusinessDocumentReviewRequested;
-import com.nifilili.business.events.BusinessPublishRequested;
+import com.nifilili.business.events.BusinessDocumentReviewRequestedEvent;
+import com.nifilili.business.events.BusinessPublishRequestedEvent;
 import com.nifilili.business.repository.BusinessRepository;
 import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.DocumentStatus;
 import com.nifilili.core.enums.KycStatus;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.kyc.domain.BusinessDocument;
@@ -27,7 +28,7 @@ import java.time.Instant;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@PreAuthorize(value = "hasRole('ADMIN')")
+//@PreAuthorize(value = "hasRole('ADMIN')")
 public class KycServiceImpl implements KycService {
 
     private final BusinessRepository businessRepository;
@@ -36,7 +37,8 @@ public class KycServiceImpl implements KycService {
     private final BusinessKycHistoryRepository historyRepository;
 
     @Override
-    public void uploadDocument(BusinessDocumentReviewRequested event) {
+    @EventListener
+    public void uploadDocument(BusinessDocumentReviewRequestedEvent event) {
         Long businessId = event.businessId();
         UploadBusinessDocumentRequest request = event.request();
 
@@ -45,6 +47,8 @@ public class KycServiceImpl implements KycService {
                 request.getDocumentDefinitionId(),
                 request.getFileUrl(),
                 request.getFileName(),
+                DocumentStatus.PENDING,
+                "Rejection reason placeholder",
                 Instant.now(),
                 Instant.now()
         );
@@ -54,7 +58,7 @@ public class KycServiceImpl implements KycService {
 
     @Override
     @EventListener
-    public void submit(BusinessPublishRequested event) {
+    public void submit(BusinessPublishRequestedEvent event) {
         Long businessId = event.businessId();
         String message = event.message();
 

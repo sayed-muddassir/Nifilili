@@ -2,7 +2,7 @@ package com.nifilili.business.service.impl;
 
 import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.CreateBusinessRequest;
-import com.nifilili.business.events.BusinessCreated;
+import com.nifilili.business.events.BusinessCreatedEvent;
 import com.nifilili.business.repository.BusinessRepository;
 import com.nifilili.business.service.BusinessOnboardingService;
 import com.nifilili.core.enums.BusinessSource;
@@ -59,7 +59,7 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
 
         businessRepository.save(business);
 
-        publisher.publishEvent(new BusinessCreated(business.getId()));
+        publisher.publishEvent(new BusinessCreatedEvent(business.getId()));
 
         return business.getId();
     }

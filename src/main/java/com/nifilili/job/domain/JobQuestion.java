@@ -1,18 +1,21 @@
 package com.nifilili.job.domain;
 
+import com.nifilili.core.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
 @Entity
 @Table(name = "job_questions")
 @Data
-public class JobQuestion {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class JobQuestion extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_opening_id", nullable = false)
@@ -26,15 +29,6 @@ public class JobQuestion {
 
     private Instant createdAt;
     private Instant updatedAt;
-
-    protected JobQuestion() {
-    }
-
-    public JobQuestion(JobOpening jobOpening, String questionText, boolean required) {
-        this.jobOpening = jobOpening;
-        this.questionText = questionText;
-        this.required = required;
-    }
 
     @PrePersist
     void onCreate() {

@@ -24,15 +24,20 @@ import java.util.Map;
 @AllArgsConstructor
 public class BusinessAttribute extends BaseEntity {
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    protected Instant createdAt;
-    @LastModifiedDate
-    @Column(nullable = false)
-    protected Instant updatedAt;
     private Long businessId;
+
     private Long attributeId;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "attribute_value", columnDefinition = "jsonb")
     private Map<String, Object> attributeValue;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    protected Instant createdAt;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    protected Instant updatedAt;
+
 }

@@ -1,14 +1,14 @@
 package com.nifilili.kyc.service;
 
-import com.nifilili.business.events.BusinessDocumentReviewRequested;
-import com.nifilili.business.events.BusinessPublishRequested;
+import com.nifilili.business.events.BusinessDocumentReviewRequestedEvent;
+import com.nifilili.business.events.BusinessPublishRequestedEvent;
 import com.nifilili.kyc.dto.request.ReviewKycRequest;
 
 public interface KycService {
 
-    void uploadDocument(BusinessDocumentReviewRequested event);
+    void uploadDocument(BusinessDocumentReviewRequestedEvent event);
 
-    void submit(BusinessPublishRequested event);
+    void submit(BusinessPublishRequestedEvent event);
 
     void review(Long businessId, ReviewKycRequest request);
 }

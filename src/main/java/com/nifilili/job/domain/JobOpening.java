@@ -1,23 +1,27 @@
 package com.nifilili.job.domain;
 
+import com.nifilili.core.entity.BaseEntity;
 import com.nifilili.core.enums.job.JobOpeningStatus;
 import com.nifilili.core.enums.job.JobType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "job_openings")
 @Data
-public class JobOpening {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class JobOpening extends BaseEntity {
 
     private Long businessId;
 
@@ -40,7 +44,7 @@ public class JobOpening {
     private String toleName;
     private String postalCode;
 
-    @Column(nullable = false)
+    @Column(name = "is_remote", nullable = false)
     private boolean remote;
 
     private Double salaryRangeMin;
@@ -50,10 +54,11 @@ public class JobOpening {
 
     private LocalDate applicationDeadline;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", nullable = false)
-    private String skills; // JSON array as String
+    private Object skills; // JSON array as String
 
-    private Long viewCount = 0L;
+    private Long viewCount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -66,10 +71,7 @@ public class JobOpening {
     private Long updatedBy;
 
     @OneToMany(mappedBy = "jobOpening", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JobQuestion> questions = new ArrayList<>();
-
-    protected JobOpening() {
-    }
+    private List<JobQuestion> questions;
 
     @PrePersist
     void onCreate() {

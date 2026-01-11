@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class KycAdminController {
 
-    private final KycService service;
+    private final KycService kycService;
     private final AdminKycQueryService kycQueryService;
 
     /**
@@ -61,6 +61,6 @@ public class KycAdminController {
             @PathVariable Long businessId,
             @RequestBody ReviewKycRequest request
     ) {
-        service.review(businessId, request);
+        kycService.review(businessId, request);
     }
 }

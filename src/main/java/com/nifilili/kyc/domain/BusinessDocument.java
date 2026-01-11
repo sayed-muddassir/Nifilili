@@ -1,9 +1,8 @@
 package com.nifilili.kyc.domain;
 
 import com.nifilili.core.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.nifilili.core.enums.DocumentStatus;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,6 +22,9 @@ public class BusinessDocument extends BaseEntity {
     private Long documentDefinitionId;
     private String fileUrl;
     private String fileName;
+    @Enumerated(EnumType.STRING)
+    private DocumentStatus status;
+    private String rejectionReason;
     @CreatedDate
     @Column(nullable = false, updatable = false)
     protected Instant createdAt;

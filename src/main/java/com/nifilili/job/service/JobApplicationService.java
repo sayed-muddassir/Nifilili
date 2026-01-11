@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface JobApplicationService {
 
-    void apply(Long jobId, ApplyJobRequest request);
+    Long apply(Long jobId, ApplyJobRequest request);
 
     void withdraw(Long applicationId, String reason);
 
-    List<MyApplicationResponse> getMyApplications();
+    List<MyApplicationResponse> getMyApplications(Long userId);
 }

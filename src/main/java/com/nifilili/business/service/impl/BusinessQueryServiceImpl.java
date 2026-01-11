@@ -82,7 +82,10 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                     List<SectionResponse> sections =
                             buildSectionResponses(business.getId());
 
-                    return mapToResponse(business, categoryIds, sections, null);
+                    List<BusinessAttributeResponse> attributes =
+                            buildAttributeResponses(business.getId());
+
+                    return mapToResponse(business, categoryIds, sections, attributes);
                 });
     }
 
@@ -112,8 +115,8 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
 
             responses.add(
                     SectionResponse.builder()
-                            .sectionId(entry.getKey())
-                            .sectionName(sectionRepository.findById(entry.getKey()).get().getName())
+                            .id(entry.getKey())
+                            .name(sectionRepository.findById(entry.getKey()).get().getName())
                             .values(values)
                             .build()
             );

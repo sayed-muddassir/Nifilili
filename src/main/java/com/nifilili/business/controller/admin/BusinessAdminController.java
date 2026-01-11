@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/admin/config")
 @RequiredArgsConstructor
-@PreAuthorize(value = "hasRole('ADMIN')")
+//@PreAuthorize(value = "hasRole('ADMIN')")
 public class BusinessAdminController {
 
     private final VerticalDefinitionService verticalDefinitionService;

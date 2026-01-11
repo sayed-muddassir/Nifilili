@@ -1,5 +1,6 @@
 package com.nifilili.job.domain;
 
+import com.nifilili.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,11 +9,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "job_categories")
 @Data
-public class JobCategory {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class JobCategory extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String name;

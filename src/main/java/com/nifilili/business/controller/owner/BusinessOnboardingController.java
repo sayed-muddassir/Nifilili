@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/business")
 @RequiredArgsConstructor
-@PreAuthorize(value = "hasRole('USER')")
+//@PreAuthorize(value = "hasRole('USER')")
 public class BusinessOnboardingController {
 
     private final BusinessOnboardingService businessOnboardingService;

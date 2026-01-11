@@ -10,8 +10,8 @@ import java.util.Map;
 @Builder
 public class SectionResponse {
 
-    private Long sectionId;
-    private String sectionName;
+    private Long id;
+    private String name;
 
     // Each group = one repeatable block
     private List<Map<String, Object>> values;
