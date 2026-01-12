@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class JobSummaryResponse {
 
+    private Long jobId;
     private String title;
     private String description;
     private JobType jobType;

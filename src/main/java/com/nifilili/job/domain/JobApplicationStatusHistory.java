@@ -1,5 +1,6 @@
 package com.nifilili.job.domain;
 
+import com.nifilili.core.entity.BaseEntity;
 import com.nifilili.core.enums.job.JobApplicationStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,11 +10,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "job_application_status_history")
 @Data
-public class JobApplicationStatusHistory {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class JobApplicationStatusHistory extends BaseEntity {
 
     private Long jobApplicationId;
 

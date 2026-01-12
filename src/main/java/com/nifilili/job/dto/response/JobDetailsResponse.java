@@ -11,6 +11,8 @@ public class JobDetailsResponse {
 
     private String title;
     private String description;
+    private Long categoryId;
+    private String categoryName;
     private JobType jobType;
     private Long municipalityId;
     private Long wardNumber;

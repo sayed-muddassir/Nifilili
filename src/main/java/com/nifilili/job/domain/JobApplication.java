@@ -1,5 +1,6 @@
 package com.nifilili.job.domain;
 
+import com.nifilili.core.entity.BaseEntity;
 import com.nifilili.core.enums.job.JobApplicationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobApplication {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class JobApplication extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_opening_id", nullable = false)

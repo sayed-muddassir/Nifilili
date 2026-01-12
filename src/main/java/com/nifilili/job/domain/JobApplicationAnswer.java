@@ -1,5 +1,6 @@
 package com.nifilili.job.domain;
 
+import com.nifilili.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,11 +9,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "job_application_answers")
 @Data
-public class JobApplicationAnswer {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class JobApplicationAnswer extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_application_id", nullable = false)

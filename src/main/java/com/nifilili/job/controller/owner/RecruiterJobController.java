@@ -4,11 +4,11 @@ import com.nifilili.job.dto.request.ChangeApplicationStatusRequest;
 import com.nifilili.job.dto.request.CreateJobQuestionRequest;
 import com.nifilili.job.dto.request.CreateJobRequest;
 import com.nifilili.job.dto.response.JobApplicationResponse;
+import com.nifilili.job.dto.response.JobApplicationTimelineResponse;
 import com.nifilili.job.dto.response.JobQuestionResponse;
 import com.nifilili.job.service.RecruiterJobService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,11 +44,18 @@ public class RecruiterJobController {
         return recruiterJobService.getJobQuestions(jobId);
     }
 
-    //Applications Pipeline
+    //Publish Job so that it will be eligible for applications
+    @PostMapping("/{jobId}/publish")
+//    @PreAuthorize("isAuthenticated()")
+    public void publishJob(@PathVariable Long jobId) {
+        recruiterJobService.publishJob(jobId);
+    }
+
+
     @GetMapping("/{jobId}/applications")
 //    @PreAuthorize("isAuthenticated()")
     public List<JobApplicationResponse> getApplications(@PathVariable Long jobId) {
-        return recruiterJobService.getApplications(jobId);
+        return recruiterJobService.getApplicationsForJob(jobId);
     }
 
     @PostMapping("/applications/{applicationId}/status")
@@ -62,10 +69,10 @@ public class RecruiterJobController {
 
     @GetMapping("/applications/{applicationId}/timeline")
 //    @PreAuthorize("isAuthenticated()")
-    public void getApplicationTimeline(
+    public List<JobApplicationTimelineResponse> getApplicationTimeline(
             @PathVariable Long applicationId
     ) {
-        recruiterJobService.getApplicationTimeline(applicationId);
+        return recruiterJobService.getApplicationTimeline(applicationId);
     }
 
 }

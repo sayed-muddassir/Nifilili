@@ -1,7 +1,9 @@
 package com.nifilili.job.dto.request;
 
+import com.nifilili.core.enums.job.JobApplicationStatus;
+
 public record ChangeApplicationStatusRequest(
-        String status,
+        JobApplicationStatus status,
         String notes
 ) {
 }
