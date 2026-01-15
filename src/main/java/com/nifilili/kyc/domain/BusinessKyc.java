@@ -1,7 +1,7 @@
 package com.nifilili.kyc.domain;
 
 import com.nifilili.core.entity.BaseEntity;
-import com.nifilili.core.enums.KycStatus;
+import com.nifilili.core.enums.kyc.KycStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

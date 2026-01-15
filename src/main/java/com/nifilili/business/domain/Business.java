@@ -1,8 +1,8 @@
 package com.nifilili.business.domain;
 
 import com.nifilili.core.entity.BaseEntity;
-import com.nifilili.core.enums.BusinessSource;
-import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.business.BusinessSource;
+import com.nifilili.core.enums.business.BusinessStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;

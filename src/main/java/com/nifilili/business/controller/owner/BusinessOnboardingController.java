@@ -3,13 +3,12 @@ package com.nifilili.business.controller.owner;
 import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
 import com.nifilili.business.service.*;
-import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.business.BusinessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -9,7 +9,7 @@ import com.nifilili.business.dto.response.BusinessResponse;
 import com.nifilili.business.dto.response.SectionResponse;
 import com.nifilili.business.repository.*;
 import com.nifilili.business.service.BusinessQueryService;
-import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

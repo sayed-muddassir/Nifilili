@@ -1,6 +1,6 @@
 package com.nifilili.kyc.repository.projection;
 
-import com.nifilili.core.enums.KycStatus;
+import com.nifilili.core.enums.kyc.KycStatus;
 
 import java.time.LocalDateTime;
 

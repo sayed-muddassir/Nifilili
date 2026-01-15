@@ -5,7 +5,7 @@ import com.nifilili.business.domain.BusinessCategory;
 import com.nifilili.business.repository.BusinessCategoryRepository;
 import com.nifilili.business.repository.BusinessRepository;
 import com.nifilili.business.service.BusinessCategoryService;
-import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.InvalidBusinessStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;

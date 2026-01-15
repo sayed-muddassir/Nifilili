@@ -1,4 +1,4 @@
-package com.nifilili.core.enums;
+package com.nifilili.core.enums.business;
 
 public enum DocumentStatus {
     PENDING,

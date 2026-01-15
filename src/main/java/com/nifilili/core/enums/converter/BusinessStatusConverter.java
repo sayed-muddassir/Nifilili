@@ -1,6 +1,6 @@
 package com.nifilili.core.enums.converter;
 
-import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.business.BusinessStatus;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

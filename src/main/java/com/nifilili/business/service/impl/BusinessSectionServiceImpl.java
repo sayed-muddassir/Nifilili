@@ -5,7 +5,7 @@ import com.nifilili.business.dto.request.SaveSectionDataRequest;
 import com.nifilili.business.repository.*;
 import com.nifilili.business.service.BusinessSectionService;
 import com.nifilili.business.validation.SectionValidationService;
-import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.InvalidBusinessStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;

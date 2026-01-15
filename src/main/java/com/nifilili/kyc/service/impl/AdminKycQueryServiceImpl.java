@@ -1,6 +1,6 @@
 package com.nifilili.kyc.service.impl;
 
-import com.nifilili.core.enums.KycStatus;
+import com.nifilili.core.enums.kyc.KycStatus;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.kyc.domain.BusinessKyc;
 import com.nifilili.kyc.dto.response.AdminKycDetailResponse;

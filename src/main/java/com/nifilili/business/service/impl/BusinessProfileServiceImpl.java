@@ -4,7 +4,7 @@ import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.UpdateBusinessProfileRequest;
 import com.nifilili.business.repository.BusinessRepository;
 import com.nifilili.business.service.BusinessProfileService;
-import com.nifilili.core.enums.BusinessStatus;
+import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.InvalidBusinessStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
