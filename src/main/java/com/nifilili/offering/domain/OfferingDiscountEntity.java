@@ -1,7 +1,7 @@
 package com.nifilili.offering.domain;
 
 import com.nifilili.core.entity.BaseEntity;
-import com.nifilili.core.enums.offering.DiscountType;
+import com.nifilili.core.enums.util.DiscountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

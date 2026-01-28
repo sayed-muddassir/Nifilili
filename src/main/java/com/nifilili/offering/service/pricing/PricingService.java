@@ -1,6 +1,6 @@
 package com.nifilili.offering.service.pricing;
 
-import com.nifilili.core.enums.offering.DiscountType;
+import com.nifilili.core.enums.util.DiscountType;
 import com.nifilili.offering.domain.OfferingDiscountEntity;
 import com.nifilili.offering.domain.OfferingEntity;
 import com.nifilili.offering.domain.OfferingVariantEntity;

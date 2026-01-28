@@ -1,4 +1,4 @@
-package com.nifilili.core.enums.offering;
+package com.nifilili.core.enums.util;
 
 public enum DiscountType {
     PERCENTAGE,

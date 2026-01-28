@@ -1,6 +1,6 @@
 package com.nifilili.offering.dto.response;
 
-import com.nifilili.core.enums.offering.DiscountType;
+import com.nifilili.core.enums.util.DiscountType;
 
 import java.math.BigDecimal;
 
