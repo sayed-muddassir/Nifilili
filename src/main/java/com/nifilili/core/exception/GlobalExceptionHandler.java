@@ -48,7 +48,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ErrorDto> handleSecurityException(SQLException ex) {
+    public ResponseEntity<ErrorDto> handleResourceNotFound(ResourceNotFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorDto(HttpStatus.NOT_FOUND.value(), ex.getMessage()),
+                HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleInvalidBusinessState(InvalidBusinessStateException ex) {
+        log.warn("Invalid business state: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorDto(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleSqlException(SQLException ex) {
         log.error("SQL error: {}", ex.getMessage());
         return new ResponseEntity<>(new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR);

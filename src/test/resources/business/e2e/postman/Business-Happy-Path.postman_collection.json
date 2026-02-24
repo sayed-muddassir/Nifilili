@@ -330,6 +330,27 @@
         "url": "{{base_url}}/api/v1/business/{{business_id}}/submit"
       },
       "event": [{"listen": "test", "script": {"exec": ["pm.response.to.have.status(202);"]}}]
+    },
+    {
+      "name": "16 Claim Admin-Seeded Business",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/business/{{admin_seeded_business_id}}/claim"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Claim returns 202', function () { pm.response.to.have.status(202); });"
+            ]
+          }
+        }
+      ]
     }
   ],
   "variable": [
@@ -342,6 +363,7 @@
     {"key": "section_field_id", "value": ""},
     {"key": "attribute_id", "value": ""},
     {"key": "document_definition_id", "value": ""},
-    {"key": "business_id", "value": ""}
+    {"key": "business_id", "value": ""},
+    {"key": "admin_seeded_business_id", "value": ""}
   ]
 }

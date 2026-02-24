@@ -5,6 +5,7 @@ import com.nifilili.business.dto.response.*;
 import com.nifilili.business.service.*;
 import com.nifilili.core.enums.business.BusinessStatus;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -145,6 +146,19 @@ public class BusinessOnboardingController {
             @Valid @RequestBody SubmitBusinessForReviewRequest request
     ) {
         businessPublishService.submitForVerification(businessId, request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @Operation(
+            summary = "Claim Admin-Seeded Business",
+            description = "Claims an unclaimed admin-seeded business listing. Sets the authenticated user as the owner and initiates the KYC verification process."
+    )
+    @ApiResponse(responseCode = "202", description = "Business claimed, KYC process initiated")
+    @ApiResponse(responseCode = "400", description = "Business is not claimable (not admin-seeded or already claimed)")
+    @ApiResponse(responseCode = "404", description = "Business not found")
+    @PostMapping("/{businessId}/claim")
+    public ResponseEntity<Void> claimBusiness(@PathVariable Long businessId) {
+        businessPublishService.claimBusiness(businessId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }

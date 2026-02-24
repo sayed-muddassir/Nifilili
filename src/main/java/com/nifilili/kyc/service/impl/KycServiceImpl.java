@@ -2,6 +2,7 @@ package com.nifilili.kyc.service.impl;
 
 import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.UploadBusinessDocumentRequest;
+import com.nifilili.business.events.BusinessClaimedEvent;
 import com.nifilili.business.events.BusinessDocumentReviewRequestedEvent;
 import com.nifilili.business.events.BusinessPublishRequestedEvent;
 import com.nifilili.business.repository.BusinessRepository;
@@ -120,6 +121,22 @@ public class KycServiceImpl implements KycService {
         }
 
         businessRepository.save(business);
+    }
+
+    @Override
+    @EventListener
+    public void onBusinessClaimed(BusinessClaimedEvent event) {
+        Long businessId = event.businessId();
+
+        BusinessKyc kyc = new BusinessKyc();
+        kyc.setBusinessId(businessId);
+        kyc.setKycStatus(KycStatus.NOT_STARTED);
+        kyc.setSubmissionCount(0);
+        kyc.setCreatedAt(Instant.now());
+        kyc.setUpdatedAt(Instant.now());
+
+        kycRepository.save(kyc);
+        saveHistory(businessId, KycStatus.NOT_STARTED, "Business claimed — awaiting document upload");
     }
 
     private void applyDocumentReviewDecisions(Long businessId, ReviewKycRequest request, KycStatus kycStatus) {
