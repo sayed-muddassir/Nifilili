@@ -12,6 +12,7 @@ public class CreateBusinessRequest {
 
     @NotBlank
     private String name;
+    private String legalName;
 
     @NotNull
     private Long municipalityId;
@@ -24,9 +25,9 @@ public class CreateBusinessRequest {
 
     @NotBlank
     private String addressField1;
+    private String addressField2;
 
     private String postalCode;
 
     private String website;
 }
-

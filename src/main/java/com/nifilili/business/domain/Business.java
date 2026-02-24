@@ -22,18 +22,26 @@ import java.util.Map;
 @AllArgsConstructor
 public class Business extends BaseEntity {
 
+    // The authenticated user who created or currently owns this business profile.
+    private Long ownerUserId;
+    // Populated when an admin-seeded listing is claimed by a user.
+    private Long claimedByUserId;
+
     private Long verticalId;
     private String name;
+    private String legalName;
 
     private Long municipalityId;
     private Integer wardNumber;
     private String toleName;
     @Column(name = "address_field_1")
     private String addressField1;
+    @Column(name = "address_field_2")
+    private String addressField2;
     private String postalCode;
 
-    private Long latitude;
-    private Long longitude;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")

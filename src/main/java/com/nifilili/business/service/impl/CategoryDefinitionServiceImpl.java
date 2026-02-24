@@ -6,6 +6,7 @@ import com.nifilili.business.dto.response.CategoryResponse;
 import com.nifilili.business.mapper.CategoryMapper;
 import com.nifilili.business.repository.CategoryRepository;
 import com.nifilili.business.service.CategoryDefinitionService;
+import com.nifilili.core.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,22 @@ public class CategoryDefinitionServiceImpl implements CategoryDefinitionService 
     public CategoryResponse create(CreateCategoryRequest request) {
         CategoryDefinition saved = repository.save(mapper.toEntity(request));
         return mapper.toResponse(saved);
+    }
+
+    @Override
+    public CategoryResponse update(Long categoryId, CreateCategoryRequest request) {
+        CategoryDefinition existing = repository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        existing.setBusinessVerticalId(request.getBusinessVerticalId());
+        existing.setParentCategoryId(request.getParentCategoryId());
+        existing.setName(request.getName());
+        existing.setSlug(request.getSlug());
+        existing.setDescription(request.getDescription());
+        existing.setIconUrl(request.getIconUrl());
+        existing.setActiveStatus(request.isActiveStatus());
+
+        return mapper.toResponse(repository.save(existing));
     }
 
     @Override

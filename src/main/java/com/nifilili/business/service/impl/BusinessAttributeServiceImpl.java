@@ -1,12 +1,17 @@
 package com.nifilili.business.service.impl;
 
 import com.nifilili.business.domain.AttributeDefinition;
+import com.nifilili.business.domain.Business;
 import com.nifilili.business.domain.BusinessAttribute;
 import com.nifilili.business.dto.request.SaveBusinessAttributeRequest;
 import com.nifilili.business.repository.AttributeDefinitionRepository;
 import com.nifilili.business.repository.BusinessAttributeRepository;
+import com.nifilili.business.repository.BusinessRepository;
 import com.nifilili.business.service.BusinessAttributeService;
+import com.nifilili.core.enums.business.BusinessStatus;
+import com.nifilili.core.exception.InvalidBusinessStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
+import com.nifilili.core.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +27,12 @@ public class BusinessAttributeServiceImpl implements BusinessAttributeService {
 
     private final AttributeDefinitionRepository definitionRepository;
     private final BusinessAttributeRepository repository;
+    private final BusinessRepository businessRepository;
 
     @Override
     public void saveAttributeData(Long businessId, SaveBusinessAttributeRequest request) {
+        Business business = loadOwnedBusiness(businessId);
+        ensureEditable(business);
 
         AttributeDefinition def = definitionRepository
                 .findById(request.getAttributeId())
@@ -47,6 +55,25 @@ public class BusinessAttributeServiceImpl implements BusinessAttributeService {
         );
 
         repository.save(attribute);
+    }
+
+    private Business loadOwnedBusiness(Long businessId) {
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
+
+        Long authenticatedUserId = SecurityUtil.getCurrentUserId();
+        if (business.getOwnerUserId() == null || !business.getOwnerUserId().equals(authenticatedUserId)) {
+            throw new InvalidBusinessStateException("Unauthorized access");
+        }
+
+        return business;
+    }
+
+    private void ensureEditable(Business business) {
+        if (business.getStatus() == BusinessStatus.PENDING
+                || business.getStatus() == BusinessStatus.PUBLISHED) {
+            throw new InvalidBusinessStateException("Business cannot be edited in current state");
+        }
     }
 
     private void validateAttributeData(AttributeDefinition def, Object value) {

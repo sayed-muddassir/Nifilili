@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "Auth Happy Path E2E",
+    "description": "Chronological happy-path auth flows: registration, duplicate checks, login, and current-user endpoint.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "auth_token",          "value": "" },
+    { "key": "login_token",         "value": "" },
+    { "key": "admin_token",         "value": "" },
+    { "key": "registered_user_id",  "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 Register New User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"E2E User {{run_id}}\",\n  \"username\": \"e2euser_{{run_id}}\",\n  \"email\": \"e2e_{{run_id}}@nifilili.com\",\n  \"password\": \"E2eTest@123\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Register returns 201', function () { pm.response.to.have.status(201); });",
+              "const payload = pm.response.json();",
+              "pm.test('Access token present', function () { pm.expect(payload.accessToken).to.be.a('string').and.not.empty; });",
+              "pm.test('User profile returned', function () { pm.expect(payload.user).to.be.an('object'); });",
+              "pm.test('Token type is Bearer', function () { pm.expect(payload.tokenType).to.eql('Bearer'); });",
+              "pm.test('Role is ROLE_USER', function () { pm.expect(payload.user.roles).to.include('ROLE_USER'); });",
+              "pm.collectionVariables.set('auth_token', payload.accessToken);",
+              "pm.collectionVariables.set('registered_user_id', payload.user.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Register Duplicate Email (409 Conflict)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Duplicate User\",\n  \"username\": \"e2edup_{{run_id}}\",\n  \"email\": \"e2e_{{run_id}}@nifilili.com\",\n  \"password\": \"E2eTest@123\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Duplicate email returns 409', function () { pm.response.to.have.status(409); });",
+              "const payload = pm.response.json();",
+              "pm.test('Error message mentions already registered', function () {",
+              "  pm.expect(payload.message).to.include('already registered');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Register Weak Password (400 Bad Request)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Weak Pass User\",\n  \"username\": \"weakuser_{{run_id}}\",\n  \"email\": \"weak_{{run_id}}@nifilili.com\",\n  \"password\": \"weak\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Weak password returns 400', function () { pm.response.to.have.status(400); });",
+              "const payload = pm.response.json();",
+              "pm.test('Error message mentions password', function () {",
+              "  pm.expect(payload.message.toLowerCase()).to.include('password');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Login with Registered User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"e2euser_{{run_id}}\",\n  \"password\": \"E2eTest@123\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Access token present', function () { pm.expect(payload.accessToken).to.be.a('string').and.not.empty; });",
+              "pm.test('User id matches registration', function () {",
+              "  pm.expect(String(payload.user.id)).to.eql(String(pm.collectionVariables.get('registered_user_id')));",
+              "});",
+              "pm.test('Role is ROLE_USER', function () { pm.expect(payload.user.roles).to.include('ROLE_USER'); });",
+              "pm.collectionVariables.set('login_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Get Current User (Authenticated)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{login_token}}" }
+        ],
+        "url": "{{base_url}}/api/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('GET /me returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('User id matches', function () {",
+              "  pm.expect(String(payload.id)).to.eql(String(pm.collectionVariables.get('registered_user_id')));",
+              "});",
+              "pm.test('Email matches', function () {",
+              "  pm.expect(payload.email).to.eql('e2e_' + pm.variables.get('run_id') + '@nifilili.com');",
+              "});",
+              "pm.test('Account is enabled', function () { pm.expect(payload.enabled).to.be.true; });",
+              "pm.test('Roles present', function () { pm.expect(payload.roles).to.be.an('array').and.not.empty; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Get Current User (No Token — 401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Unauthenticated GET /me returns 401', function () { pm.response.to.have.status(401); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Admin Login (Regression)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Admin login returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Admin token present', function () { pm.expect(payload.accessToken).to.be.a('string').and.not.empty; });",
+              "pm.test('Admin has ROLE_ADMIN', function () { pm.expect(payload.user.roles).to.include('ROLE_ADMIN'); });",
+              "pm.collectionVariables.set('admin_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -14,6 +14,7 @@ public class BusinessResponse {
 
     private Long id;
     private String name;
+    private String legalName;
     private String businessSummary;
 
     private Long verticalId;
@@ -23,6 +24,7 @@ public class BusinessResponse {
     private Integer wardNumber;
     private String toleName;
     private String addressField1;
+    private String addressField2;
     private String postalCode;
 
     private BigDecimal latitude;

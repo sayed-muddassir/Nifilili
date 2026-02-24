@@ -8,6 +8,7 @@ import java.util.List;
 public interface DocumentDefinitionService {
 
     DocumentDefinitionResponse create(CreateDocumentDefinitionRequest request);
+    DocumentDefinitionResponse update(Long documentDefinitionId, CreateDocumentDefinitionRequest request);
 
     List<DocumentDefinitionResponse> getByVertical(Long verticalId);
 }

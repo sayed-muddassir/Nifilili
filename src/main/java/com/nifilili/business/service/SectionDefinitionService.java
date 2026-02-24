@@ -10,8 +10,10 @@ import java.util.List;
 public interface SectionDefinitionService {
 
     SectionResponse createSection(CreateSectionRequest request);
+    SectionResponse updateSection(Long sectionId, CreateSectionRequest request);
 
     SectionFieldResponse addField(Long sectionId, CreateSectionFieldRequest request);
+    SectionFieldResponse updateField(Long fieldId, CreateSectionFieldRequest request);
 
     List<SectionResponse> getByVertical(Long verticalId);
 

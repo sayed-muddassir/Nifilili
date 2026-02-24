@@ -9,4 +9,6 @@ public interface BusinessDocumentRepository
         extends JpaRepository<BusinessDocument, Long> {
 
     List<BusinessDocument> findByBusinessId(Long businessId);
+
+    java.util.Optional<BusinessDocument> findByIdAndBusinessId(Long id, Long businessId);
 }

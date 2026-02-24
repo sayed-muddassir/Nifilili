@@ -25,6 +25,8 @@ public class BusinessDocument extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private DocumentStatus status;
     private String rejectionReason;
+    private Instant reviewedAt;
+    private Long reviewedByUserId;
     @CreatedDate
     @Column(nullable = false, updatable = false)
     protected Instant createdAt;

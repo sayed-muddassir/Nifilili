@@ -6,6 +6,7 @@ import com.nifilili.business.dto.response.VerticalResponse;
 import com.nifilili.business.mapper.VerticalMapper;
 import com.nifilili.business.repository.VerticalRepository;
 import com.nifilili.business.service.VerticalDefinitionService;
+import com.nifilili.core.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,20 @@ public class VerticalDefinitionServiceImpl implements VerticalDefinitionService 
     public VerticalResponse create(CreateVerticalRequest request) {
         VerticalDefinition saved = repository.save(mapper.toEntity(request));
         return mapper.toResponse(saved);
+    }
+
+    @Override
+    public VerticalResponse update(Long verticalId, CreateVerticalRequest request) {
+        VerticalDefinition existing = repository.findById(verticalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vertical not found"));
+
+        existing.setName(request.getName());
+        existing.setSlug(request.getSlug());
+        existing.setDescription(request.getDescription());
+        existing.setIconUrl(request.getIconUrl());
+        existing.setActive(request.isActive());
+
+        return mapper.toResponse(repository.save(existing));
     }
 
     @Override

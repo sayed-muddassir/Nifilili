@@ -31,5 +31,7 @@ public class BusinessKyc extends BaseEntity {
     private KycStatus kycStatus;
     @Column(columnDefinition = "text")
     private String adminMessage;
+    @Column(columnDefinition = "text")
+    private String rejectionReason;
     private Integer submissionCount;
 }

@@ -1,8 +1,10 @@
 package com.nifilili.auth.config;
 
+import com.nifilili.auth.UserPrincipal;
 import com.nifilili.auth.domain.User;
 import com.nifilili.auth.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class CustomUserDetailsService implements UserDetailsService {
 
     private UserRepository userRepository;
@@ -29,9 +32,13 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map((role) -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toSet());
 
-        return new org.springframework.security.core.userdetails.User(
-                usernameOrEmail,
+        log.info("Loaded user '{}' with {} authorities", user.getUsername(), authorities.size());
+        // Always expose the same principal shape across modules.
+        return UserPrincipal.of(
+                user.getId(),
+                user.getUsername(),
                 user.getPassword(),
+                user.isEnabled(),
                 authorities
         );
     }

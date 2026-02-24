@@ -14,6 +14,7 @@ public class AdminKycDetailResponse {
 
     private KycStatus kycStatus;
     private String adminMessage;
+    private String rejectionReason;
     private Integer submissionCount;
 
     private List<BusinessDocumentResponse> documents;
