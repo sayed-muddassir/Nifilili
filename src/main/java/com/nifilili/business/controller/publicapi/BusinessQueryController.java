@@ -2,6 +2,7 @@ package com.nifilili.business.controller.publicapi;
 
 import com.nifilili.business.dto.response.BusinessResponse;
 import com.nifilili.business.service.BusinessQueryService;
+import com.nifilili.core.constants.SwaggerConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/public/businesses")
 @RequiredArgsConstructor
 @Tag(
-        name = "Business Query [Public]",
+        name = SwaggerConstants.BUSINESS_3,
         description = "Public business discovery APIs."
 )
 public class BusinessQueryController {

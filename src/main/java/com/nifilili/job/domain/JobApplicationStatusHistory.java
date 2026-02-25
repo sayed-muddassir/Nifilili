@@ -15,8 +15,12 @@ public class JobApplicationStatusHistory extends BaseEntity {
     private Long jobApplicationId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private JobApplicationStatus status;
+    @Column(name = "status_from")
+    private JobApplicationStatus statusFrom;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_to", nullable = false)
+    private JobApplicationStatus statusTo;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
@@ -32,12 +36,14 @@ public class JobApplicationStatusHistory extends BaseEntity {
 
     public JobApplicationStatusHistory(
             Long jobApplicationId,
-            JobApplicationStatus status,
+            JobApplicationStatus statusFrom,
+            JobApplicationStatus statusTo,
             String notes,
             Long changedBy
     ) {
         this.jobApplicationId = jobApplicationId;
-        this.status = status;
+        this.statusFrom = statusFrom;
+        this.statusTo = statusTo;
         this.notes = notes;
         this.changedBy = changedBy;
         this.changedDate = Instant.now();

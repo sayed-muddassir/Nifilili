@@ -3,6 +3,7 @@ package com.nifilili.business.controller.admin;
 import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
 import com.nifilili.business.service.*;
+import com.nifilili.core.constants.SwaggerConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
 @Tag(
-        name = "Business Configuration [Admin]",
+        name = SwaggerConstants.BUSINESS_1,
         description = "Admin APIs to manage business onboarding master definitions in a predictable sequence."
 )
 public class BusinessAdminController {

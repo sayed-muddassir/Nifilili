@@ -5,6 +5,7 @@ import com.nifilili.auth.dto.request.RegisterDto;
 import com.nifilili.auth.dto.response.JwtAuthResponse;
 import com.nifilili.auth.dto.response.UserProfileResponse;
 import com.nifilili.auth.service.AuthService;
+import com.nifilili.core.constants.SwaggerConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class AuthController {
     @Operation(
             summary = "User Registration",
             description = "Creates a new user account and returns a JWT token with user profile.",
-            tags = {"Auth [Public]"}
+            tags = {SwaggerConstants.AUTH_1}
     )
     @PostMapping("/register")
     public ResponseEntity<JwtAuthResponse> register(@Valid @RequestBody RegisterDto registerDto) {
@@ -37,7 +38,7 @@ public class AuthController {
     @Operation(
             summary = "User Login",
             description = "Authenticates a user and returns a JWT token with user profile.",
-            tags = {"Auth [Public]"}
+            tags = {SwaggerConstants.AUTH_1}
     )
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody LoginDto loginDto) {
@@ -50,7 +51,7 @@ public class AuthController {
     @Operation(
             summary = "Get Current User Profile",
             description = "Returns the authenticated user's profile. Requires a valid Bearer token.",
-            tags = {"Auth [Protected]"}
+            tags = {SwaggerConstants.AUTH_2}
     )
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getCurrentUser() {

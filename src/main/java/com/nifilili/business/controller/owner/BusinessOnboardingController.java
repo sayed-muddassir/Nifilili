@@ -3,6 +3,7 @@ package com.nifilili.business.controller.owner;
 import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
 import com.nifilili.business.service.*;
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.core.enums.business.BusinessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
 @Tag(
-        name = "Business Onboarding [User]",
+        name = SwaggerConstants.BUSINESS_2,
         description = "Chronological onboarding APIs: fetch config, create business, complete profile, upload docs, submit for review."
 )
 public class BusinessOnboardingController {

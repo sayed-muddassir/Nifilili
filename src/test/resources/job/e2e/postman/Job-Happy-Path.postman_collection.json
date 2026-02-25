@@ -1,0 +1,514 @@
+{
+  "info": {
+    "name": "Job Happy Path E2E",
+    "description": "Chronological happy-path flow for job module: admin creates category, recruiter creates/publishes job with questions, applicant applies/withdraws, recruiter manages pipeline.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "run_id", "value": "{{$timestamp}}"},
+    {"key": "admin_token", "value": ""},
+    {"key": "user_token", "value": ""},
+    {"key": "category_id", "value": ""},
+    {"key": "job_id", "value": ""},
+    {"key": "question_id", "value": ""},
+    {"key": "application_id", "value": ""},
+    {"key": "applicant_user_id", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "01 Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Admin login is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.collectionVariables.set('admin_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 User Login (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{user_username}}\",\n  \"password\": \"{{user_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('User login is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.collectionVariables.set('user_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Create Job Category (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Engineering {{run_id}}\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/jobs/categories"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create category is 201', function () { pm.response.to.have.status(201); });",
+              "pm.collectionVariables.set('category_id', pm.response.json());"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Get All Job Categories",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/admin/jobs/categories"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get categories is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Create Job Opening (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessId\": {{business_id}},\n  \"jobCategoryId\": {{category_id}},\n  \"title\": \"Backend Developer {{run_id}}\",\n  \"description\": \"We are looking for a Java Backend Developer\",\n  \"jobType\": \"FULL_TIME\",\n  \"municipalityId\": 1,\n  \"wardNumber\": 5,\n  \"toleName\": \"Thamel\",\n  \"postalCode\": \"44600\",\n  \"remote\": false,\n  \"salaryRangeMin\": 50000,\n  \"salaryRangeMax\": 80000,\n  \"numberOfOpenings\": 2,\n  \"applicationDeadline\": \"2026-06-30\",\n  \"skills\": [\"Java\", \"Spring Boot\", \"PostgreSQL\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/jobs"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create job is 201', function () { pm.response.to.have.status(201); });",
+              "pm.collectionVariables.set('job_id', pm.response.json());"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Update Job Opening (Recruiter)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Senior Backend Developer {{run_id}}\",\n  \"description\": \"Updated: We are looking for a Senior Java Backend Developer\",\n  \"jobType\": \"FULL_TIME\",\n  \"municipalityId\": 1,\n  \"wardNumber\": 5,\n  \"toleName\": \"Thamel\",\n  \"postalCode\": \"44600\",\n  \"remote\": true,\n  \"salaryRangeMin\": 60000,\n  \"salaryRangeMax\": 100000,\n  \"numberOfOpenings\": 3,\n  \"applicationDeadline\": \"2026-07-31\",\n  \"skills\": [\"Java\", \"Spring Boot\", \"PostgreSQL\", \"Kubernetes\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/jobs/{{job_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update job is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Add Screening Question (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"questionText\": \"Why do you want to join our team?\",\n  \"required\": true\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/jobs/{{job_id}}/questions"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Add question is 201', function () { pm.response.to.have.status(201); });",
+              "pm.collectionVariables.set('question_id', pm.response.json());"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Get Screening Questions (Recruiter)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/business/jobs/{{job_id}}/questions"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get questions is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('At least 1 question', function () { pm.expect(pm.response.json().length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Publish Job Opening (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/business/jobs/{{job_id}}/publish"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Publish job is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Search Open Jobs (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/public/jobs?keyword=Backend",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "jobs"],
+          "query": [
+            {"key": "keyword", "value": "Backend"}
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Search jobs is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 Get Job Details (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/v1/public/jobs/{{job_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get job details is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has title', function () { pm.expect(pm.response.json().title).to.be.a('string'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Apply for Job (Applicant)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": {{applicant_user_id}},\n  \"resumeUrl\": \"https://example.com/resume.pdf\",\n  \"coverLetter\": \"I am excited about this opportunity.\",\n  \"answers\": {\n    \"{{question_id}}\": \"I am passionate about building scalable systems.\"\n  }\n}"
+        },
+        "url": "{{base_url}}/api/v1/public/jobs/{{job_id}}/apply"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Apply is 201', function () { pm.response.to.have.status(201); });",
+              "pm.collectionVariables.set('application_id', pm.response.json());"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 Get My Applications (Applicant)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/public/jobs/applications/{{applicant_user_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get my applications is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('At least 1 application', function () { pm.expect(pm.response.json().length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Get Applications for Job (Recruiter)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/business/jobs/{{job_id}}/applications"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get applications is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('At least 1 application', function () { pm.expect(pm.response.json().length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 Change Status: RECEIVED -> REVIEWED (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"REVIEWED\",\n  \"notes\": \"Profile looks strong, moving to review.\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/jobs/applications/{{application_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Change to REVIEWED is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 Change Status: REVIEWED -> SHORTLISTED (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"SHORTLISTED\",\n  \"notes\": \"Shortlisted for interview.\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/jobs/applications/{{application_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Change to SHORTLISTED is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 Change Status: SHORTLISTED -> INTERVIEWING (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"INTERVIEWING\",\n  \"notes\": \"Scheduled for technical interview.\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/jobs/applications/{{application_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Change to INTERVIEWING is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 Change Status: INTERVIEWING -> HIRED (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"HIRED\",\n  \"notes\": \"Offer extended and accepted.\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/jobs/applications/{{application_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Change to HIRED is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19 Get Application Timeline (Recruiter)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/business/jobs/applications/{{application_id}}/timeline"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get timeline is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has 5 history entries', function () { pm.expect(pm.response.json().length).to.eql(5); });",
+              "pm.test('Final status is HIRED', function () {",
+              "  const timeline = pm.response.json();",
+              "  pm.expect(timeline[timeline.length - 1].statusTo).to.eql('HIRED');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 Close Job Opening (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/business/jobs/{{job_id}}/close"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Close job is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21 Reopen Job Opening (Recruiter)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/business/jobs/{{job_id}}/reopen"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Reopen job is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

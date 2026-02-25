@@ -62,9 +62,33 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleInvalidJobState(InvalidJobStateException ex) {
+        log.warn("Invalid job state: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorDto(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ErrorDto> handleSqlException(SQLException ex) {
         log.error("SQL error: {}", ex.getMessage());
         return new ResponseEntity<>(new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    // TODO : Replace with custom exceptions for specific cases (e.g. duplicate application, invalid job status transition, etc.)
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error("Invalid argument error: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorDto(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    // TODO : Replace with custom exceptions for specific cases (e.g. invalid state transition, application withdrawal not allowed, etc.)
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleIllegalArgumentException(IllegalStateException ex) {
+        log.error("Invalid state error: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }
