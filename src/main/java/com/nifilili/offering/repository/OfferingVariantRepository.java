@@ -1,6 +1,8 @@
 package com.nifilili.offering.repository;
 
 import com.nifilili.offering.domain.OfferingVariantEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,14 +18,17 @@ public interface OfferingVariantRepository
     // All variants for an offering
     List<OfferingVariantEntity> findByOfferingId(Long offeringId);
 
+    // Paginated variants for an offering
+    Page<OfferingVariantEntity> findByOfferingId(Long offeringId, Pageable pageable);
+
     // Active variants only
     List<OfferingVariantEntity> findByOfferingIdAndStatus(
             Long offeringId,
             String status
     );
 
-    // SKU uniqueness
-    boolean existsBySku(String sku);
+    // SKU uniqueness (per offering)
+    boolean existsByOfferingIdAndSku(Long offeringId, String sku);
 
     // Check if offering has variants
     boolean existsByOfferingId(Long offeringId);

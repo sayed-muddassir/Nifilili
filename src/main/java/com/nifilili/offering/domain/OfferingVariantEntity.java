@@ -17,7 +17,7 @@ import java.util.List;
 @Table(
         name = "offering_variants",
         uniqueConstraints = {
-                @UniqueConstraint(name = "offering_variants_sku_unique", columnNames = "sku")
+                @UniqueConstraint(name = "offering_variants_offering_sku_unique", columnNames = {"offering_id", "sku"})
         }
 )
 @Getter

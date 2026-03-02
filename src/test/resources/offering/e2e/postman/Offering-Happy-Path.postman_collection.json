@@ -1,0 +1,961 @@
+{
+  "info": {
+    "name": "Offering Happy Path E2E",
+    "description": "Chronological happy-path flow for offering module: admin creates category & attributes, owner creates/publishes offering with variants & discounts, public browses, admin moderates.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "run_id", "value": "{{$timestamp}}"},
+    {"key": "admin_token", "value": ""},
+    {"key": "user_token", "value": ""},
+    {"key": "category_id", "value": ""},
+    {"key": "child_category_id", "value": ""},
+    {"key": "attribute_id", "value": ""},
+    {"key": "offering_id", "value": ""},
+    {"key": "variant_id", "value": ""},
+    {"key": "variant_attr_id", "value": ""},
+    {"key": "discount_id", "value": ""},
+    {"key": "owner_id", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "01 Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Admin login is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Access token present', function () { pm.expect(payload.accessToken).to.be.a('string').and.not.empty; });",
+              "pm.collectionVariables.set('admin_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Owner Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{user_username}}\",\n  \"password\": \"{{user_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Owner login is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Access token present', function () { pm.expect(payload.accessToken).to.be.a('string').and.not.empty; });",
+              "pm.collectionVariables.set('user_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Create Root Category (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Electronics {{run_id}}\",\n  \"parentCategoryId\": null\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/offering-categories"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create root category is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has category id', function () { pm.expect(payload.id).to.be.a('number'); });",
+              "pm.test('Name matches', function () { pm.expect(payload.name).to.include('Electronics'); });",
+              "pm.test('No parent', function () { pm.expect(payload.parentCategoryId).to.be.null; });",
+              "pm.collectionVariables.set('category_id', payload.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Create Child Category (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Smartphones {{run_id}}\",\n  \"parentCategoryId\": {{category_id}}\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/offering-categories"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create child category is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has parent', function () { pm.expect(payload.parentCategoryId).to.eql(Number(pm.collectionVariables.get('category_id'))); });",
+              "pm.collectionVariables.set('child_category_id', payload.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Get Category Tree (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/admin/offering-categories/tree"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get tree is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is array', function () { pm.expect(pm.response.json()).to.be.an('array'); });",
+              "pm.test('At least 1 root category', function () { pm.expect(pm.response.json().length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Update Category (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Mobile Phones {{run_id}}\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/offering-categories/{{child_category_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update category is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Name updated', function () { pm.expect(pm.response.json().name).to.include('Mobile Phones'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Create Attribute for Category (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offeringCategoryId\": {{child_category_id}},\n  \"name\": \"Color\",\n  \"attributeType\": \"DROPDOWN\",\n  \"options\": [\"Red\", \"Blue\", \"Black\", \"White\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/offering-attributes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create attribute is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has attribute id', function () { pm.expect(payload.id).to.be.a('number'); });",
+              "pm.test('Name is Color', function () { pm.expect(payload.name).to.eql('Color'); });",
+              "pm.test('Has 4 options', function () { pm.expect(payload.options.length).to.eql(4); });",
+              "pm.collectionVariables.set('attribute_id', payload.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Get Attributes by Category (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/admin/offering-attributes/category/{{child_category_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get attributes is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is array', function () { pm.expect(pm.response.json()).to.be.an('array'); });",
+              "pm.test('At least 1 attribute', function () { pm.expect(pm.response.json().length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Update Attribute (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Color\",\n  \"attributeType\": \"DROPDOWN\",\n  \"options\": [\"Red\", \"Blue\", \"Black\", \"White\", \"Silver\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/offering-attributes/{{attribute_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update attribute is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has 5 options now', function () { pm.expect(pm.response.json().options.length).to.eql(5); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Create Offering (Owner)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ownerType\": \"BUSINESS\",\n  \"ownerId\": {{owner_id}},\n  \"categoryId\": {{child_category_id}},\n  \"type\": \"PRODUCT\",\n  \"title\": \"Premium Smartphone {{run_id}}\",\n  \"description\": \"A high-end smartphone with great camera and performance\",\n  \"sku\": \"PHONE-{{run_id}}\",\n  \"price\": 999.99,\n  \"isDynamicPricing\": false,\n  \"availableQuantity\": 100,\n  \"isFeatured\": true,\n  \"isB2bEnabled\": false,\n  \"images\": [\"phone-front.jpg\", \"phone-back.jpg\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/offerings"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create offering is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has offering id', function () { pm.expect(payload.id).to.be.a('number'); });",
+              "pm.test('Status is DRAFT', function () { pm.expect(payload.status).to.eql('DRAFT'); });",
+              "pm.test('Has createdAt', function () { pm.expect(payload.createdAt).to.be.a('string'); });",
+              "pm.collectionVariables.set('offering_id', payload.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 Get My Offering (Owner)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get my offering is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has title', function () { pm.expect(payload.title).to.include('Premium Smartphone'); });",
+              "pm.test('Status is DRAFT', function () { pm.expect(payload.status).to.eql('DRAFT'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Update Offering (Owner)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Ultra Premium Smartphone {{run_id}}\",\n  \"description\": \"Updated: The best smartphone in the market\",\n  \"price\": 1099.99,\n  \"availableQuantity\": 150,\n  \"isFeatured\": true,\n  \"isB2bEnabled\": true,\n  \"images\": [\"phone-front-v2.jpg\", \"phone-back-v2.jpg\", \"phone-side.jpg\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update offering is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Title updated', function () { pm.expect(pm.response.json().title).to.include('Ultra Premium'); });",
+              "pm.test('Price updated', function () { pm.expect(pm.response.json().price).to.eql(1099.99); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 List My Offerings (Owner)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/offerings?status=DRAFT&page=0&size=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "offerings"],
+          "query": [
+            {"key": "status", "value": "DRAFT"},
+            {"key": "page", "value": "0"},
+            {"key": "size", "value": "10"}
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('List offerings is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has content array', function () { pm.expect(payload.content).to.be.an('array'); });",
+              "pm.test('At least 1 offering', function () { pm.expect(payload.content.length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Create Variant (Owner)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sku\": \"PHONE-128GB-{{run_id}}\",\n  \"price\": 999.99,\n  \"availableQuantity\": 50,\n  \"images\": [\"phone-128gb.jpg\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}/variants"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create variant is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has variant id', function () { pm.expect(payload.id).to.be.a('number'); });",
+              "pm.test('SKU matches', function () { pm.expect(payload.sku).to.include('PHONE-128GB'); });",
+              "pm.test('Status is ACTIVE', function () { pm.expect(payload.status).to.eql('ACTIVE'); });",
+              "pm.collectionVariables.set('variant_id', payload.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 Update Variant (Owner)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sku\": \"PHONE-256GB-{{run_id}}\",\n  \"price\": 1199.99,\n  \"availableQuantity\": 30,\n  \"images\": [\"phone-256gb.jpg\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}/variants/{{variant_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update variant is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('SKU updated', function () { pm.expect(pm.response.json().sku).to.include('PHONE-256GB'); });",
+              "pm.test('Price updated', function () { pm.expect(pm.response.json().price).to.eql(1199.99); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 List Variants (Owner)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}/variants"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('List variants is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has content', function () { pm.expect(payload.content).to.be.an('array'); });",
+              "pm.test('At least 1 variant', function () { pm.expect(payload.content.length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 Assign Variant Attributes (Owner)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"attributes\": [\n    {\n      \"offeringAttributesId\": {{attribute_id}},\n      \"attributeName\": \"Color\",\n      \"attributeValue\": \"Black\"\n    },\n    {\n      \"offeringAttributesId\": null,\n      \"attributeName\": \"Storage\",\n      \"attributeValue\": \"256GB\"\n    }\n  ]\n}"
+        },
+        "url": "{{base_url}}/api/v1/variants/{{variant_id}}/attributes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Assign attributes is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Variant ID matches', function () { pm.expect(payload.variantId).to.eql(Number(pm.collectionVariables.get('variant_id'))); });",
+              "pm.test('Saved is true', function () { pm.expect(payload.saved).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 List Variant Attributes (Owner)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/variants/{{variant_id}}/attributes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('List attributes is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Response is array', function () { pm.expect(payload).to.be.an('array'); });",
+              "pm.test('Has 2 attributes', function () { pm.expect(payload.length).to.eql(2); });",
+              "pm.test('Has Color attribute', function () { pm.expect(payload.some(a => a.attributeName === 'Color')).to.be.true; });",
+              "pm.test('Has Storage custom attribute', function () { pm.expect(payload.some(a => a.attributeName === 'Storage')).to.be.true; });",
+              "const colorAttr = payload.find(a => a.attributeName === 'Color');",
+              "pm.collectionVariables.set('variant_attr_id', colorAttr.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19 Update Variant Attribute Value (Owner)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"attributeValue\": \"Silver\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/variants/{{variant_id}}/attributes/{{variant_attr_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update attribute value is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is UPDATED', function () { pm.expect(pm.response.json().status).to.eql('UPDATED'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 Create Discount (Owner)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offeringId\": {{offering_id}},\n  \"variantId\": {{variant_id}},\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 15,\n  \"startDate\": \"2026-01-01T00:00:00\",\n  \"endDate\": \"2026-12-31T23:59:59\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/discounts"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create discount is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has discount id', function () { pm.expect(payload.id).to.be.a('number'); });",
+              "pm.test('Status is ACTIVE', function () { pm.expect(payload.status).to.eql('ACTIVE'); });",
+              "pm.collectionVariables.set('discount_id', payload.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21 List Discounts by Offering (Owner)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/discounts/offering/{{offering_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('List discounts is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has content', function () { pm.expect(payload.content).to.be.an('array'); });",
+              "pm.test('At least 1 discount', function () { pm.expect(payload.content.length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22 Publish Offering (Owner)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}/publish"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Publish offering is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is PUBLISHED', function () { pm.expect(pm.response.json().status).to.eql('PUBLISHED'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23 Get Published Offering (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/v1/public/offerings/{{offering_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get public offering is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has title', function () { pm.expect(payload.title).to.be.a('string'); });",
+              "pm.test('Has base price', function () { pm.expect(payload.price).to.be.a('number'); });",
+              "pm.test('Has discounted price', function () { pm.expect(payload.discountedPrice).to.be.a('number'); });",
+              "pm.test('Discounted price <= base price', function () { pm.expect(payload.discountedPrice).to.be.at.most(payload.price); });",
+              "pm.test('Has variants array', function () { pm.expect(payload.variants).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24 Search Published Offerings (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/public/offerings/search?categoryId={{child_category_id}}&type=PRODUCT&page=0&size=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "public", "offerings", "search"],
+          "query": [
+            {"key": "categoryId", "value": "{{child_category_id}}"},
+            {"key": "type", "value": "PRODUCT"},
+            {"key": "page", "value": "0"},
+            {"key": "size", "value": "10"}
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Search offerings is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has content array', function () { pm.expect(payload.content).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "25 Browse by Business (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/v1/public/offerings/business/{{owner_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Browse by business is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has content', function () { pm.expect(payload.content).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26 Browse by Category (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/v1/public/offerings/category/{{child_category_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Browse by category is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has content', function () { pm.expect(payload.content).to.be.an('array'); });",
+              "pm.test('At least 1 offering', function () { pm.expect(payload.content.length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27 List Featured Offerings (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/v1/public/offerings/featured"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Featured offerings is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has content', function () { pm.expect(payload.content).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "28 Get Variant Pricing (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/v1/public/pricing/variants/{{variant_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get variant pricing is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has base price', function () { pm.expect(payload.basePrice).to.be.a('number'); });",
+              "pm.test('Has final price', function () { pm.expect(payload.finalPrice).to.be.a('number'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "29 Update Variant Inventory (Owner)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/offerings/{{offering_id}}/variants/{{variant_id}}/inventory?quantity=75",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "offerings", "{{offering_id}}", "variants", "{{variant_id}}", "inventory"],
+          "query": [
+            {"key": "quantity", "value": "75"}
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update variant inventory is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is UPDATED', function () { pm.expect(pm.response.json().status).to.eql('UPDATED'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "30 Update Offering Inventory (Owner)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/offerings/{{offering_id}}/inventory?quantity=200",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "offerings", "{{offering_id}}", "inventory"],
+          "query": [
+            {"key": "quantity", "value": "200"}
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update offering inventory is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is UPDATED', function () { pm.expect(pm.response.json().status).to.eql('UPDATED'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "31 Admin List All Offerings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/admin/offerings?status=PUBLISHED&page=0&size=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "admin", "offerings"],
+          "query": [
+            {"key": "status", "value": "PUBLISHED"},
+            {"key": "page", "value": "0"},
+            {"key": "size", "value": "10"}
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Admin list offerings is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Has content', function () { pm.expect(payload.content).to.be.an('array'); });",
+              "pm.test('At least 1 published offering', function () { pm.expect(payload.content.length).to.be.above(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "32 Archive Offering (Owner)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}/archive"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Archive offering is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is ARCHIVED', function () { pm.expect(pm.response.json().status).to.eql('ARCHIVED'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "33 Restore Offering (Owner)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}/restore"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Restore offering is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is DRAFT', function () { pm.expect(pm.response.json().status).to.eql('DRAFT'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "34 Admin Force Status Change",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"PUBLISHED\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/offerings/{{offering_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Admin status change is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is PUBLISHED', function () { pm.expect(pm.response.json().status).to.eql('PUBLISHED'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "35 Deactivate Discount (Owner)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/discounts/{{discount_id}}/deactivate"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Deactivate discount is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is INACTIVE', function () { pm.expect(pm.response.json().status).to.eql('INACTIVE'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "36 Deactivate Variant (Owner)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/offerings/{{offering_id}}/variants/{{variant_id}}/deactivate"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Deactivate variant is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is INACTIVE', function () { pm.expect(pm.response.json().status).to.eql('INACTIVE'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "37 Delete Variant Attribute (Owner)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/variants/{{variant_id}}/attributes/{{variant_attr_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Delete variant attribute is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Status is DELETED', function () { pm.expect(pm.response.json().status).to.eql('DELETED'); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

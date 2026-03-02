@@ -2,7 +2,6 @@ package com.nifilili.order.service.impl;
 
 import com.nifilili.order.model.*;
 import com.nifilili.order.service.business.PricingService;
-import com.nifilili.order.util.DiscountCalculator;
 import com.nifilili.order.util.TaxCalculator;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class PricingServiceImpl implements PricingService {
+public class OrderPricingServiceImpl implements PricingService {
 
     @Override
     public PricingResult calculate(PricingContext ctx) {

@@ -1,4 +1,4 @@
-package com.nifilili.offering.service.pricing;
+package com.nifilili.offering.service.impl;
 
 import com.nifilili.core.enums.util.DiscountType;
 import com.nifilili.offering.domain.OfferingDiscountEntity;
@@ -9,17 +9,20 @@ import com.nifilili.offering.dto.response.PricingResponse;
 import com.nifilili.offering.repository.OfferingDiscountRepository;
 import com.nifilili.offering.repository.OfferingRepository;
 import com.nifilili.offering.repository.OfferingVariantRepository;
+import com.nifilili.offering.service.PricingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class PricingService {
+public class PricingServiceImpl implements PricingService {
 
     private final OfferingDiscountRepository discountRepository;
     private final OfferingRepository offeringRepository;
@@ -47,7 +50,7 @@ public class PricingService {
         OfferingDiscountEntity discount =
                 discountRepository.findFirstByVariantIdAndStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
                         variantId, "ACTIVE", now(), now()
-                ).orElse(null);
+                ).orElseThrow(() -> new IllegalArgumentException("Discount not found"));
 
         return new PricingResponse(
                 base,
