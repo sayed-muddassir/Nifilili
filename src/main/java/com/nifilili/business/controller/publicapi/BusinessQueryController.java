@@ -2,8 +2,11 @@ package com.nifilili.business.controller.publicapi;
 
 import com.nifilili.business.dto.response.BusinessResponse;
 import com.nifilili.business.service.BusinessQueryService;
+import com.nifilili.core.constants.SwaggerConstants;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,35 +17,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/public/businesses")
 @RequiredArgsConstructor
+@Tag(
+        name = SwaggerConstants.BUSINESS_3,
+        description = "Public business discovery APIs."
+)
 public class BusinessQueryController {
 
     private final BusinessQueryService businessQueryService;
 
-    /* --------------------------------------------
-       API 1: GET BUSINESS BY ID
-       -------------------------------------------- */
-    @Operation(summary = "Get Business by ID",
-            description = "Retrieves detailed information about a specific business using its unique identifier.",
-            tags = {"Business Query [Public]"}
-    )
-    @GetMapping("/{businessId}")
-    public BusinessResponse getBusinessById(
-            @PathVariable Long businessId
-    ) {
-        return businessQueryService.getBusinessById(businessId);
-    }
-
-    /* --------------------------------------------
-       API 2: GET ALL BUSINESSES (PAGINATED)
-       -------------------------------------------- */
-    @Operation(summary = "Get All Businesses",
-            description = "Retrieves a paginated list of all businesses.",
-            tags = {"Business Query [Public]"}
+    @Operation(
+            summary = "1. List Published Businesses",
+            description = "Returns paginated published businesses with sections and attributes."
     )
     @GetMapping
-    public Page<BusinessResponse> getAllBusinesses(
-            Pageable pageable
-    ) {
+    public Page<BusinessResponse> getAllBusinesses(@ParameterObject Pageable pageable) {
         return businessQueryService.getAllBusinesses(pageable);
+    }
+
+    @Operation(
+            summary = "2. Get Business Details",
+            description = "Returns full details for one published business id."
+    )
+    @GetMapping("/{businessId}")
+    public BusinessResponse getBusinessById(@PathVariable Long businessId) {
+        return businessQueryService.getBusinessById(businessId);
     }
 }

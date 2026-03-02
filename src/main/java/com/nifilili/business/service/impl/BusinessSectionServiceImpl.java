@@ -8,11 +8,14 @@ import com.nifilili.business.validation.SectionValidationService;
 import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.InvalidBusinessStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
+import com.nifilili.core.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class BusinessSectionServiceImpl implements BusinessSectionService {
     private final SectionGroupRepository sectionGroupRepository;
     private final SectionRepository sectionRepository;
     private final SectionFieldRepository sectionFieldRepository;
+    private final BusinessCategoryRepository businessCategoryRepository;
 
     private final SectionValidationService sectionValidationService;
 
@@ -49,22 +53,12 @@ public class BusinessSectionServiceImpl implements BusinessSectionService {
 
         sectionValidationService.validate(fields, request.getFieldValues());
 
-        Long groupId = request.getSectionGroupId();
-
-        if (groupId == null && sectionDefinition.isAllowMultiple()) {
-            BusinessSectionGroup group = new BusinessSectionGroup(
-                    businessId,
-                    sectionId,
-                    "Group"
-            );
-            sectionGroupRepository.save(group);
-            groupId = group.getId();
-        }
+        Long sectionGroupId = resolveSectionGroupIdForSave(businessId, sectionId, sectionDefinition, request.getSectionGroupId());
 
         BusinessSectionData data = new BusinessSectionData(
                 businessId,
                 sectionId,
-                groupId,
+                sectionGroupId,
                 request.getFieldValues()
         );
 
@@ -76,10 +70,10 @@ public class BusinessSectionServiceImpl implements BusinessSectionService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Business not found"));
 
-//        Long userId = SecurityUtil.getCurrentUserId();
-//        if (!business.getOwnerId().equals(userId)) {
-//            throw new InvalidBusinessStateException("Unauthorized access");
-//        }
+        Long authenticatedUserId = SecurityUtil.getCurrentUserId();
+        if (business.getOwnerUserId() == null || !business.getOwnerUserId().equals(authenticatedUserId)) {
+            throw new InvalidBusinessStateException("Unauthorized access");
+        }
         return business;
     }
 
@@ -96,5 +90,45 @@ public class BusinessSectionServiceImpl implements BusinessSectionService {
             throw new InvalidBusinessStateException(
                     "SectionDefinition does not apply to this business");
         }
+
+        if (sectionDefinition.getCategoryId() != null) {
+            Set<Long> assignedCategoryIds = businessCategoryRepository.findByBusinessId(business.getId())
+                    .stream()
+                    .map(BusinessCategory::getCategoryId)
+                    .collect(Collectors.toSet());
+
+            if (!assignedCategoryIds.contains(sectionDefinition.getCategoryId())) {
+                throw new InvalidBusinessStateException("Section category is not assigned to this business");
+            }
+        }
+    }
+
+    private Long resolveSectionGroupIdForSave(
+            Long businessId,
+            Long sectionId,
+            SectionDefinition sectionDefinition,
+            Long requestedSectionGroupId
+    ) {
+        if (sectionDefinition.isAllowMultiple()) {
+            if (requestedSectionGroupId != null) {
+                return requestedSectionGroupId;
+            }
+
+            // Repeatable sections require a concrete group so entries stay logically grouped.
+            BusinessSectionGroup group = new BusinessSectionGroup(
+                    businessId,
+                    sectionId,
+                    "Auto Group"
+            );
+            sectionGroupRepository.save(group);
+            return group.getId();
+        }
+
+        if (requestedSectionGroupId != null) {
+            throw new InvalidBusinessStateException("Non-repeatable sections cannot use sectionGroupId");
+        }
+
+        // Non-repeatable sections intentionally persist a null sectionGroupId.
+        return null;
     }
 }

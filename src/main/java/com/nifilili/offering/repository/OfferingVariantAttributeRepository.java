@@ -15,5 +15,8 @@ public interface OfferingVariantAttributeRepository
 
     // Delete attributes when variant is removed
     void deleteByVariantId(Long variantId);
+
+    // Check if a predefined attribute is in use by any variant
+    boolean existsByOfferingAttributeId(Long attributeId);
 }
 

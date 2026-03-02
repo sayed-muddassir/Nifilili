@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,7 @@ import java.io.IOException;
 // Execute Before Executing Spring Security Filters
 // Validate the JWT Token and Provides user details to Spring Security for Authentication
 @Component
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -37,22 +39,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Get JWT token from HTTP request
         String token = getTokenFromRequest(request);
 
-        // Validate Token
-        if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
-            // get username from token
-            String username = jwtTokenProvider.getUsername(token);
+        try {
+            // Validate token and attach principal to SecurityContext.
+            if (StringUtils.hasText(token)
+                    && jwtTokenProvider.validateToken(token)
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String username = jwtTokenProvider.getUsername(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                log.info("Authenticated request '{}' for user '{}'", request.getRequestURI(), username);
+            }
+        } catch (Exception ex) {
+            // Keep request flow alive; protected endpoints will be handled by entry point.
+            SecurityContextHolder.clearContext();
+            log.info("JWT authentication failed for path '{}': {}", request.getRequestURI(), ex.getMessage());
         }
 
         filterChain.doFilter(request, response);

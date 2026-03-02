@@ -8,6 +8,7 @@ import java.util.List;
 public interface CategoryDefinitionService {
 
     CategoryResponse create(CreateCategoryRequest request);
+    CategoryResponse update(Long categoryId, CreateCategoryRequest request);
 
     List<CategoryResponse> getByVertical(Long verticalId);
 }

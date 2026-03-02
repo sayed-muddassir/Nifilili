@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.nifilili.core.enums.offering.OfferingType;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,15 +55,72 @@ public interface OfferingRepository
             String status
     );
 
+    // Paginated featured offerings (enum status)
+    Page<OfferingEntity> findByIsFeaturedTrueAndStatus(
+            OfferingStatus status,
+            Pageable pageable
+    );
+
+    // Admin: list all offerings by status
+    Page<OfferingEntity> findByStatus(
+            OfferingStatus status,
+            Pageable pageable
+    );
+
+    // Check if offerings use a specific category (for safe category delete)
+    boolean existsByCategoryId(Long categoryId);
+
     long countByOwnerTypeAndOwnerIdAndIsFeaturedTrue(
             String ownerType,
             Long ownerId
     );
 
     // -------------------------
-    // SKU checks
+    // Owner listing (by ownerId)
     // -------------------------
-    boolean existsBySku(String sku);
+    Page<OfferingEntity> findByOwnerId(
+            Long ownerId,
+            Pageable pageable
+    );
+
+    Page<OfferingEntity> findByOwnerIdAndStatus(
+            Long ownerId,
+            OfferingStatus status,
+            Pageable pageable
+    );
+
+    // -------------------------
+    // Public search (all filters optional)
+    // -------------------------
+    @Query("""
+        SELECT o FROM OfferingEntity o
+        WHERE o.status = 'PUBLISHED'
+          AND (:categoryId IS NULL OR o.category.id = :categoryId)
+          AND (:type IS NULL OR o.type = :type)
+          AND (:minPrice IS NULL OR o.price >= :minPrice)
+          AND (:maxPrice IS NULL OR o.price <= :maxPrice)
+    """)
+    Page<OfferingEntity> searchPublished(
+            @Param("categoryId") Long categoryId,
+            @Param("type") OfferingType type,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            Pageable pageable
+    );
+
+    // -------------------------
+    // Category-based browsing (enum status)
+    // -------------------------
+    Page<OfferingEntity> findByCategoryIdAndStatus(
+            Long categoryId,
+            OfferingStatus status,
+            Pageable pageable
+    );
+
+    // -------------------------
+    // SKU checks (unique per owner)
+    // -------------------------
+    boolean existsByOwnerIdAndSku(Long ownerId, String sku);
 
     // -------------------------
     // Inventory

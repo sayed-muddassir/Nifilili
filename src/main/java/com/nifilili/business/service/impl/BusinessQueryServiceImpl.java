@@ -70,7 +70,7 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
     @Override
     public Page<BusinessResponse> getAllBusinesses(Pageable pageable) {
 
-        return businessRepository.findAll(pageable)
+        return businessRepository.findByStatus(BusinessStatus.PUBLISHED, pageable)
                 .map(business -> {
                     List<Long> categoryIds =
                             businessCategoryRepository
@@ -116,7 +116,9 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
             responses.add(
                     SectionResponse.builder()
                             .id(entry.getKey())
-                            .name(sectionRepository.findById(entry.getKey()).get().getName())
+                            .name(sectionRepository.findById(entry.getKey())
+                                    .orElseThrow(() -> new ResourceNotFoundException("Section not found: " + entry.getKey()))
+                                    .getName())
                             .values(values)
                             .build()
             );
@@ -135,7 +137,9 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
             responses.add(
                     BusinessAttributeResponse.builder()
                             .attributeId(attribute.getAttributeId())
-                            .name(attributeDefinitionRepository.findById(attribute.getAttributeId()).get().getName())
+                            .name(attributeDefinitionRepository.findById(attribute.getAttributeId())
+                                    .orElseThrow(() -> new ResourceNotFoundException("Attribute not found: " + attribute.getAttributeId()))
+                                    .getName())
                             .attributeValue(attribute.getAttributeValue())
                             .build(
                             ));
@@ -154,6 +158,7 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
         return BusinessResponse.builder()
                 .id(business.getId())
                 .name(business.getName())
+                .legalName(business.getLegalName())
                 .businessSummary(business.getBusinessSummary())
                 .verticalId(business.getVerticalId())
                 .categoryIds(categoryIds)
@@ -161,9 +166,10 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                 .wardNumber(business.getWardNumber())
                 .toleName(business.getToleName())
                 .addressField1(business.getAddressField1())
+                .addressField2(business.getAddressField2())
                 .postalCode(business.getPostalCode())
-                .latitude(BigDecimal.valueOf(business.getLatitude()))
-                .longitude(BigDecimal.valueOf(business.getLongitude()))
+                .latitude(business.getLatitude() != null ? business.getLatitude() : BigDecimal.ZERO)
+                .longitude(business.getLongitude() != null ? business.getLongitude() : BigDecimal.ZERO)
                 .contacts(business.getContacts())
                 .businessHours(business.getBusinessHours())
                 .website(business.getWebsite())

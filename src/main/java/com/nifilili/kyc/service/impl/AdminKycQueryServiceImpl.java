@@ -55,6 +55,7 @@ public class AdminKycQueryServiceImpl
         response.setVerticalId(null);   // optional enrichment later
         response.setKycStatus(kyc.getKycStatus());
         response.setAdminMessage(kyc.getAdminMessage());
+        response.setRejectionReason(kyc.getRejectionReason());
         response.setSubmissionCount(kyc.getSubmissionCount());
         response.setDocuments(documents);
 

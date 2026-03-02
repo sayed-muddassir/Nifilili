@@ -1,6 +1,8 @@
 package com.nifilili.offering.repository;
 
 import com.nifilili.offering.domain.OfferingDiscountEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -30,4 +32,7 @@ public interface OfferingDiscountRepository
 
     // List discounts for management
     List<OfferingDiscountEntity> findByOfferingId(Long offeringId);
+
+    // Paginated discounts for management
+    Page<OfferingDiscountEntity> findByOfferingId(Long offeringId, Pageable pageable);
 }

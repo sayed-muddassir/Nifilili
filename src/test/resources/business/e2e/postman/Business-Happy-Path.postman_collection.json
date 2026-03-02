@@ -1,0 +1,369 @@
+{
+  "info": {
+    "name": "Business Happy Path E2E",
+    "description": "Chronological happy-path onboarding for business module with admin setup + owner onboarding.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Admin login is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.collectionVariables.set('admin_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Create Vertical",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Food Services {{run_id}}\",\n  \"slug\": \"food-services-{{run_id}}\",\n  \"description\": \"Vertical for E2E\",\n  \"iconUrl\": \"https://example.com/icons/food.png\",\n  \"active\": true\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/config/verticals"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.collectionVariables.set('vertical_id', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Create Category",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessVerticalId\": {{vertical_id}},\n  \"parentCategoryId\": null,\n  \"name\": \"Cafe {{run_id}}\",\n  \"slug\": \"cafe-{{run_id}}\",\n  \"description\": \"Category for E2E\",\n  \"iconUrl\": \"https://example.com/icons/cafe.png\",\n  \"activeStatus\": true\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/config/categories"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.collectionVariables.set('category_id', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Create Section",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"verticalId\": {{vertical_id}},\n  \"categoryId\": {{category_id}},\n  \"name\": \"menu_details_{{run_id}}\",\n  \"label\": \"Menu Details\",\n  \"promptText\": \"Please provide menu details\",\n  \"required\": true,\n  \"allowMultiple\": false,\n  \"groupable\": false\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/config/sections"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.collectionVariables.set('section_id', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Create Section Field",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"primary_dish\",\n  \"label\": \"Primary Dish\",\n  \"type\": \"TEXT\",\n  \"options\": [],\n  \"required\": true,\n  \"allowMultiple\": false\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/config/sections/{{section_id}}/fields"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.collectionVariables.set('section_field_id', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Create Attribute Definition",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"verticalId\": {{vertical_id}},\n  \"name\": \"service_mode_{{run_id}}\",\n  \"label\": \"Service Mode\",\n  \"type\": \"DROPDOWN\",\n  \"options\": [\"DINE_IN\", \"TAKEAWAY\"],\n  \"required\": true,\n  \"allowMultiple\": false,\n  \"prompt\": \"Choose one mode\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/config/attributes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.collectionVariables.set('attribute_id', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Create Document Definition",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"verticalId\": {{vertical_id}},\n  \"name\": \"business_registration_{{run_id}}\",\n  \"label\": \"Business Registration\",\n  \"allowedExtensions\": [\"pdf\", \"jpg\"],\n  \"maxFileSize\": 5242880,\n  \"required\": true\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/config/documents"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.collectionVariables.set('document_definition_id', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 User Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{user_username}}\",\n  \"password\": \"{{user_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.collectionVariables.set('user_token', pm.response.json().accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Create Business",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"verticalId\": {{vertical_id}},\n  \"name\": \"Happy Path Cafe {{run_id}}\",\n  \"legalName\": \"Happy Path Cafe Pvt Ltd\",\n  \"municipalityId\": 1,\n  \"wardNumber\": 1,\n  \"toleName\": \"Downtown\",\n  \"addressField1\": \"Main Road\",\n  \"addressField2\": \"Near Landmark\",\n  \"postalCode\": \"44600\",\n  \"website\": \"https://happy.example.com\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(201);",
+              "pm.collectionVariables.set('business_id', pm.response.json().businessId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Update Profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessSummary\": \"E2E onboarding run\",\n  \"legalName\": \"Happy Path Cafe Pvt Ltd\",\n  \"addressField2\": \"Updated Landmark\",\n  \"contacts\": {\"phone\": \"+977-9800000000\", \"email\": \"owner@example.com\"},\n  \"businessHours\": {\"mon\": \"09:00-18:00\"},\n  \"latitude\": 27.7172,\n  \"longitude\": 85.3240\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/{{business_id}}/profile"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.response.to.have.status(204);"]}}]
+    },
+    {
+      "name": "11 Update Categories",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"categoryIds\": [{{category_id}}]\n}"},
+        "url": "{{base_url}}/api/v1/business/{{business_id}}/categories"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.response.to.have.status(204);"]}}]
+    },
+    {
+      "name": "12 Save Section Data",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sectionGroupId\": null,\n  \"fieldValues\": {\"primary_dish\": \"Mocha\"}\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/{{business_id}}/sections/{{section_id}}"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.response.to.have.status(201);"]}}]
+    },
+    {
+      "name": "13 Save Attribute Data",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"attributeId\": {{attribute_id}},\n  \"attributeValue\": \"DINE_IN\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/{{business_id}}/attributes"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.response.to.have.status(204);"]}}]
+    },
+    {
+      "name": "14 Upload Document",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documentDefinitionId\": {{document_definition_id}},\n  \"fileUrl\": \"https://example.com/docs/registration.pdf\",\n  \"fileName\": \"registration.pdf\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/{{business_id}}/documents"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.response.to.have.status(202);"]}}]
+    },
+    {
+      "name": "15 Submit For Review",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Please review my onboarding request\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/{{business_id}}/submit"
+      },
+      "event": [{"listen": "test", "script": {"exec": ["pm.response.to.have.status(202);"]}}]
+    },
+    {
+      "name": "16 Claim Admin-Seeded Business",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/business/{{admin_seeded_business_id}}/claim"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Claim returns 202', function () { pm.response.to.have.status(202); });"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "run_id", "value": "{{$timestamp}}"},
+    {"key": "admin_token", "value": ""},
+    {"key": "user_token", "value": ""},
+    {"key": "vertical_id", "value": ""},
+    {"key": "category_id", "value": ""},
+    {"key": "section_id", "value": ""},
+    {"key": "section_field_id", "value": ""},
+    {"key": "attribute_id", "value": ""},
+    {"key": "document_definition_id", "value": ""},
+    {"key": "business_id", "value": ""},
+    {"key": "admin_seeded_business_id", "value": ""}
+  ]
+}

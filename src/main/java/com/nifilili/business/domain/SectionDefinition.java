@@ -17,9 +17,11 @@ import lombok.Setter;
 public class SectionDefinition extends BaseEntity {
 
     private Long verticalId;
+    private Long categoryId;
     private String name;
     private String label;
     private String prompt;
+    private String promptText;
     private boolean required;
     private boolean allowMultiple;
     private boolean groupable;

@@ -7,6 +7,7 @@ import com.nifilili.business.service.BusinessProfileService;
 import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.InvalidBusinessStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
+import com.nifilili.core.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,8 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
         ensureEditable(business);
 
         business.setBusinessSummary(request.getBusinessSummary());
+        business.setLegalName(request.getLegalName());
+        business.setAddressField2(request.getAddressField2());
         business.setContacts(request.getContacts());
         business.setBusinessHours(request.getBusinessHours());
         business.setLatitude(request.getLatitude());
@@ -40,10 +43,10 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Business not found"));
 
-//        Long userId = SecurityUtil.getCurrentUserId();
-//        if (!business.getOwnerId().equals(userId)) {
-//            throw new InvalidBusinessStateException("Unauthorized access");
-//        }
+        Long authenticatedUserId = SecurityUtil.getCurrentUserId();
+        if (business.getOwnerUserId() == null || !business.getOwnerUserId().equals(authenticatedUserId)) {
+            throw new InvalidBusinessStateException("Unauthorized access");
+        }
         return business;
     }
 

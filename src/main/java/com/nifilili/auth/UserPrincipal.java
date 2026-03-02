@@ -35,15 +35,21 @@ public class UserPrincipal implements UserDetails {
             Long userId,
             String username,
             String password,
+            boolean enabled,
             Collection<? extends GrantedAuthority> authorities
     ) {
-        return new UserPrincipal(
-                userId,
-                username,
-                password,
-                true,
-                authorities
-        );
+        return new UserPrincipal(userId, username, password, enabled, authorities);
+    }
+
+    /** @deprecated Use {@link #of(Long, String, String, boolean, Collection)} to pass enabled from DB. */
+    @Deprecated(since = "v1.1", forRemoval = true)
+    public static UserPrincipal of(
+            Long userId,
+            String username,
+            String password,
+            Collection<? extends GrantedAuthority> authorities
+    ) {
+        return new UserPrincipal(userId, username, password, true, authorities);
     }
 
     public static UserPrincipal anonymous() {
