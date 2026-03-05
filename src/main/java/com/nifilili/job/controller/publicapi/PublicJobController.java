@@ -1,5 +1,6 @@
 package com.nifilili.job.controller.publicapi;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.job.dto.response.JobDetailsResponse;
 import com.nifilili.job.dto.response.JobSummaryResponse;
 import com.nifilili.job.service.JobQueryService;
@@ -16,13 +17,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/public/jobs")
 @RequiredArgsConstructor
-@Tag(name = "Public Job Listings", description = "APIs for public job search and details")
+@Tag(name = SwaggerConstants.JOB_3, description = "Public job search and detail APIs.")
 public class PublicJobController {
 
     private final JobQueryService jobQueryService;
 
     @Operation(
-            summary = "Search Job Openings",
+            summary = "Step 3.1: Search Job Openings",
             description = "Searches open job openings with optional keyword and category filtering. Returns only OPEN jobs."
     )
     @ApiResponse(responseCode = "200", description = "List of matching job summaries")
@@ -36,7 +37,7 @@ public class PublicJobController {
     }
 
     @Operation(
-            summary = "Get Job Details",
+            summary = "Step 3.2: Get Job Details",
             description = "Retrieves full details for a specific job opening including category, location, salary, and skills."
     )
     @ApiResponse(responseCode = "200", description = "Job opening details")

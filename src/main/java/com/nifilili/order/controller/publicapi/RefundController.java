@@ -30,7 +30,7 @@ public class RefundController {
     private final RefundService refundService;
 
     @PostMapping("/{orderId}/refunds")
-    @Operation(summary = "Create refund request", description = "Creates a refund request with bank account details")
+    @Operation(summary = "Step 6.1: Create Refund Request", description = "Creates a refund request with bank account details")
     @ApiResponse(responseCode = "201", description = "Refund request created")
     @ApiResponse(responseCode = "404", description = "Order not found")
     public ResponseEntity<RefundResponse> createRefund(

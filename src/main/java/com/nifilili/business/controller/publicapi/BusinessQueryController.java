@@ -26,7 +26,7 @@ public class BusinessQueryController {
     private final BusinessQueryService businessQueryService;
 
     @Operation(
-            summary = "1. List Published Businesses",
+            summary = "Step 1: List Published Businesses",
             description = "Returns paginated published businesses with sections and attributes."
     )
     @GetMapping
@@ -35,7 +35,7 @@ public class BusinessQueryController {
     }
 
     @Operation(
-            summary = "2. Get Business Details",
+            summary = "Step 2: Get Business Details",
             description = "Returns full details for one published business id."
     )
     @GetMapping("/{businessId}")

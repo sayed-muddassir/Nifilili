@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.owner;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.offering.domain.OfferingDiscountEntity;
 import com.nifilili.offering.dto.request.CreateDiscountRequest;
 import com.nifilili.offering.dto.response.DiscountDetailResponse;
@@ -21,13 +22,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/discounts")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
-@Tag(name = "Discount Owner", description = "Discount management for offerings and variants")
+@Tag(name = SwaggerConstants.OFFERING_2, description = "Owner offering lifecycle, variants, and pricing controls.")
 public class DiscountController {
 
     private final DiscountService discountService;
 
     @PostMapping
-    @Operation(summary = "Create discount",
+    @Operation(summary = "Step 2.18: Create Discount",
             description = "Creates a time-bound percentage or flat discount for an offering or specific variant")
     @ApiResponse(responseCode = "200", description = "Discount created")
     @ApiResponse(responseCode = "400", description = "Invalid offering or variant")
@@ -39,7 +40,7 @@ public class DiscountController {
     }
 
     @GetMapping("/offering/{offeringId}")
-    @Operation(summary = "List discounts by offering",
+    @Operation(summary = "Step 2.19: List Discounts by Offering",
             description = "Returns a paginated list of all discounts (active and inactive) for the specified offering")
     @ApiResponse(responseCode = "200", description = "Discount list returned")
     public Page<DiscountDetailResponse> listByOffering(@PathVariable Long offeringId, Pageable pageable) {
@@ -48,7 +49,7 @@ public class DiscountController {
     }
 
     @PatchMapping("/{id}/deactivate")
-    @Operation(summary = "Deactivate discount",
+    @Operation(summary = "Step 2.20: Deactivate Discount",
             description = "Sets the discount status to INACTIVE, effectively ending the discount")
     @ApiResponse(responseCode = "200", description = "Discount deactivated")
     @ApiResponse(responseCode = "400", description = "Discount not found")
@@ -58,4 +59,3 @@ public class DiscountController {
         return new StatusResponse("INACTIVE");
     }
 }
-

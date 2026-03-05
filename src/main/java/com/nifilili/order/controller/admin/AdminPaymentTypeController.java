@@ -33,7 +33,7 @@ public class AdminPaymentTypeController {
     private final PaymentTypeRepository paymentTypeRepository;
 
     @GetMapping
-    @Operation(summary = "List payment types", description = "Returns all active payment types")
+    @Operation(summary = "Step 12.1: List Payment Types", description = "Returns all active payment types")
     @ApiResponse(responseCode = "200", description = "Payment types returned")
     public ResponseEntity<List<PaymentTypeResponse>> listPaymentTypes() {
         log.info("GET /api/v1/admin/payment-types");
@@ -44,7 +44,7 @@ public class AdminPaymentTypeController {
     }
 
     @DeleteMapping("/{paymentTypeId}")
-    @Operation(summary = "Deactivate payment type", description = "Deactivates a payment type (soft delete)")
+    @Operation(summary = "Step 12.2: Deactivate Payment Type", description = "Deactivates a payment type (soft delete)")
     @ApiResponse(responseCode = "204", description = "Payment type deactivated")
     @ApiResponse(responseCode = "404", description = "Payment type not found")
     public ResponseEntity<Void> deactivate(@PathVariable Long paymentTypeId) {

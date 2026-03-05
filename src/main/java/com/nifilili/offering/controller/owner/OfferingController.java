@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.owner;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.core.enums.offering.OfferingStatus;
 import com.nifilili.offering.domain.OfferingEntity;
 import com.nifilili.offering.dto.request.CreateOfferingRequest;
@@ -23,13 +24,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/offerings")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
-@Tag(name = "Offering Owner", description = "Owner offering management endpoints")
+@Tag(name = SwaggerConstants.OFFERING_2, description = "Owner offering lifecycle, variants, and pricing controls.")
 public class OfferingController {
 
     private final OfferingService offeringService;
 
     @GetMapping
-    @Operation(summary = "List my offerings",
+    @Operation(summary = "Step 2.8: List My Offerings",
             description = "Returns paginated list of the authenticated owner's offerings, optionally filtered by status")
     @ApiResponse(responseCode = "200", description = "Offerings page returned")
     public Page<OfferingResponse> listMyOfferings(
@@ -40,7 +41,7 @@ public class OfferingController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get my offering", description = "Returns full detail of an offering owned by the authenticated user, including draft and archived")
+    @Operation(summary = "Step 2.7: Get My Offering", description = "Returns full detail of an offering owned by the authenticated user, including draft and archived")
     @ApiResponse(responseCode = "200", description = "Offering detail returned")
     @ApiResponse(responseCode = "400", description = "Offering not found or not owned by the current user")
     public OfferingResponse getMyOffering(@PathVariable Long id) {
@@ -53,7 +54,7 @@ public class OfferingController {
     }
 
     @PostMapping
-    @Operation(summary = "Create offering", description = "Creates a new product or service in DRAFT status")
+    @Operation(summary = "Step 2.1: Create Offering", description = "Creates a new product or service in DRAFT status")
     @ApiResponse(responseCode = "200", description = "Offering created")
     @ApiResponse(responseCode = "400", description = "Invalid category or request")
     public CreateOfferingResponse create(@RequestBody CreateOfferingRequest request) {
@@ -81,7 +82,7 @@ public class OfferingController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update offering", description = "Updates an existing offering. Archived offerings cannot be modified.")
+    @Operation(summary = "Step 2.2: Update Offering", description = "Updates an existing offering. Archived offerings cannot be modified.")
     @ApiResponse(responseCode = "200", description = "Offering updated")
     @ApiResponse(responseCode = "400", description = "Offering not found or archived")
     public OfferingResponse update(
@@ -110,7 +111,7 @@ public class OfferingController {
     }
 
     @PatchMapping("/{id}/publish")
-    @Operation(summary = "Publish offering", description = "Transitions an offering to PUBLISHED status, making it visible to customers")
+    @Operation(summary = "Step 2.5: Publish Offering", description = "Transitions an offering to PUBLISHED status, making it visible to customers")
     @ApiResponse(responseCode = "200", description = "Offering published")
     @ApiResponse(responseCode = "400", description = "Offering not found")
     public StatusResponse publish(@PathVariable Long id) {
@@ -119,7 +120,7 @@ public class OfferingController {
     }
 
     @PatchMapping("/{id}/archive")
-    @Operation(summary = "Archive offering", description = "Transitions an offering to ARCHIVED status, hiding it from customers")
+    @Operation(summary = "Step 2.10: Archive Offering", description = "Transitions an offering to ARCHIVED status, hiding it from customers")
     @ApiResponse(responseCode = "200", description = "Offering archived")
     @ApiResponse(responseCode = "400", description = "Offering not found")
     public StatusResponse archive(@PathVariable Long id) {
@@ -128,7 +129,7 @@ public class OfferingController {
     }
 
     @PatchMapping("/{id}/restore")
-    @Operation(summary = "Restore offering", description = "Restores an archived offering back to DRAFT status")
+    @Operation(summary = "Step 2.11: Restore Offering", description = "Restores an archived offering back to DRAFT status")
     @ApiResponse(responseCode = "200", description = "Offering restored to draft")
     @ApiResponse(responseCode = "400", description = "Offering not found")
     public StatusResponse restore(@PathVariable Long id) {
@@ -137,7 +138,7 @@ public class OfferingController {
     }
 
     @PatchMapping("/{id}/inventory")
-    @Operation(summary = "Update inventory", description = "Updates the available quantity for an offering")
+    @Operation(summary = "Step 2.9: Update Offering Inventory", description = "Updates the available quantity for an offering")
     @ApiResponse(responseCode = "200", description = "Inventory updated")
     @ApiResponse(responseCode = "400", description = "Offering not found")
     public StatusResponse inventory(
@@ -147,5 +148,4 @@ public class OfferingController {
         return new StatusResponse("UPDATED");
     }
 }
-
 

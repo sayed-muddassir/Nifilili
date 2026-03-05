@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.owner;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.offering.dto.request.AssignVariantAttributesRequest;
 import com.nifilili.offering.dto.request.UpdateVariantAttributeRequest;
 import com.nifilili.offering.dto.response.StatusResponse;
@@ -21,13 +22,13 @@ import java.util.List;
 @RequestMapping("/api/v1/variants/{variantId}/attributes")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
-@Tag(name = "Variant Attribute Owner", description = "Attribute assignment for product variants")
+@Tag(name = SwaggerConstants.OFFERING_2, description = "Owner offering lifecycle, variants, and pricing controls.")
 public class VariantAttributeController {
 
     private final VariantAttributeService service;
 
     @PostMapping
-    @Operation(summary = "Assign attributes to variant",
+    @Operation(summary = "Step 2.14: Assign Attributes to Variant",
             description = "Assigns attribute values (e.g., Color=Red, Size=M) to a product variant")
     @ApiResponse(responseCode = "200", description = "Attributes assigned")
     @ApiResponse(responseCode = "400", description = "Invalid attribute or variant not found")
@@ -41,7 +42,7 @@ public class VariantAttributeController {
     }
 
     @GetMapping
-    @Operation(summary = "List variant attributes",
+    @Operation(summary = "Step 2.15: List Variant Attributes",
             description = "Returns all attribute key-value pairs assigned to the specified variant")
     @ApiResponse(responseCode = "200", description = "Attributes returned")
     public List<VariantAttributeDetailResponse> list(@PathVariable Long variantId) {
@@ -50,7 +51,7 @@ public class VariantAttributeController {
     }
 
     @PatchMapping("/{attributeId}")
-    @Operation(summary = "Update variant attribute value",
+    @Operation(summary = "Step 2.16: Update Variant Attribute Value",
             description = "Changes the value of an existing variant attribute, validating against predefined options if applicable")
     @ApiResponse(responseCode = "200", description = "Attribute value updated")
     @ApiResponse(responseCode = "400", description = "Attribute not found or value not allowed")
@@ -64,7 +65,7 @@ public class VariantAttributeController {
     }
 
     @DeleteMapping("/{attributeId}")
-    @Operation(summary = "Delete variant attribute",
+    @Operation(summary = "Step 2.17: Delete Variant Attribute",
             description = "Removes an attribute assignment from the variant")
     @ApiResponse(responseCode = "200", description = "Attribute deleted")
     @ApiResponse(responseCode = "400", description = "Attribute not found")
@@ -74,4 +75,3 @@ public class VariantAttributeController {
         return new StatusResponse("DELETED");
     }
 }
-

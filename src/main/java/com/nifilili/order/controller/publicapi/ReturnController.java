@@ -30,7 +30,7 @@ public class ReturnController {
     private final ReturnService returnService;
 
     @PostMapping("/{orderItemId}/returns")
-    @Operation(summary = "Create return request", description = "Creates a return request for a delivered order item within the return window")
+    @Operation(summary = "Step 5.1: Create Return Request", description = "Creates a return request for a delivered order item within the return window")
     @ApiResponse(responseCode = "201", description = "Return request created")
     @ApiResponse(responseCode = "400", description = "Item not delivered or return window expired")
     @ApiResponse(responseCode = "404", description = "Order item not found")

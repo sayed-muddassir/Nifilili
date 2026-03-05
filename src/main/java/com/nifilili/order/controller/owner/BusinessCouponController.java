@@ -35,7 +35,7 @@ public class BusinessCouponController {
     private final CouponService couponService;
 
     @PostMapping
-    @Operation(summary = "Create coupon", description = "Creates a new coupon for the business")
+    @Operation(summary = "Step 10.1: Create Coupon", description = "Creates a new coupon for the business")
     @ApiResponse(responseCode = "201", description = "Coupon created")
     @ApiResponse(responseCode = "400", description = "Invalid coupon data")
     public ResponseEntity<CouponResponse> createCoupon(@Valid @RequestBody CreateCouponRequest request) {
@@ -44,7 +44,7 @@ public class BusinessCouponController {
     }
 
     @PutMapping("/{couponId}")
-    @Operation(summary = "Update coupon", description = "Updates an existing coupon")
+    @Operation(summary = "Step 10.2: Update Coupon", description = "Updates an existing coupon")
     @ApiResponse(responseCode = "200", description = "Coupon updated")
     @ApiResponse(responseCode = "404", description = "Coupon not found")
     public ResponseEntity<CouponResponse> updateCoupon(@PathVariable Long couponId,
@@ -54,7 +54,7 @@ public class BusinessCouponController {
     }
 
     @GetMapping
-    @Operation(summary = "List coupons", description = "Returns paginated list of business coupons")
+    @Operation(summary = "Step 10.3: List Coupons", description = "Returns paginated list of business coupons")
     @ApiResponse(responseCode = "200", description = "Coupons returned")
     public ResponseEntity<Page<CouponResponse>> listCoupons(Pageable pageable) {
         log.info("GET /api/v1/business/coupons");
@@ -62,7 +62,7 @@ public class BusinessCouponController {
     }
 
     @DeleteMapping("/{couponId}")
-    @Operation(summary = "Deactivate coupon", description = "Deactivates a coupon (soft delete)")
+    @Operation(summary = "Step 10.4: Deactivate Coupon", description = "Deactivates a coupon (soft delete)")
     @ApiResponse(responseCode = "204", description = "Coupon deactivated")
     @ApiResponse(responseCode = "404", description = "Coupon not found")
     public ResponseEntity<Void> deactivate(@PathVariable Long couponId) {

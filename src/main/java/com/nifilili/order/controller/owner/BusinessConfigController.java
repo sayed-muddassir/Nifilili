@@ -32,7 +32,7 @@ public class BusinessConfigController {
     private final BusinessConfigService businessConfigService;
 
     @GetMapping
-    @Operation(summary = "Get configs", description = "Returns all configuration key-value pairs for the business")
+    @Operation(summary = "Step 11.1: Get Configs", description = "Returns all configuration key-value pairs for the business")
     @ApiResponse(responseCode = "200", description = "Configs returned")
     public ResponseEntity<List<BusinessConfigResponse>> getConfigs() {
         Long businessId = SecurityUtil.getCurrentUserId();
@@ -41,7 +41,7 @@ public class BusinessConfigController {
     }
 
     @PutMapping
-    @Operation(summary = "Upsert config", description = "Creates or updates a configuration key-value pair")
+    @Operation(summary = "Step 11.2: Upsert Config", description = "Creates or updates a configuration key-value pair")
     @ApiResponse(responseCode = "200", description = "Config saved")
     @ApiResponse(responseCode = "400", description = "Invalid config data")
     public ResponseEntity<BusinessConfigResponse> upsertConfig(

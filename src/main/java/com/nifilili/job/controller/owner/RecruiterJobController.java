@@ -1,5 +1,6 @@
 package com.nifilili.job.controller.owner;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.job.dto.request.ChangeApplicationStatusRequest;
 import com.nifilili.job.dto.request.CreateJobQuestionRequest;
 import com.nifilili.job.dto.request.CreateJobRequest;
@@ -26,7 +27,7 @@ import java.util.List;
 @RequestMapping("/api/v1/business/jobs")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
-@Tag(name = "Recruiter Job Management", description = "APIs for recruiters to manage job postings and applications")
+@Tag(name = SwaggerConstants.JOB_2, description = "Recruiter APIs for job lifecycle and hiring pipeline.")
 public class RecruiterJobController {
 
     private final RecruiterJobService recruiterJobService;
@@ -34,7 +35,7 @@ public class RecruiterJobController {
     // ── Job Lifecycle ───────────────────────────────────────────────────────
 
     @Operation(
-            summary = "Create Job Opening",
+            summary = "Step 2.1: Create Job Opening",
             description = "Creates a new job opening in DRAFT status for the specified business."
     )
     @ApiResponse(responseCode = "201", description = "Job opening created, returns the new job ID")
@@ -47,7 +48,7 @@ public class RecruiterJobController {
     }
 
     @Operation(
-            summary = "Update Job Opening",
+            summary = "Step 2.2: Update Job Opening",
             description = "Updates a job opening that is still in DRAFT status. Only editable before publishing."
     )
     @ApiResponse(responseCode = "200", description = "Job opening updated successfully")
@@ -64,7 +65,7 @@ public class RecruiterJobController {
     }
 
     @Operation(
-            summary = "Publish Job Opening",
+            summary = "Step 2.4: Publish Job Opening",
             description = "Publishes a DRAFT job opening, changing its status to OPEN and making it visible to applicants."
     )
     @ApiResponse(responseCode = "200", description = "Job opening published successfully")
@@ -77,7 +78,7 @@ public class RecruiterJobController {
     }
 
     @Operation(
-            summary = "Close Job Opening",
+            summary = "Step 2.9: Close Job Opening",
             description = "Closes an open job opening, hiding it from public listings and preventing new applications."
     )
     @ApiResponse(responseCode = "200", description = "Job opening closed successfully")
@@ -91,7 +92,7 @@ public class RecruiterJobController {
     }
 
     @Operation(
-            summary = "Reopen Job Opening",
+            summary = "Step 2.10: Reopen Job Opening",
             description = "Reopens a previously closed job opening, making it visible to public listings again."
     )
     @ApiResponse(responseCode = "200", description = "Job opening reopened successfully")
@@ -107,7 +108,7 @@ public class RecruiterJobController {
     // ── Screening Questions ─────────────────────────────────────────────────
 
     @Operation(
-            summary = "Add Screening Question",
+            summary = "Step 2.3: Add Screening Question",
             description = "Adds a custom screening question to a DRAFT job opening."
     )
     @ApiResponse(responseCode = "201", description = "Screening question created, returns the new question ID")
@@ -123,7 +124,7 @@ public class RecruiterJobController {
     }
 
     @Operation(
-            summary = "Get Screening Questions",
+            summary = "Step 2.5: List Screening Questions",
             description = "Retrieves all screening questions for a specific job opening."
     )
     @ApiResponse(responseCode = "200", description = "List of screening questions")
@@ -136,7 +137,7 @@ public class RecruiterJobController {
     // ── Application Pipeline ────────────────────────────────────────────────
 
     @Operation(
-            summary = "Get Applications for Job",
+            summary = "Step 2.6: List Applications for Job",
             description = "Retrieves all applications submitted for a specific job opening with answers to screening questions."
     )
     @ApiResponse(responseCode = "200", description = "List of applications with answers")
@@ -147,7 +148,7 @@ public class RecruiterJobController {
     }
 
     @Operation(
-            summary = "Change Application Status",
+            summary = "Step 2.7: Change Application Status",
             description = "Moves an application through the recruitment pipeline. Valid transitions: RECEIVED→REVIEWED/REJECTED, REVIEWED→SHORTLISTED/REJECTED, SHORTLISTED→INTERVIEWING, INTERVIEWING→HIRED/REJECTED."
     )
     @ApiResponse(responseCode = "200", description = "Application status updated and history recorded")
@@ -163,7 +164,7 @@ public class RecruiterJobController {
     }
 
     @Operation(
-            summary = "Get Application Timeline",
+            summary = "Step 2.8: Get Application Timeline",
             description = "Retrieves the full audit trail of status changes for a specific application."
     )
     @ApiResponse(responseCode = "200", description = "Chronological list of status changes")

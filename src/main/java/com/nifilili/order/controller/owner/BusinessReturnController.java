@@ -29,7 +29,7 @@ public class BusinessReturnController {
     private final BusinessReturnService businessReturnService;
 
     @PutMapping("/{returnRequestId}/status")
-    @Operation(summary = "Update return status", description = "Manages return lifecycle: pickup, receive, inspect, refund or reject")
+    @Operation(summary = "Step 8.1: Update Return Status", description = "Manages return lifecycle: pickup, receive, inspect, refund or reject")
     @ApiResponse(responseCode = "200", description = "Status updated")
     @ApiResponse(responseCode = "400", description = "Invalid status transition")
     @ApiResponse(responseCode = "404", description = "Return request not found")

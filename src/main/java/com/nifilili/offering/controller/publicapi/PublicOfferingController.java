@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.publicapi;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.core.enums.offering.OfferingType;
 import com.nifilili.offering.domain.OfferingEntity;
 import com.nifilili.offering.dto.response.PublicOfferingResponse;
@@ -23,14 +24,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/public/offerings")
 @RequiredArgsConstructor
-@Tag(name = "Offering Public", description = "Public offering browsing and search endpoints")
+@Tag(name = SwaggerConstants.OFFERING_3, description = "Public offering discovery and pricing endpoints.")
 public class PublicOfferingController {
 
     private final PublicOfferingService service;
     private final PricingService pricingService;
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get offering details",
+    @Operation(summary = "Step 3.1: Get Offering Details",
             description = "Returns a published offering with variants, attributes, and discounted price")
     @ApiResponse(responseCode = "200", description = "Offering details returned")
     @ApiResponse(responseCode = "400", description = "Offering not found or not published")
@@ -53,7 +54,7 @@ public class PublicOfferingController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search offerings",
+    @Operation(summary = "Step 3.2: Search Offerings",
             description = "Search published offerings by category, type, and price range. All filters are optional and combinable.")
     @ApiResponse(responseCode = "200", description = "Search results returned")
     public Page<PublicOfferingSummary> search(
@@ -68,7 +69,7 @@ public class PublicOfferingController {
     }
 
     @GetMapping("/business/{ownerId}")
-    @Operation(summary = "Browse by business",
+    @Operation(summary = "Step 3.3: Browse by Business",
             description = "Returns a paginated list of published offerings from a specific business or owner storefront")
     @ApiResponse(responseCode = "200", description = "Business offerings returned")
     public Page<PublicOfferingSummary> listByBusiness(@PathVariable Long ownerId, Pageable pageable) {
@@ -77,7 +78,7 @@ public class PublicOfferingController {
     }
 
     @GetMapping("/category/{categoryId}")
-    @Operation(summary = "Browse by category",
+    @Operation(summary = "Step 3.4: Browse by Category",
             description = "Returns a paginated list of published offerings within a specific product/service category")
     @ApiResponse(responseCode = "200", description = "Category offerings returned")
     public Page<PublicOfferingSummary> listByCategory(@PathVariable Long categoryId, Pageable pageable) {
@@ -86,7 +87,7 @@ public class PublicOfferingController {
     }
 
     @GetMapping("/featured")
-    @Operation(summary = "List featured offerings",
+    @Operation(summary = "Step 3.5: List Featured Offerings",
             description = "Returns a paginated list of published offerings marked as featured")
     @ApiResponse(responseCode = "200", description = "Featured offerings returned")
     public Page<PublicOfferingSummary> featured(Pageable pageable) {
@@ -94,4 +95,3 @@ public class PublicOfferingController {
         return service.listFeatured(pageable);
     }
 }
-

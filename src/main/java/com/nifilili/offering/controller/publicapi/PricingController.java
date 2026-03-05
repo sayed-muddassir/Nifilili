@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.publicapi;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.offering.dto.response.PricingResponse;
 import com.nifilili.offering.service.PricingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,13 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/public/pricing")
 @RequiredArgsConstructor
-@Tag(name = "Pricing Public", description = "Public pricing and discount resolution")
+@Tag(name = SwaggerConstants.OFFERING_3, description = "Public offering discovery and pricing endpoints.")
 public class PricingController {
 
     private final PricingService pricingService;
 
     @GetMapping("/variants/{variantId}")
-    @Operation(summary = "Get variant pricing",
+    @Operation(summary = "Step 3.6: Get Variant Pricing",
             description = "Returns base price, active discount, and final price for a variant")
     @ApiResponse(responseCode = "200", description = "Pricing details returned")
     @ApiResponse(responseCode = "400", description = "Variant not found")
@@ -31,5 +32,4 @@ public class PricingController {
         return pricingService.getVariantPriceDetails(variantId);
     }
 }
-
 

@@ -32,7 +32,7 @@ public class CancellationController {
     private final CancellationService cancellationService;
 
     @PostMapping("/{orderId}/cancellations")
-    @Operation(summary = "Request cancellation", description = "Requests cancellation for one or more order items")
+    @Operation(summary = "Step 4.1: Request Cancellation", description = "Requests cancellation for one or more order items")
     @ApiResponse(responseCode = "201", description = "Cancellation requested")
     @ApiResponse(responseCode = "400", description = "Item not in cancellable state")
     @ApiResponse(responseCode = "404", description = "Order or item not found")

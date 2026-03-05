@@ -151,7 +151,7 @@ public class BusinessOnboardingController {
     }
 
     @Operation(
-            summary = "Claim Admin-Seeded Business",
+            summary = "Step 8: Claim Admin-Seeded Business",
             description = "Claims an unclaimed admin-seeded business listing. Sets the authenticated user as the owner and initiates the KYC verification process."
     )
     @ApiResponse(responseCode = "202", description = "Business claimed, KYC process initiated")

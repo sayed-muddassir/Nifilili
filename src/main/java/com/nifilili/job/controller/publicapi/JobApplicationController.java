@@ -1,5 +1,6 @@
 package com.nifilili.job.controller.publicapi;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.job.dto.request.ApplyJobRequest;
 import com.nifilili.job.dto.response.MyApplicationResponse;
 import com.nifilili.job.service.JobApplicationService;
@@ -19,13 +20,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/public/jobs")
 @RequiredArgsConstructor
-@Tag(name = "Job Application Management", description = "APIs for job seekers to manage their job applications")
+@Tag(name = SwaggerConstants.JOB_4, description = "Job seeker application lifecycle APIs.")
 public class JobApplicationController {
 
     private final JobApplicationService jobApplicationService;
 
     @Operation(
-            summary = "Apply for Job",
+            summary = "Step 4.1: Apply for Job",
             description = "Submits a job application with resume, cover letter, and answers to screening questions."
     )
     @ApiResponse(responseCode = "201", description = "Application submitted successfully")
@@ -41,7 +42,7 @@ public class JobApplicationController {
     }
 
     @Operation(
-            summary = "Withdraw Application",
+            summary = "Step 4.2: Withdraw Application",
             description = "Withdraws a job application. Only allowed while the application is still in RECEIVED status."
     )
     @ApiResponse(responseCode = "200", description = "Application withdrawn successfully")
@@ -57,7 +58,7 @@ public class JobApplicationController {
     }
 
     @Operation(
-            summary = "Get My Applications",
+            summary = "Step 4.3: List My Applications",
             description = "Retrieves all job applications submitted by the specified user with their current status."
     )
     @ApiResponse(responseCode = "200", description = "List of user's job applications")

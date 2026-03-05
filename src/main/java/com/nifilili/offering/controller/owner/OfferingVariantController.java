@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.owner;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.offering.domain.OfferingVariantEntity;
 import com.nifilili.offering.dto.request.CreateVariantRequest;
 import com.nifilili.offering.dto.request.UpdateVariantRequest;
@@ -21,13 +22,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/offerings/{offeringId}/variants")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
-@Tag(name = "Offering Variant Owner", description = "Variant management for offering owners")
+@Tag(name = SwaggerConstants.OFFERING_2, description = "Owner offering lifecycle, variants, and pricing controls.")
 public class OfferingVariantController {
 
     private final OfferingVariantService variantService;
 
     @PostMapping
-    @Operation(summary = "Create variant", description = "Creates a new variant for an offering with its own SKU, price, and images")
+    @Operation(summary = "Step 2.3: Create Variant", description = "Creates a new variant for an offering with its own SKU, price, and images")
     @ApiResponse(responseCode = "200", description = "Variant created")
     @ApiResponse(responseCode = "400", description = "Offering not found")
     public VariantResponse create(
@@ -45,7 +46,7 @@ public class OfferingVariantController {
     }
 
     @PutMapping("/{variantId}")
-    @Operation(summary = "Update variant", description = "Updates an existing variant's SKU, price, quantity, and images")
+    @Operation(summary = "Step 2.4: Update Variant", description = "Updates an existing variant's SKU, price, quantity, and images")
     @ApiResponse(responseCode = "200", description = "Variant updated")
     @ApiResponse(responseCode = "400", description = "Variant not found")
     public VariantResponse update(
@@ -64,7 +65,7 @@ public class OfferingVariantController {
     }
 
     @GetMapping
-    @Operation(summary = "List variants", description = "Returns a paginated list of variants for the specified offering")
+    @Operation(summary = "Step 2.6: List Variants", description = "Returns a paginated list of variants for the specified offering")
     @ApiResponse(responseCode = "200", description = "Variants returned")
     public Page<VariantResponse> list(@PathVariable Long offeringId, Pageable pageable) {
         log.info("GET /api/v1/offerings/{}/variants", offeringId);
@@ -73,7 +74,7 @@ public class OfferingVariantController {
     }
 
     @PatchMapping("/{variantId}/inventory")
-    @Operation(summary = "Update variant inventory", description = "Updates the available quantity for a variant")
+    @Operation(summary = "Step 2.12: Update Variant Inventory", description = "Updates the available quantity for a variant")
     @ApiResponse(responseCode = "200", description = "Variant inventory updated")
     public StatusResponse inventory(
             @PathVariable Long variantId,
@@ -84,7 +85,7 @@ public class OfferingVariantController {
     }
 
     @PatchMapping("/{variantId}/deactivate")
-    @Operation(summary = "Deactivate variant",
+    @Operation(summary = "Step 2.13: Deactivate Variant",
             description = "Soft-deletes a variant by setting its status to INACTIVE")
     @ApiResponse(responseCode = "200", description = "Variant deactivated")
     @ApiResponse(responseCode = "400", description = "Variant not found")

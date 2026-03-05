@@ -35,7 +35,7 @@ public class BusinessPaymentController {
     private final RefundService refundService;
 
     @GetMapping("/{orderId}/payment")
-    @Operation(summary = "Get payment status", description = "Returns payment details for an order")
+    @Operation(summary = "Step 9.1: Get Payment Status", description = "Returns payment details for an order")
     @ApiResponse(responseCode = "200", description = "Payment returned")
     @ApiResponse(responseCode = "404", description = "Payment not found")
     public ResponseEntity<PaymentStatusResponse> getPayment(@PathVariable Long orderId) {
@@ -44,7 +44,7 @@ public class BusinessPaymentController {
     }
 
     @PutMapping("/{orderId}/payment/verify")
-    @Operation(summary = "Verify payment", description = "Verifies a manual bank transfer payment")
+    @Operation(summary = "Step 9.2: Verify Payment", description = "Verifies a manual bank transfer payment")
     @ApiResponse(responseCode = "200", description = "Payment verified")
     @ApiResponse(responseCode = "400", description = "Payment not in verifiable state")
     public ResponseEntity<Void> verifyPayment(@PathVariable Long orderId,
@@ -55,7 +55,7 @@ public class BusinessPaymentController {
     }
 
     @PutMapping("/{orderId}/payment/cod")
-    @Operation(summary = "Record COD payment", description = "Records a cash-on-delivery payment upon delivery")
+    @Operation(summary = "Step 9.3: Record COD Payment", description = "Records a cash-on-delivery payment upon delivery")
     @ApiResponse(responseCode = "200", description = "COD payment recorded")
     @ApiResponse(responseCode = "400", description = "Payment not in pending state")
     public ResponseEntity<Void> recordCodPayment(@PathVariable Long orderId,
@@ -66,7 +66,7 @@ public class BusinessPaymentController {
     }
 
     @PutMapping("/refunds/{refundId}/status")
-    @Operation(summary = "Update refund status", description = "Updates refund status through approval and processing")
+    @Operation(summary = "Step 9.4: Update Refund Status", description = "Updates refund status through approval and processing")
     @ApiResponse(responseCode = "200", description = "Refund status updated")
     @ApiResponse(responseCode = "400", description = "Invalid status transition")
     @ApiResponse(responseCode = "404", description = "Refund not found")

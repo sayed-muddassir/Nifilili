@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.admin;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.offering.domain.OfferingCategoryEntity;
 import com.nifilili.offering.dto.request.CreateCategoryRequest;
 import com.nifilili.offering.dto.request.UpdateCategoryRequest;
@@ -22,13 +23,13 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/offering-categories")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
-@Tag(name = "Offering Category Admin", description = "Admin management of product and service categories")
+@Tag(name = SwaggerConstants.OFFERING_1, description = "Admin setup for offering categories and attributes.")
 public class OfferingCategoryAdminController {
 
     private final OfferingCategoryService categoryService;
 
     @PostMapping
-    @Operation(summary = "Create category", description = "Creates a new offering category, optionally as a child of an existing category")
+    @Operation(summary = "Step 1.1: Create Category", description = "Creates a new offering category, optionally as a child of an existing category")
     @ApiResponse(responseCode = "200", description = "Category created")
     @ApiResponse(responseCode = "400", description = "Parent category not found")
     public CategoryResponse create(@RequestBody CreateCategoryRequest request) {
@@ -43,7 +44,7 @@ public class OfferingCategoryAdminController {
     }
 
     @GetMapping("/tree")
-    @Operation(summary = "Get category tree", description = "Returns the hierarchical tree of all offering categories")
+    @Operation(summary = "Step 1.2: Get Category Tree", description = "Returns the hierarchical tree of all offering categories")
     @ApiResponse(responseCode = "200", description = "Category tree returned")
     public List<CategoryTreeResponse> tree() {
         return categoryService.getTree()
@@ -53,7 +54,7 @@ public class OfferingCategoryAdminController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update category", description = "Updates the name of an existing offering category")
+    @Operation(summary = "Step 1.3: Update Category", description = "Updates the name of an existing offering category")
     @ApiResponse(responseCode = "200", description = "Category updated")
     @ApiResponse(responseCode = "400", description = "Category not found")
     public CategoryResponse update(@PathVariable Long id, @RequestBody UpdateCategoryRequest request) {
@@ -67,7 +68,7 @@ public class OfferingCategoryAdminController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete category",
+    @Operation(summary = "Step 1.4: Delete Category",
             description = "Deletes a category if it has no child categories and no offerings assigned to it")
     @ApiResponse(responseCode = "200", description = "Category deleted")
     @ApiResponse(responseCode = "400", description = "Category not found or has children/offerings")
@@ -85,5 +86,4 @@ public class OfferingCategoryAdminController {
         );
     }
 }
-
 

@@ -39,7 +39,7 @@ public class OrderController {
     private final OrderQueryService orderQueryService;
 
     @PostMapping
-    @Operation(summary = "Place order", description = "Places an order from the current cart with delivery address and payment type")
+    @Operation(summary = "Step 3.1: Place Order", description = "Places an order from the current cart with delivery address and payment type")
     @ApiResponse(responseCode = "201", description = "Order placed")
     @ApiResponse(responseCode = "400", description = "Cart empty or invalid request")
     @ApiResponse(responseCode = "404", description = "Payment type not found")
@@ -49,7 +49,7 @@ public class OrderController {
     }
 
     @GetMapping
-    @Operation(summary = "List my orders", description = "Returns paginated list of the authenticated user's orders")
+    @Operation(summary = "Step 3.2: List My Orders", description = "Returns paginated list of the authenticated user's orders")
     @ApiResponse(responseCode = "200", description = "Orders returned")
     public ResponseEntity<Page<OrderSummaryResponse>> listOrders(
             @RequestParam(required = false) OrderStatus status,
@@ -59,7 +59,7 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    @Operation(summary = "Get order details", description = "Returns full order details with items, timeline, and payment")
+    @Operation(summary = "Step 3.3: Get Order Details", description = "Returns full order details with items, timeline, and payment")
     @ApiResponse(responseCode = "200", description = "Order details returned")
     @ApiResponse(responseCode = "404", description = "Order not found")
     public ResponseEntity<OrderDetailsResponse> getOrderDetails(@PathVariable Long orderId) {

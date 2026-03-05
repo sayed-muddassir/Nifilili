@@ -33,7 +33,7 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    @Operation(summary = "Get cart", description = "Returns the authenticated user's cart with enriched item details")
+    @Operation(summary = "Step 1.1: Get Cart", description = "Returns the authenticated user's cart with enriched item details")
     @ApiResponse(responseCode = "200", description = "Cart returned")
     public ResponseEntity<CartResponse> getCart() {
         log.info("GET /api/v1/cart");
@@ -41,7 +41,7 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    @Operation(summary = "Add item to cart", description = "Adds an item to the cart or increments quantity if already present")
+    @Operation(summary = "Step 1.2: Add Item to Cart", description = "Adds an item to the cart or increments quantity if already present")
     @ApiResponse(responseCode = "200", description = "Item added")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     public ResponseEntity<CartResponse> addItem(@Valid @RequestBody AddCartItemRequest request) {
@@ -50,7 +50,7 @@ public class CartController {
     }
 
     @PutMapping("/items/{cartItemId}")
-    @Operation(summary = "Update item quantity", description = "Updates the quantity of a specific cart item")
+    @Operation(summary = "Step 1.3: Update Item Quantity", description = "Updates the quantity of a specific cart item")
     @ApiResponse(responseCode = "200", description = "Quantity updated")
     @ApiResponse(responseCode = "404", description = "Cart item not found")
     public ResponseEntity<CartResponse> updateQuantity(@PathVariable Long cartItemId,
@@ -60,7 +60,7 @@ public class CartController {
     }
 
     @DeleteMapping("/items/{cartItemId}")
-    @Operation(summary = "Remove item", description = "Removes an item from the cart")
+    @Operation(summary = "Step 1.4: Remove Item", description = "Removes an item from the cart")
     @ApiResponse(responseCode = "204", description = "Item removed")
     @ApiResponse(responseCode = "404", description = "Cart item not found")
     public ResponseEntity<Void> removeItem(@PathVariable Long cartItemId) {
@@ -70,7 +70,7 @@ public class CartController {
     }
 
     @DeleteMapping
-    @Operation(summary = "Clear cart", description = "Removes all items from the cart")
+    @Operation(summary = "Step 1.5: Clear Cart", description = "Removes all items from the cart")
     @ApiResponse(responseCode = "204", description = "Cart cleared")
     public ResponseEntity<Void> clearCart() {
         log.info("DELETE /api/v1/cart");

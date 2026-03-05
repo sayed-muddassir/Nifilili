@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.admin;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.offering.domain.OfferingAttributeEntity;
 import com.nifilili.offering.dto.request.CreateAttributeRequest;
 import com.nifilili.offering.dto.request.UpdateAttributeRequest;
@@ -21,13 +22,13 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/offering-attributes")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
-@Tag(name = "Offering Attribute Admin", description = "Admin management of category-level product attributes")
+@Tag(name = SwaggerConstants.OFFERING_1, description = "Admin setup for offering categories and attributes.")
 public class OfferingAttributeAdminController {
 
     private final OfferingAttributeService attributeService;
 
     @PostMapping
-    @Operation(summary = "Create attribute",
+    @Operation(summary = "Step 1.7: Create Attribute",
             description = "Creates a new attribute definition for a category (e.g., Color, Size)")
     @ApiResponse(responseCode = "200", description = "Attribute created")
     @ApiResponse(responseCode = "400", description = "Category not found")
@@ -50,7 +51,7 @@ public class OfferingAttributeAdminController {
     }
 
     @GetMapping("/category/{categoryId}")
-    @Operation(summary = "Get attributes by category",
+    @Operation(summary = "Step 1.8: Get Attributes by Category",
             description = "Returns all attribute definitions for a given category")
     @ApiResponse(responseCode = "200", description = "Attributes returned")
     public List<AttributeResponse> byCategory(@PathVariable Long categoryId) {
@@ -67,7 +68,7 @@ public class OfferingAttributeAdminController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update attribute",
+    @Operation(summary = "Step 1.9: Update Attribute",
             description = "Updates an attribute definition's name, type, and allowed options")
     @ApiResponse(responseCode = "200", description = "Attribute updated")
     @ApiResponse(responseCode = "400", description = "Attribute not found")
@@ -86,7 +87,7 @@ public class OfferingAttributeAdminController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete attribute",
+    @Operation(summary = "Step 1.10: Delete Attribute",
             description = "Deletes an attribute definition if it is not in use by any variant attributes")
     @ApiResponse(responseCode = "200", description = "Attribute deleted")
     @ApiResponse(responseCode = "400", description = "Attribute not found or in use")
@@ -96,4 +97,3 @@ public class OfferingAttributeAdminController {
         return new StatusResponse("DELETED");
     }
 }
-

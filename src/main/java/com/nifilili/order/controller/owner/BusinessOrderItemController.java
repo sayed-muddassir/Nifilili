@@ -33,7 +33,7 @@ public class BusinessOrderItemController {
     private final CancellationService cancellationService;
 
     @PutMapping("/{orderItemId}/status")
-    @Operation(summary = "Update item status", description = "Updates the status of an order item through its lifecycle")
+    @Operation(summary = "Step 7.1: Update Item Status", description = "Updates the status of an order item through its lifecycle")
     @ApiResponse(responseCode = "200", description = "Status updated")
     @ApiResponse(responseCode = "400", description = "Invalid status transition")
     @ApiResponse(responseCode = "404", description = "Order item not found")
@@ -45,7 +45,7 @@ public class BusinessOrderItemController {
     }
 
     @PutMapping("/{orderItemId}/reject")
-    @Operation(summary = "Reject order item", description = "Rejects an order item with a mandatory reason")
+    @Operation(summary = "Step 7.2: Reject Order Item", description = "Rejects an order item with a mandatory reason")
     @ApiResponse(responseCode = "200", description = "Item rejected")
     @ApiResponse(responseCode = "400", description = "Item cannot be rejected")
     @ApiResponse(responseCode = "404", description = "Order item not found")
@@ -57,7 +57,7 @@ public class BusinessOrderItemController {
     }
 
     @PutMapping("/{orderItemId}/cancellation/decide")
-    @Operation(summary = "Decide cancellation", description = "Approves or rejects a pending cancellation request")
+    @Operation(summary = "Step 7.3: Decide Cancellation", description = "Approves or rejects a pending cancellation request")
     @ApiResponse(responseCode = "200", description = "Decision recorded")
     @ApiResponse(responseCode = "400", description = "No pending cancellation")
     @ApiResponse(responseCode = "404", description = "Cancellation request not found")

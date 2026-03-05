@@ -1,5 +1,6 @@
 package com.nifilili.job.controller.admin;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.job.dto.request.CreateJobCategoryRequest;
 import com.nifilili.job.dto.response.JobCategoryResponse;
 import com.nifilili.job.service.JobCategoryService;
@@ -21,13 +22,13 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/jobs/categories")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
-@Tag(name = "Job Category Management [Admin]", description = "APIs for managing job categories (Admin only)")
+@Tag(name = SwaggerConstants.JOB_1, description = "Admin setup APIs for job categories.")
 public class JobAdminController {
 
     private final JobCategoryService jobCategoryService;
 
     @Operation(
-            summary = "Create Job Category",
+            summary = "Step 1.1: Create Job Category",
             description = "Creates a new job category in the system. Category names must be unique."
     )
     @ApiResponse(responseCode = "201", description = "Job category created successfully")
@@ -44,7 +45,7 @@ public class JobAdminController {
     }
 
     @Operation(
-            summary = "Get All Job Categories",
+            summary = "Step 1.2: List Job Categories",
             description = "Retrieves all job categories in the system."
     )
     @ApiResponse(responseCode = "200", description = "List of all job categories")

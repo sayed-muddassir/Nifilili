@@ -23,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     @Operation(
-            summary = "User Registration",
+            summary = "Step 1.1: User Registration",
             description = "Creates a new user account and returns a JWT token with user profile.",
             tags = {SwaggerConstants.AUTH_1}
     )
@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "User Login",
+            summary = "Step 1.2: User Login",
             description = "Authenticates a user and returns a JWT token with user profile.",
             tags = {SwaggerConstants.AUTH_1}
     )
@@ -49,7 +49,7 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "Get Current User Profile",
+            summary = "Step 1.3: Get Current User Profile",
             description = "Returns the authenticated user's profile. Requires a valid Bearer token.",
             tags = {SwaggerConstants.AUTH_2}
     )

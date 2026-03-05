@@ -1,5 +1,6 @@
 package com.nifilili.offering.controller.admin;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.core.enums.offering.OfferingStatus;
 import com.nifilili.offering.domain.OfferingEntity;
 import com.nifilili.offering.dto.request.AdminStatusChangeRequest;
@@ -20,13 +21,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/offerings")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
-@Tag(name = "Offering Admin", description = "Admin oversight and moderation of all platform offerings")
+@Tag(name = SwaggerConstants.OFFERING_1, description = "Admin oversight and moderation for offerings.")
 public class OfferingAdminController {
 
     private final OfferingAdminService offeringAdminService;
 
     @GetMapping
-    @Operation(summary = "List all offerings",
+    @Operation(summary = "Step 1.5: List All Offerings",
             description = "Returns a paginated list of all offerings across all owners, optionally filtered by status")
     @ApiResponse(responseCode = "200", description = "Offerings returned")
     public Page<OfferingResponse> listAll(
@@ -41,7 +42,7 @@ public class OfferingAdminController {
     }
 
     @PatchMapping("/{id}/status")
-    @Operation(summary = "Change offering status",
+    @Operation(summary = "Step 1.6: Change Offering Status",
             description = "Admin force-changes an offering's status (e.g., ARCHIVED to suspend a problematic offering)")
     @ApiResponse(responseCode = "200", description = "Status changed")
     @ApiResponse(responseCode = "400", description = "Offering not found")

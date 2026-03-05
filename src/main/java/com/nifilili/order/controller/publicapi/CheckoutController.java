@@ -28,7 +28,7 @@ public class CheckoutController {
     private final CheckoutService checkoutService;
 
     @PostMapping("/preview")
-    @Operation(summary = "Checkout preview", description = "Generates a checkout preview with pricing, taxes, and discounts")
+    @Operation(summary = "Step 2.1: Checkout Preview", description = "Generates a checkout preview with pricing, taxes, and discounts")
     @ApiResponse(responseCode = "200", description = "Preview generated")
     @ApiResponse(responseCode = "400", description = "Cart is empty or invalid")
     public ResponseEntity<CheckoutPreviewResponse> preview(@Valid @RequestBody CheckoutPreviewRequest request) {
