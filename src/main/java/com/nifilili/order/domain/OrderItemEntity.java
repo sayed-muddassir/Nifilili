@@ -1,10 +1,16 @@
 package com.nifilili.order.domain;
 
 import com.nifilili.core.entity.BaseEntity;
+import com.nifilili.core.enums.order.OrderItemStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -17,64 +23,66 @@ import java.util.Map;
 @Table(name = "order_items")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItemEntity extends BaseEntity {
 
-    @Column(name = "order_id", nullable = false)
+    @Column(nullable = false)
     private Long orderId;
 
-    @Column(name = "business_id", nullable = false)
+    @Column(nullable = false)
     private Long businessId;
 
-    @Column(name = "offering_id", nullable = false)
+    @Column(nullable = false)
     private Long offeringId;
 
-    @Column(name = "coupon_id")
     private Long couponId;
 
-    @Column(name = "variant_id")
     private Long variantId;
 
+    // Snapshot fields — captured at checkout time
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String sku;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "variant_attributes", columnDefinition = "jsonb", nullable = false)
+    @Column(columnDefinition = "jsonb")
     private Map<String, Object> variantAttributes;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(name = "unit_price", nullable = false)
+    @Column(nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(name = "discount_amount", nullable = false)
+    @Column(nullable = false)
     private BigDecimal discountAmount;
 
-    @Column(name = "delivery_charge", nullable = false)
+    @Column(nullable = false)
     private BigDecimal deliveryCharge;
 
-    @Column(name = "tax_amount", nullable = false)
+    @Column(nullable = false)
     private BigDecimal taxAmount;
 
     @Column(nullable = false)
     private BigDecimal subtotal;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private OrderItemStatus status;
 
-    // TODO audit fields
-    @Column(name = "created_at", nullable = false)
+    // Audit
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(nullable = false)
     private Long createdBy;
 
-    @Column(name = "updated_by", nullable = false)
+    @Column(nullable = false)
     private Long updatedBy;
 }

@@ -1,0 +1,825 @@
+{
+  "info": {
+    "_postman_id": "order-collection-001",
+    "name": "Order Module - Happy Path",
+    "description": "End-to-end happy path for the order module: login -> cart -> checkout -> order -> payment -> status updates -> return -> refund",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "run_id", "value": "{{$timestamp}}"}
+  ],
+  "item": [
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Login as User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has token', () => pm.expect(json.accessToken).to.be.a('string'));",
+                  "pm.environment.set('token', json.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{user_email}}\", \"password\": \"{{user_password}}\"}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login as Owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('owner_token', pm.response.json().accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{owner_email}}\", \"password\": \"{{owner_password}}\"}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('admin_token', pm.response.json().accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{admin_email}}\", \"password\": \"{{admin_password}}\"}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Cart",
+      "item": [
+        {
+          "name": "Add Item to Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has items', () => pm.expect(json.items).to.be.an('array'));",
+                  "if (json.items.length > 0) { pm.environment.set('cart_item_id', json.items[0].cartItemId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"offeringId\": 1, \"quantity\": 2}"
+            },
+            "url": "{{base_url}}/api/v1/cart/items"
+          }
+        },
+        {
+          "name": "Get Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has cartId', () => pm.expect(json.cartId).to.be.a('number'));",
+                  "pm.test('Has summary', () => pm.expect(json.summary).to.be.an('object'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/cart"
+          }
+        },
+        {
+          "name": "Update Cart Item Quantity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\": 3}"
+            },
+            "url": "{{base_url}}/api/v1/cart/items/{{cart_item_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Checkout",
+      "item": [
+        {
+          "name": "Checkout Preview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has business groups', () => pm.expect(json.businessGroups).to.be.an('array'));",
+                  "pm.test('Has summary', () => pm.expect(json.summary).to.be.an('object'));",
+                  "pm.test('Has payable amount', () => pm.expect(json.summary.payableAmount).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"address\": {\"municipalityId\": 1, \"wardNumber\": 5, \"toleName\": \"Kathmandu\", \"addressField1\": \"123 Main St\"}}"
+            },
+            "url": "{{base_url}}/api/v1/checkout/preview"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Place Order",
+      "item": [
+        {
+          "name": "Place Order (COD)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has orderId', () => pm.expect(json.orderId).to.be.a('number'));",
+                  "pm.test('Has orderNumber', () => pm.expect(json.orderNumber).to.be.a('string'));",
+                  "pm.environment.set('order_id', json.orderId);",
+                  "pm.environment.set('order_number', json.orderNumber);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"receiverName\": \"John Doe\", \"contactNumber\": \"9841234567\", \"email\": \"john@example.com\", \"address\": {\"municipalityId\": 1, \"wardNumber\": 5, \"toleName\": \"Kathmandu\", \"addressField1\": \"123 Main St\"}, \"paymentTypeId\": {{payment_type_id}}}"
+            },
+            "url": "{{base_url}}/api/v1/orders"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Query Orders",
+      "item": [
+        {
+          "name": "List My Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has content', () => pm.expect(json.content).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/orders"
+          }
+        },
+        {
+          "name": "Get Order Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has orderNumber', () => pm.expect(json.orderNumber).to.be.a('string'));",
+                  "pm.test('Has items', () => pm.expect(json.items).to.be.an('array'));",
+                  "if (json.items.length > 0) { pm.environment.set('order_item_id', json.items[0].orderItemId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/orders/{{order_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Business Order Management",
+      "item": [
+        {
+          "name": "Update Item Status to RECEIVED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"newStatus\": \"RECEIVED\", \"note\": \"Item received at warehouse\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/order-items/{{order_item_id}}/status"
+          }
+        },
+        {
+          "name": "Update Item Status to PREPARING",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"newStatus\": \"PREPARING\", \"note\": \"Preparing for shipment\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/order-items/{{order_item_id}}/status"
+          }
+        },
+        {
+          "name": "Update Item Status to SHIPPED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"newStatus\": \"SHIPPED\", \"note\": \"Shipped via courier\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/order-items/{{order_item_id}}/status"
+          }
+        },
+        {
+          "name": "Update Item Status to DELIVERED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"newStatus\": \"DELIVERED\", \"note\": \"Delivered to customer\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/order-items/{{order_item_id}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Payment",
+      "item": [
+        {
+          "name": "Get Payment Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has status', () => pm.expect(json.status).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/orders/{{order_id}}/payment"
+          }
+        },
+        {
+          "name": "Record COD Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amountReceived\": 500.00, \"receiverName\": \"Delivery Agent\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/orders/{{order_id}}/payment/cod"
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Returns",
+      "item": [
+        {
+          "name": "Create Return Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has rmaNumber', () => pm.expect(json.rmaNumber).to.be.a('string'));",
+                  "pm.environment.set('return_request_id', json.returnRequestId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Product damaged\", \"details\": \"Arrived with scratches\", \"photos\":[], \"pickupAddress\": {\"municipalityId\": 1, \"wardNumber\": 5, \"toleName\": \"Kathmandu\", \"addressField1\": \"123 Main St\"}}"
+            },
+            "url": "{{base_url}}/api/v1/order-items/{{order_item_id}}/returns"
+          }
+        },
+        {
+          "name": "Schedule Pickup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"PICKUP_SCHEDULED\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/returns/{{return_request_id}}/status"
+          }
+        },
+        {
+          "name": "Mark Picked Up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"PICKED_UP\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/returns/{{return_request_id}}/status"
+          }
+        },
+        {
+          "name": "Mark Received",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"RECEIVED\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/returns/{{return_request_id}}/status"
+          }
+        },
+        {
+          "name": "Mark Inspected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"INSPECTED\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/returns/{{return_request_id}}/status"
+          }
+        },
+        {
+          "name": "Mark Refunded",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"REFUNDED\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/returns/{{return_request_id}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Refunds",
+      "item": [
+        {
+          "name": "Create Refund",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has refundId', () => pm.expect(json.refundId).to.be.a('number'));",
+                  "pm.environment.set('refund_id', json.refundId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bankName\": \"Nepal Bank\", \"accountHolder\": \"John Doe\", \"accountNumber\": \"1234567890\", \"branch\": \"Main Branch\"}"
+            },
+            "url": "{{base_url}}/api/v1/orders/{{order_id}}/refunds"
+          }
+        },
+        {
+          "name": "Approve Refund",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"APPROVED\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/orders/refunds/{{refund_id}}/status"
+          }
+        },
+        {
+          "name": "Process Refund",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"PROCESSED\", \"reference\": \"REF-12345\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/orders/refunds/{{refund_id}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Coupons (Owner)",
+      "item": [
+        {
+          "name": "Create Coupon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has id', () => pm.expect(json.id).to.be.a('number'));",
+                  "pm.environment.set('coupon_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\": \"SAVE10_{{run_id}}\", \"discountType\": \"PERCENTAGE\", \"discountValue\": 10, \"validFrom\": \"2026-01-01\", \"validTo\": \"2026-12-31\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/coupons"
+          }
+        },
+        {
+          "name": "List Coupons",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has content', () => pm.expect(pm.response.json().content).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/coupons"
+          }
+        },
+        {
+          "name": "Deactivate Coupon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/coupons/{{coupon_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Business Config",
+      "item": [
+        {
+          "name": "Upsert Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has configKey', () => pm.expect(json.configKey).to.equal('tax_rate'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"configKey\": \"tax_rate\", \"configValue\": \"15\"}"
+            },
+            "url": "{{base_url}}/api/v1/business/config"
+          }
+        },
+        {
+          "name": "Get Configs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/config"
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Admin Payment Types",
+      "item": [
+        {
+          "name": "List Payment Types",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": "{{base_url}}/api/v1/admin/payment-types"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,10 +1,16 @@
 package com.nifilili.order.domain;
 
 import com.nifilili.core.entity.BaseEntity;
+import com.nifilili.core.enums.order.ReturnStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -15,16 +21,20 @@ import java.util.Map;
 
 @Entity
 @Table(name = "return_requests")
-@Getter @Setter
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReturnRequestEntity extends BaseEntity {
 
-    @Column(name = "order_item_id", nullable = false)
+    @Column(nullable = false)
     private Long orderItemId;
 
     @Column(nullable = false)
     private String reason;
 
-    @Column(name = "reason_details", columnDefinition = "TEXT")
+    @Column(columnDefinition = "text")
     private String reasonDetails;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -32,35 +42,40 @@ public class ReturnRequestEntity extends BaseEntity {
     private List<String> photos;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "pickup_address", columnDefinition = "jsonb", nullable = false)
+    @Column(columnDefinition = "jsonb", nullable = false)
     private Map<String, Object> pickupAddress;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private ReturnStatus status;
 
-    @Column(name = "rma_number")
     private String rmaNumber;
 
+    // Lifecycle timestamps — set when each phase is reached
+    @Column(nullable = false)
     private LocalDateTime requestedAt;
+
     private LocalDateTime pickupScheduledAt;
+
     private LocalDateTime receivedAt;
+
     private LocalDateTime inspectedAt;
+
     private LocalDateTime rejectedAt;
 
-    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    @Column(columnDefinition = "text")
     private String rejectionReason;
 
-    // TODO audit fields
-    @Column(name = "created_at", nullable = false)
+    // Audit
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(nullable = false)
     private Long createdBy;
 
-    @Column(name = "updated_by", nullable = false)
+    @Column(nullable = false)
     private Long updatedBy;
 }
-

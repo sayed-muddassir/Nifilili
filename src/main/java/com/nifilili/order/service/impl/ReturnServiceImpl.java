@@ -1,151 +1,111 @@
 package com.nifilili.order.service.impl;
 
+import com.nifilili.core.enums.order.OrderItemStatus;
+import com.nifilili.core.enums.order.ReturnStatus;
+import com.nifilili.core.exception.InvalidOrderStateException;
+import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.core.security.SecurityUtil;
-import com.nifilili.order.dto.request.returnflow.CreateReturnRequest;
-import com.nifilili.order.dto.response.returnflow.ReturnResponse;
 import com.nifilili.order.domain.OrderItemEntity;
+import com.nifilili.order.domain.OrderStatusHistoryEntity;
 import com.nifilili.order.domain.ReturnRequestEntity;
+import com.nifilili.order.dto.request.CreateReturnRequest;
+import com.nifilili.order.dto.response.ReturnResponse;
+import com.nifilili.order.mapper.ReturnMapper;
 import com.nifilili.order.repository.OrderItemRepository;
+import com.nifilili.order.repository.OrderStatusHistoryRepository;
 import com.nifilili.order.repository.ReturnRequestRepository;
-import com.nifilili.order.service.returnflow.ReturnService;
-import jakarta.transaction.Transactional;
+import com.nifilili.order.service.BusinessConfigService;
+import com.nifilili.order.service.ReturnService;
+import com.nifilili.order.util.OrderNumberGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReturnServiceImpl implements ReturnService {
 
-    private final OrderItemRepository orderItemRepository;
+    private static final String CONFIG_RETURN_WINDOW_DAYS = "return_window_days";
+    private static final int DEFAULT_RETURN_WINDOW_DAYS = 7;
+
     private final ReturnRequestRepository returnRequestRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final OrderStatusHistoryRepository statusHistoryRepository;
+    private final BusinessConfigService businessConfigService;
+    private final ReturnMapper returnMapper;
 
-    /**
-     * Item states eligible for return.
-     */
-    private static final Set<String> RETURN_ELIGIBLE_STATES = Set.of(
-            "delivered"
-    );
-
-    // ------------------------------------------------------------------
-    // CREATE RETURN REQUEST (USER ACTION)
-    // ------------------------------------------------------------------
-
-    /**
-     * Create a return request for a delivered order item.
-     *
-     * IMPORTANT BUSINESS RULES:
-     * - Only delivered items can be returned
-     * - Return window must be valid
-     * - One return per order item
-     * - No refund is created here
-     */
     @Override
-    @Transactional
-    public ReturnResponse createReturn(
-            Long orderItemId,
-            CreateReturnRequest request
-    ) {
-
+    public ReturnResponse createReturn(Long orderItemId, CreateReturnRequest request) {
         Long userId = SecurityUtil.getCurrentUserId();
+        log.info("Creating return request for orderItemId={}", orderItemId);
+        LocalDateTime now = LocalDateTime.now();
 
-        // 1️⃣ Fetch order item
         OrderItemEntity item = orderItemRepository.findById(orderItemId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Order item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order item not found"));
 
-        // 🔐 Ownership check (customer)
-        if (!item.getCreatedBy().equals(userId)) {
-            throw new IllegalStateException(
-                    "Unauthorized return request"
-            );
+        if (item.getStatus() != OrderItemStatus.DELIVERED) {
+            throw new InvalidOrderStateException("Can only return delivered items");
         }
 
-        // 🚫 Return eligibility check
-        if (!RETURN_ELIGIBLE_STATES.contains(item.getStatus())) {
-            throw new IllegalStateException(
-                    "Item not eligible for return in state: " + item.getStatus()
-            );
+        // Check return window
+        Map<Long, Map<String, String>> configs = businessConfigService
+                .getConfigMap(Set.of(item.getBusinessId()));
+        Map<String, String> businessConfig = configs.getOrDefault(item.getBusinessId(), Map.of());
+        int returnWindowDays = Integer.parseInt(
+                businessConfig.getOrDefault(CONFIG_RETURN_WINDOW_DAYS,
+                        String.valueOf(DEFAULT_RETURN_WINDOW_DAYS)));
+
+        long daysSinceDelivery = ChronoUnit.DAYS.between(item.getUpdatedAt().toLocalDate(), now.toLocalDate());
+        if (daysSinceDelivery > returnWindowDays) {
+            throw new InvalidOrderStateException(
+                    "Return window of " + returnWindowDays + " days has expired");
         }
 
-        // 🚫 Prevent duplicate return request
-        returnRequestRepository.findByOrderItemId(orderItemId)
-                .ifPresent(r ->
-                        throwDuplicateReturnException()
-                );
-
-        // 🚫 Return window check (mocked)
-        if (!isWithinReturnWindow(item)) {
-            throw new IllegalStateException(
-                    "Return window has expired"
-            );
+        // Check for existing return
+        if (returnRequestRepository.findByOrderItemId(orderItemId).isPresent()) {
+            throw new InvalidOrderStateException("Return request already exists for this item");
         }
 
-        // 2️⃣ Create return request
-        ReturnRequestEntity returnRequest = new ReturnRequestEntity();
-        returnRequest.setOrderItemId(orderItemId);
-        returnRequest.setReason(request.getReason());
-        returnRequest.setReasonDetails(request.getDetails());
-        returnRequest.setPhotos(request.getPhotos());
-        returnRequest.setPickupAddress(Map.of("municipalityId",
-                request.getPickupAddress().getMunicipalityId(),
-                "wardNumber",
-                request.getPickupAddress().getWardNumber(),
-                "toleName",
-                request.getPickupAddress().getToleName(),
-                "addressField1",
-                request.getPickupAddress().getAddressField1(),
-                "postalCode",
-                request.getPickupAddress().getPostalCode()
-        ));
+        ReturnRequestEntity returnRequest = ReturnRequestEntity.builder()
+                .orderItemId(orderItemId)
+                .reason(request.getReason())
+                .reasonDetails(request.getDetails())
+                .photos(request.getPhotos())
+                .pickupAddress(request.getPickupAddress() != null
+                        ? Map.of(
+                        "municipalityId", request.getPickupAddress().getMunicipalityId(),
+                        "wardNumber", request.getPickupAddress().getWardNumber(),
+                        "toleName", request.getPickupAddress().getToleName(),
+                        "addressField1", request.getPickupAddress().getAddressField1())
+                        : Map.of())
+                .status(ReturnStatus.REQUESTED)
+                .rmaNumber(OrderNumberGenerator.generateRmaNumber())
+                .requestedAt(now)
+                .createdAt(now)
+                .updatedAt(now)
+                .createdBy(userId)
+                .updatedBy(userId)
+                .build();
 
-        returnRequest.setStatus("requested");
-        returnRequest.setRmaNumber(generateRma());
+        returnRequest = returnRequestRepository.save(returnRequest);
 
-        returnRequest.setRequestedAt(LocalDateTime.now());
-        returnRequest.setCreatedAt(LocalDateTime.now());
-        returnRequest.setUpdatedAt(LocalDateTime.now());
-        returnRequest.setCreatedBy(userId);
-        returnRequest.setUpdatedBy(userId);
+        // Record status history
+        statusHistoryRepository.save(OrderStatusHistoryEntity.builder()
+                .orderItemId(orderItemId)
+                .oldStatus(OrderItemStatus.DELIVERED.name())
+                .newStatus("RETURN_REQUESTED")
+                .createdBy(userId)
+                .createdAt(now)
+                .build());
 
-        returnRequestRepository.save(returnRequest);
-
-        return new ReturnResponse(
-                returnRequest.getId(),
-                returnRequest.getRmaNumber(),
-                returnRequest.getStatus()
-        );
-    }
-
-    // ------------------------------------------------------------------
-    // INTERNAL HELPERS
-    // ------------------------------------------------------------------
-
-    private void throwDuplicateReturnException() {
-        throw new IllegalStateException(
-                "Return request already exists for this item"
-        );
-    }
-
-    /**
-     * Mock return window validation.
-     *
-     * Replace with:
-     * - business config lookup
-     * - delivered_at timestamp
-     */
-    private boolean isWithinReturnWindow(OrderItemEntity item) {
-
-        // Mock logic: always allow
-        return true;
-    }
-
-    private String generateRma() {
-        return "RMA-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return returnMapper.toResponse(returnRequest);
     }
 }
-

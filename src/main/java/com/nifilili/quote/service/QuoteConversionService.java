@@ -1,5 +1,8 @@
 package com.nifilili.quote.service;
 
+import com.nifilili.core.enums.order.OrderItemStatus;
+import com.nifilili.core.enums.order.OrderStatus;
+import com.nifilili.core.enums.order.PaymentStatus;
 import com.nifilili.quote.domain.Quote;
 import com.nifilili.quote.domain.QuoteConversion;
 import com.nifilili.quote.domain.QuoteLineItem;
@@ -82,8 +85,8 @@ public class QuoteConversionService {
         order.setDiscountAmount(BigDecimal.ZERO);
         order.setTotalAmount(quote.getTotalAmount());
 
-        order.setStatus("placed");
-        order.setPaymentStatus("pending");
+        order.setStatus(OrderStatus.PLACED);
+        order.setPaymentStatus(PaymentStatus.PENDING);
         order.setAmountPaid(BigDecimal.ZERO);
         order.setCustomerNotes("Created from quote " + quote.getQuoteNumber());
         order.setIsB2bOrder(false);
@@ -151,7 +154,7 @@ public class QuoteConversionService {
         item.setDeliveryCharge(BigDecimal.ZERO);
         item.setTaxAmount(BigDecimal.ZERO);
         item.setSubtotal(unitPrice.multiply(BigDecimal.valueOf(quantity)));
-        item.setStatus("placed");
+        item.setStatus(OrderItemStatus.PLACED);
         item.setCreatedAt(now);
         item.setUpdatedAt(now);
         item.setCreatedBy(userId);

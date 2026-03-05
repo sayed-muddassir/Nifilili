@@ -69,6 +69,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleInvalidOrderState(InvalidOrderStateException ex) {
+        log.warn("Invalid order state: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorDto(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ErrorDto> handleSqlException(SQLException ex) {
         log.error("SQL error: {}", ex.getMessage());
         return new ResponseEntity<>(new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()),

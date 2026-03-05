@@ -18,7 +18,19 @@ import org.springframework.context.annotation.Configuration;
                 @Tag(name = SwaggerConstants.AUTH_2),
                 @Tag(name = SwaggerConstants.BUSINESS_1),
                 @Tag(name = SwaggerConstants.BUSINESS_2),
-                @Tag(name = SwaggerConstants.BUSINESS_3)
+                @Tag(name = SwaggerConstants.BUSINESS_3),
+                @Tag(name = SwaggerConstants.ORDER_1),
+                @Tag(name = SwaggerConstants.ORDER_2),
+                @Tag(name = SwaggerConstants.ORDER_3),
+                @Tag(name = SwaggerConstants.ORDER_4),
+                @Tag(name = SwaggerConstants.ORDER_5),
+                @Tag(name = SwaggerConstants.ORDER_6),
+                @Tag(name = SwaggerConstants.ORDER_7),
+                @Tag(name = SwaggerConstants.ORDER_8),
+                @Tag(name = SwaggerConstants.ORDER_9),
+                @Tag(name = SwaggerConstants.ORDER_10),
+                @Tag(name = SwaggerConstants.ORDER_11),
+                @Tag(name = SwaggerConstants.ORDER_12)
         }
 )
 public class OpenApiConfig {}

@@ -1,201 +1,103 @@
 package com.nifilili.order.service.impl;
 
+import com.nifilili.core.enums.order.RefundStatus;
+import com.nifilili.core.exception.InvalidOrderStateException;
+import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.core.security.SecurityUtil;
-import com.nifilili.order.dto.request.refund.CreateRefundRequest;
-import com.nifilili.order.dto.request.refund.UpdateRefundStatusRequest;
-import com.nifilili.order.dto.response.refund.RefundResponse;
-import com.nifilili.order.domain.OrderItemEntity;
 import com.nifilili.order.domain.OrderRefundEntity;
-import com.nifilili.order.domain.RefundItemEntity;
-import com.nifilili.order.repository.OrderItemRepository;
+import com.nifilili.order.dto.request.CreateRefundRequest;
+import com.nifilili.order.dto.request.UpdateRefundStatusRequest;
+import com.nifilili.order.dto.response.RefundResponse;
+import com.nifilili.order.events.RefundProcessedEvent;
+import com.nifilili.order.mapper.RefundMapper;
 import com.nifilili.order.repository.OrderRefundRepository;
-import com.nifilili.order.repository.RefundItemRepository;
-import com.nifilili.order.service.refund.RefundService;
-import jakarta.transaction.Transactional;
+import com.nifilili.order.repository.OrderRepository;
+import com.nifilili.order.service.RefundService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RefundServiceImpl implements RefundService {
 
-    private final OrderItemRepository orderItemRepository;
-    private final OrderRefundRepository orderRefundRepository;
-    private final RefundItemRepository refundItemRepository;
-
-    /**
-     * Item states eligible for refund.
-     */
-    private static final Set<String> REFUND_ELIGIBLE_ITEM_STATES = Set.of(
-            "cancelled",
-            "return_approved",
-            "returned",
-            "refunded"
+    private static final Map<RefundStatus, Set<RefundStatus>> ALLOWED_TRANSITIONS = Map.of(
+            RefundStatus.PENDING, Set.of(RefundStatus.APPROVED, RefundStatus.CANCELLED),
+            RefundStatus.APPROVED, Set.of(RefundStatus.PROCESSED, RefundStatus.FAILED)
     );
 
-    /**
-     * Allowed refund status transitions.
-     */
-    private static final Set<String> ALLOWED_REFUND_STATUSES = Set.of(
-            "pending",
-            "approved",
-            "processed",
-            "failed",
-            "cancelled"
-    );
+    private final OrderRefundRepository refundRepository;
+    private final OrderRepository orderRepository;
+    private final RefundMapper refundMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
-    // ------------------------------------------------------------------
-    // CREATE REFUND
-    // ------------------------------------------------------------------
-
-    /**
-     * Create a refund for an order.
-     *
-     * IMPORTANT RULES:
-     * - Refunds are NEVER auto-created.
-     * - Only approved items are refunded.
-     * - Supports partial refunds.
-     */
     @Override
-    @Transactional
     public RefundResponse createRefund(Long orderId, CreateRefundRequest request) {
+        log.info("Creating refund for orderId={}", orderId);
 
-        Long actorId = SecurityUtil.getCurrentUserId();
+        orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        // 1️⃣ Fetch refundable items
-        List<OrderItemEntity> refundableItems =
-                orderItemRepository.findByOrderId(orderId).stream()
-                        .filter(item ->
-                                REFUND_ELIGIBLE_ITEM_STATES.contains(item.getStatus()))
-                        .toList();
-
-        if (refundableItems.isEmpty()) {
-            throw new IllegalStateException(
-                    "No refundable items found for order"
-            );
+        // Check for existing refund
+        if (refundRepository.findByOrderId(orderId).isPresent()) {
+            throw new InvalidOrderStateException("Refund already exists for this order");
         }
 
-        // 2️⃣ Calculate refund amount (item-level)
-        BigDecimal refundAmount = refundableItems.stream()
-                .map(this::calculateRefundAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        OrderRefundEntity refund = OrderRefundEntity.builder()
+                .orderId(orderId)
+                .refundAmount(BigDecimal.ZERO) // Will be calculated based on cancelled/returned items
+                .status(RefundStatus.PENDING)
+                .bankName(request.getBankName())
+                .bankAccountName(request.getAccountHolder())
+                .accountNumber(request.getAccountNumber())
+                .branch(request.getBranch())
+                .build();
 
-        // 3️⃣ Create refund record
-        OrderRefundEntity refund = new OrderRefundEntity();
-        refund.setOrderId(orderId);
-        refund.setRefundAmount(refundAmount);
-        refund.setStatus("pending");
-
-        refund.setBankName(request.getBankName());
-        refund.setBankAccountName(request.getAccountHolder());
-        refund.setAccountNumber(request.getAccountNumber());
-        refund.setBranch(request.getBranch());
-
-        refund.setProcessedAt(null);
-
-        orderRefundRepository.save(refund);
-
-        // 4️⃣ Create refund items (one per order item)
-        for (OrderItemEntity item : refundableItems) {
-
-            RefundItemEntity refundItem = new RefundItemEntity();
-            refundItem.setRefundId(refund.getId());
-            refundItem.setOrderItemId(item.getId());
-//            refundItem.setRefundAmount(calculateRefundAmount(item));
-//            refundItem.setStatus("pending"); TOD UNCOMMENT if needed in future
-
-            refundItemRepository.save(refundItem);
-        }
-
-        return new RefundResponse(
-                refund.getId(),
-                refundAmount,
-                refund.getStatus()
-        );
+        refund = refundRepository.save(refund);
+        return refundMapper.toResponse(refund);
     }
 
-    // ------------------------------------------------------------------
-    // UPDATE REFUND STATUS
-    // ------------------------------------------------------------------
-
-    /**
-     * Update refund status.
-     *
-     * Typical flow:
-     * pending → approved → processed
-     */
     @Override
-    @Transactional
-    public void updateRefundStatus(
-            Long refundId,
-            UpdateRefundStatusRequest request
-    ) {
+    public RefundResponse updateRefundStatus(Long refundId, UpdateRefundStatusRequest request) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        log.info("Updating refund status: refundId={}, newStatus={}", refundId, request.getStatus());
 
-        Long actorId = SecurityUtil.getCurrentUserId();
+        OrderRefundEntity refund = refundRepository.findById(refundId)
+                .orElseThrow(() -> new ResourceNotFoundException("Refund not found"));
 
-        OrderRefundEntity refund = orderRefundRepository.findById(refundId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Refund not found"));
+        RefundStatus newStatus = RefundStatus.valueOf(request.getStatus());
+        RefundStatus oldStatus = refund.getStatus();
 
-        String newStatus = request.getStatus();
+        validateTransition(oldStatus, newStatus);
 
-        // 🚫 Validate status
-        if (!ALLOWED_REFUND_STATUSES.contains(newStatus)) {
-            throw new IllegalArgumentException(
-                    "Invalid refund status: " + newStatus
-            );
-        }
-
-        // 🚫 Terminal protection
-        if (isTerminal(refund.getStatus())) {
-            throw new IllegalStateException(
-                    "Refund already in terminal state: " + refund.getStatus()
-            );
-        }
-
-        // 1️⃣ Update refund record
         refund.setStatus(newStatus);
-
-        if ("processed".equalsIgnoreCase(newStatus)) {
+        if (request.getReference() != null) {
             refund.setRefundReference(request.getReference());
-            refund.setProcessedAt(LocalDateTime.now());
         }
 
-        orderRefundRepository.save(refund);
+        if (newStatus == RefundStatus.PROCESSED) {
+            refund.setProcessedAt(LocalDateTime.now());
+            eventPublisher.publishEvent(new RefundProcessedEvent(refund.getOrderId(), refund.getId()));
+        }
 
-        // 2️⃣ Sync refund items
-        refundItemRepository.findAll().stream()
-                .filter(ri -> ri.getRefundId().equals(refundId))
-                .forEach(ri -> {
-//                    ri.setStatus(newStatus);
-                    refundItemRepository.save(ri);
-                });
+        refund = refundRepository.save(refund);
+        return refundMapper.toResponse(refund);
     }
 
-    // ------------------------------------------------------------------
-    // INTERNAL HELPERS
-    // ------------------------------------------------------------------
-
-    /**
-     * Refund amount calculation logic.
-     *
-     * Business rule:
-     * refund = subtotal + tax + delivery - discount
-     */
-    private BigDecimal calculateRefundAmount(OrderItemEntity item) {
-
-        return item.getSubtotal()
-                .add(item.getTaxAmount())
-                .add(item.getDeliveryCharge())
-                .subtract(item.getDiscountAmount());
-    }
-
-    private boolean isTerminal(String status) {
-        return Set.of("processed", "cancelled").contains(status);
+    private void validateTransition(RefundStatus from, RefundStatus to) {
+        Set<RefundStatus> allowed = ALLOWED_TRANSITIONS.get(from);
+        if (allowed == null || !allowed.contains(to)) {
+            throw new InvalidOrderStateException(
+                    "Cannot transition refund from " + from + " to " + to);
+        }
     }
 }

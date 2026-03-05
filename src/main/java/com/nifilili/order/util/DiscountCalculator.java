@@ -1,68 +1,59 @@
 package com.nifilili.order.util;
 
-import com.nifilili.order.model.Coupon;
+import com.nifilili.core.enums.util.DiscountType;
+import com.nifilili.order.domain.CouponEntity;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * DiscountCalculator applies coupon discount on an item subtotal.
- *
- * Supported discount types:
- * - PERCENTAGE (with optional max cap)
- * - FIXED amount
- *
- * IMPORTANT:
- * - This class assumes coupon validity is already checked
- * - This class NEVER returns negative values
+ * Calculates discount amount for a given item subtotal and coupon.
+ * Supports PERCENTAGE (with optional maxDiscount cap) and FIXED_AMOUNT types.
  */
 public final class DiscountCalculator {
 
+    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+
     private DiscountCalculator() {
-        // Utility class
+        // utility class
     }
 
     /**
-     * Calculate discount amount for a single item.
+     * Calculates the applicable discount.
      *
-     * @param itemSubtotal subtotal before discount
-     * @param coupon       validated coupon (may be null)
+     * @param itemSubtotal the subtotal before discount
+     * @param coupon       the coupon to apply
+     * @return the discount amount, never exceeding the subtotal, rounded to 2 decimal places
      */
-    public static BigDecimal calculate(
-            BigDecimal itemSubtotal,
-            Coupon coupon
-    ) {
-
-        if (coupon == null) {
+    public static BigDecimal calculate(BigDecimal itemSubtotal, CouponEntity coupon) {
+        if (itemSubtotal == null || itemSubtotal.compareTo(BigDecimal.ZERO) <= 0 || coupon == null) {
             return BigDecimal.ZERO;
         }
 
         BigDecimal discount;
 
-        switch (coupon.getDiscountType()) {
+        if (coupon.getDiscountType() == DiscountType.PERCENTAGE) {
+            discount = itemSubtotal
+                    .multiply(coupon.getDiscountValue())
+                    .divide(ONE_HUNDRED, 2, RoundingMode.HALF_UP);
 
-            case PERCENTAGE -> {
-                discount = itemSubtotal
-                        .multiply(coupon.getDiscountValue())
-                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-                // Apply max discount cap if present
-                if (coupon.getMaxDiscount() != null &&
-                        discount.compareTo(coupon.getMaxDiscount()) > 0) {
-                    discount = coupon.getMaxDiscount();
-                }
+            // Apply maxDiscount cap if configured
+            if (coupon.getMaxDiscount() != null && discount.compareTo(coupon.getMaxDiscount()) > 0) {
+                discount = coupon.getMaxDiscount();
             }
-
-            case FIXED_AMOUNT -> {
-                discount = coupon.getDiscountValue();
-            }
-
-            default -> discount = BigDecimal.ZERO;
+        } else {
+            // FIXED_AMOUNT
+            discount = coupon.getDiscountValue();
         }
 
-        // Safety: discount cannot exceed subtotal
+        // Discount cannot exceed the subtotal
         if (discount.compareTo(itemSubtotal) > 0) {
             discount = itemSubtotal;
+        }
+
+        // Guard against negative discount
+        if (discount.compareTo(BigDecimal.ZERO) < 0) {
+            return BigDecimal.ZERO;
         }
 
         return discount.setScale(2, RoundingMode.HALF_UP);

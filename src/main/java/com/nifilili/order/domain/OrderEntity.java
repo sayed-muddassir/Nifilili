@@ -1,10 +1,17 @@
 package com.nifilili.order.domain;
 
 import com.nifilili.core.entity.BaseEntity;
+import com.nifilili.core.enums.order.OrderStatus;
+import com.nifilili.core.enums.order.PaymentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -14,94 +21,98 @@ import java.time.LocalDateTime;
 @Table(name = "orders")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderEntity extends BaseEntity {
 
-    @Column(name = "user_id", nullable = false)
+    @Column(nullable = false)
     private Long userId;
 
-    @Column(name = "order_number", nullable = false)
+    @Column(nullable = false, unique = true)
     private String orderNumber;
 
-    @Column(name = "invoice_number", nullable = false)
+    @Column(nullable = false, unique = true)
     private String invoiceNumber;
 
-    @Column(name = "receiver_name", nullable = false)
+    // Delivery address snapshot
+    @Column(nullable = false)
     private String receiverName;
 
-    @Column(name = "contact_number", nullable = false)
+    @Column(nullable = false)
     private String contactNumber;
 
     @Column(nullable = false)
     private String email;
 
-    @Column(name = "municipality_id", nullable = false)
+    @Column(nullable = false)
     private Long municipalityId;
 
-    @Column(name = "ward_number", nullable = false)
+    @Column(nullable = false)
     private Integer wardNumber;
 
-    @Column(name = "tole_name", nullable = false)
+    @Column(nullable = false)
     private String toleName;
 
-    @Column(name = "address_field_1", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "address_field_1", nullable = false)
     private String addressField1;
 
-    @Column(name = "postal_code", nullable = false)
+    @Column(nullable = false)
     private String postalCode;
 
-    @Column(name = "subtotal_amount", nullable = false)
+    // Aggregated amounts
+    @Column(nullable = false)
     private BigDecimal subtotalAmount;
 
-    @Column(name = "delivery_charge", nullable = false)
+    @Column(nullable = false)
     private BigDecimal deliveryCharge;
 
-    @Column(name = "tax_amount", nullable = false)
+    @Column(nullable = false)
     private BigDecimal taxAmount;
 
-    @Column(name = "discount_amount", nullable = false)
+    @Column(nullable = false)
     private BigDecimal discountAmount;
 
-    @Column(name = "total_amount", nullable = false)
+    @Column(nullable = false)
     private BigDecimal totalAmount;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private OrderStatus status;
 
-    @Column(name = "payment_status", nullable = false)
-    private String paymentStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus;
 
-    @Column(name = "amount_paid", nullable = false)
+    @Column(nullable = false)
     private BigDecimal amountPaid;
 
-    @Column(name = "customer_notes", columnDefinition = "TEXT")
+    @Column(columnDefinition = "text")
     private String customerNotes;
 
+    // B2B fields
+    @Builder.Default
     @Column(name = "is_b2b_order", nullable = false)
-    private Boolean isB2bOrder;
+    private Boolean isB2bOrder = false;
 
-    @Column(name = "b2b_quote_id")
     private Long b2bQuoteId;
 
-    @Column(nullable = false)
     private String source;
 
-    @Column(name = "source_quote_id")
     private Long sourceQuoteId;
 
-    @Column(name = "source_request_id")
     private Long sourceRequestId;
 
-    // TODO audit fields
-    @Column(name = "created_at", nullable = false)
+    // Audit
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(nullable = false)
     private Long createdBy;
 
-    @Column(name = "updated_by", nullable = false)
+    @Column(nullable = false)
     private Long updatedBy;
 }
-
