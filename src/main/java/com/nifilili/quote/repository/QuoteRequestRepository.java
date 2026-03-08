@@ -1,20 +1,17 @@
 package com.nifilili.quote.repository;
 
-import com.nifilili.quote.domain.QuoteRequest;
+import com.nifilili.core.enums.quote.QuoteRequestStatus;
+import com.nifilili.quote.domain.QuoteRequestEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-public interface QuoteRequestRepository extends JpaRepository<QuoteRequest, Long> {
+public interface QuoteRequestRepository extends JpaRepository<QuoteRequestEntity, Long> {
 
-    List<QuoteRequest> findByBusinessId(Long businessId);
+    List<QuoteRequestEntity> findByUserIdOrderByIdDesc(Long userId);
 
-    List<QuoteRequest> findByBusinessIdOrderByIdDesc(Long businessId);
+    List<QuoteRequestEntity> findByBusinessIdOrderByIdDesc(Long businessId);
 
-    List<QuoteRequest> findByUserIdOrderByIdDesc(Long userId);
-
-    List<QuoteRequest> findByStatusAndExpiredAtBefore(
-            com.nifilili.core.enums.quote.QuoteRequestStatus status,
-            java.time.LocalDateTime expiredAt
-    );
+    List<QuoteRequestEntity> findByStatusAndExpiredAtBefore(QuoteRequestStatus status, LocalDateTime now);
 }

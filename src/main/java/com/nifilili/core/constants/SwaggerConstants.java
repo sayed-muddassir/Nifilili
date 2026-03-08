@@ -33,4 +33,8 @@ public class SwaggerConstants {
     public static final String ORDER_10 = "5.10 - Coupons [Owner]";
     public static final String ORDER_11 = "5.11 - Business Config [Owner]";
     public static final String ORDER_12 = "5.12 - Payment Types [Admin]";
+
+    public static final String QUOTE_1 = "6.01 - Quote Requests [User]";
+    public static final String QUOTE_2 = "6.02 - Quote Management [Owner]";
+    public static final String QUOTE_3 = "6.03 - Quotes [Admin]";
 }

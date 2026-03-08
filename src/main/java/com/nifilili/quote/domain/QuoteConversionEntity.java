@@ -4,7 +4,10 @@ import com.nifilili.core.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -13,17 +16,20 @@ import java.time.LocalDateTime;
 @Table(name = "quote_conversions")
 @Getter
 @Setter
-public class QuoteConversion extends BaseEntity {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class QuoteConversionEntity extends BaseEntity {
 
-    @Column(name = "quote_id", nullable = false)
+    @Column(nullable = false, unique = true)
     private Long quoteId;
 
-    @Column(name = "order_id", nullable = false)
+    @Column(nullable = false)
     private Long orderId;
 
-    @Column(name = "converted_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime convertedAt;
 
-    @Column(name = "converted_by", nullable = false)
+    @Column(nullable = false)
     private Long convertedBy;
 }

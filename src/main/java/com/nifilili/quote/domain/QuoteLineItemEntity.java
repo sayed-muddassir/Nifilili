@@ -4,7 +4,10 @@ import com.nifilili.core.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -14,32 +17,35 @@ import java.time.LocalDateTime;
 @Table(name = "quote_line_items")
 @Getter
 @Setter
-public class QuoteLineItem extends BaseEntity {
-
-    @Column(name = "quote_id", nullable = false)
-    private Long quoteId;
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class QuoteLineItemEntity extends BaseEntity {
 
     @Column(nullable = false)
+    private Long quoteId;
+
+    @Column(nullable = false, columnDefinition = "text")
     private String description;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(name = "unit_price", nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(name = "total_price", nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(nullable = false)
     private Long createdBy;
 
-    @Column(name = "updated_by", nullable = false)
+    @Column(nullable = false)
     private Long updatedBy;
 }

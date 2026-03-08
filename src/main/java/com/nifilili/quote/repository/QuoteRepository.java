@@ -1,25 +1,20 @@
 package com.nifilili.quote.repository;
 
 import com.nifilili.core.enums.quote.QuoteStatus;
-import com.nifilili.quote.domain.Quote;
+import com.nifilili.quote.domain.QuoteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface QuoteRepository extends JpaRepository<Quote, Long> {
+public interface QuoteRepository extends JpaRepository<QuoteEntity, Long> {
 
-    Optional<Quote> findTopByRequestIdAndStatusInOrderByIdDesc(
-            Long requestId,
-            List<QuoteStatus> statuses
-    );
+    List<QuoteEntity> findByRequestIdOrderByIdDesc(Long requestId);
 
-    List<Quote> findByRequestIdOrderByIdDesc(Long requestId);
+    Optional<QuoteEntity> findFirstByRequestIdOrderByIdDesc(Long requestId);
 
-    Optional<Quote> findTopByRequestIdOrderByIdDesc(Long requestId);
+    boolean existsByRequestIdAndStatusIn(Long requestId, List<QuoteStatus> statuses);
 
-    List<Quote> findByStatusAndValidUntilBefore(
-            QuoteStatus status,
-            java.time.LocalDateTime validUntil
-    );
+    List<QuoteEntity> findByStatusAndValidUntilBefore(QuoteStatus status, LocalDateTime now);
 }

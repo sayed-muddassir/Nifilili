@@ -76,6 +76,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleInvalidQuoteState(InvalidQuoteStateException ex) {
+        log.warn("Invalid quote state: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorDto(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ErrorDto> handleSqlException(SQLException ex) {
         log.error("SQL error: {}", ex.getMessage());
         return new ResponseEntity<>(new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()),

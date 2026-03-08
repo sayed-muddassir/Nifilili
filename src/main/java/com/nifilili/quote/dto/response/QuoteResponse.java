@@ -1,7 +1,6 @@
 package com.nifilili.quote.dto.response;
 
-import com.nifilili.core.enums.quote.QuoteStatus;
-import com.nifilili.quote.dto.request.QuoteLineItemDTO;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,26 +8,24 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class QuoteResponseDTO {
+@Builder
+public class QuoteResponse {
 
-    private Long id;
-    private String quoteNumber;
-
+    private Long quoteId;
     private Long requestId;
-
+    private Long parentQuoteId;
+    private String quoteNumber;
     private String serviceDetails;
     private BigDecimal totalAmount;
     private String currency;
-
     private Integer estimatedDurationDays;
     private LocalDateTime validUntil;
-
-    private QuoteStatus status;
-
-    private List<QuoteLineItemDTO> lineItems;
-
+    private List<String> attachments;
+    private String status;
     private LocalDateTime sentAt;
     private LocalDateTime acceptedAt;
     private LocalDateTime rejectedAt;
     private String rejectionReason;
+    private List<QuoteLineItemResponse> lineItems;
+    private LocalDateTime createdAt;
 }
