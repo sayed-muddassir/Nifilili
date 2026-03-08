@@ -1,5 +1,6 @@
 package com.nifilili.kyc.controller.admin;
 
+import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.core.enums.kyc.KycStatus;
 import com.nifilili.kyc.dto.request.ReviewKycRequest;
 import com.nifilili.kyc.dto.response.AdminKycDetailResponse;
@@ -7,6 +8,7 @@ import com.nifilili.kyc.dto.response.AdminKycListItemResponse;
 import com.nifilili.kyc.service.AdminKycQueryService;
 import com.nifilili.kyc.service.KycService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/kyc")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
+@Tag(name = SwaggerConstants.BUSINESS_3, description = "KYC management endpoints for admin users to review and manage KYC applications.")
 public class KycAdminController {
 
     private final KycService kycService;

@@ -15,6 +15,7 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class QuoteRequestEntity extends BaseEntity {
 
     private String budgetRange;
 
-    private String preferredTimeline;
+    private LocalDate preferredTimeline;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")

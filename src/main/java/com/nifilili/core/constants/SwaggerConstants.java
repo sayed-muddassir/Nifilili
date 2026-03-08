@@ -10,7 +10,8 @@ public class SwaggerConstants {
 
     public static final String BUSINESS_1 = "2.01 - Business Configuration [Admin]";
     public static final String BUSINESS_2 = "2.02 - Business Onboarding [User]";
-    public static final String BUSINESS_3 = "2.03 - Business Discovery [Public]";
+    public static final String BUSINESS_3 = "2.03 - Business KYC [Admin]";
+    public static final String BUSINESS_4 = "2.04 - Business Discovery [Public]";
 
     public static final String OFFERING_1 = "3.01 - Offering Configuration [Admin]";
     public static final String OFFERING_2 = "3.02 - Offering Management [Owner]";

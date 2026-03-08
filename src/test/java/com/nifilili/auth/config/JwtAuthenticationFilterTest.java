@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +30,9 @@ class JwtAuthenticationFilterTest {
     @Mock
     private UserDetailsService userDetailsService;
 
+    @Mock
+    private HandlerExceptionResolver handlerExceptionResolver;
+
     @AfterEach
     void clearSecurityContext() {
         SecurityContextHolder.clearContext();
@@ -36,7 +40,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void doFilterInternal_WhenBearerTokenValid_ShouldSetAuthentication() throws ServletException, IOException {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, handlerExceptionResolver);
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/orders");
         request.addHeader("Authorization", "Bearer valid-token");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -56,7 +60,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void doFilterInternal_WhenAuthorizationHeaderMissing_ShouldSkipAuthentication() throws ServletException, IOException {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, handlerExceptionResolver);
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/orders");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
@@ -68,21 +72,39 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_WhenTokenProcessingFails_ShouldClearContextAndContinue() throws ServletException, IOException {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
+    void doFilterInternal_WhenJwtProcessingFails_ShouldClearContextAndContinue() throws ServletException, IOException {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, handlerExceptionResolver);
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/orders");
         request.addHeader("Authorization", "Bearer broken-token");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
         when(jwtTokenProvider.validateToken("broken-token")).thenReturn(true);
-        when(jwtTokenProvider.getUsername("broken-token")).thenThrow(new RuntimeException("parse failure"));
+        when(jwtTokenProvider.getUsername("broken-token")).thenThrow(new IllegalArgumentException("parse failure"));
 
         filter.doFilter(request, response, chain);
 
         // Filter must not break the request chain on JWT parsing failure.
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         assertNotNull(chain.getRequest());
+        verifyNoInteractions(handlerExceptionResolver);
+    }
+
+    @Test
+    void doFilterInternal_WhenUnexpectedFailureOccurs_ShouldDelegateToExceptionResolver() throws ServletException, IOException {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, handlerExceptionResolver);
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/orders");
+        request.addHeader("Authorization", "Bearer valid-token");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+
+        when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
+        when(jwtTokenProvider.getUsername("valid-token")).thenReturn("john");
+        when(userDetailsService.loadUserByUsername("john")).thenThrow(new RuntimeException("database down"));
+
+        filter.doFilter(request, response, chain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(handlerExceptionResolver).resolveException(eq(request), eq(response), isNull(), any(RuntimeException.class));
     }
 }
-

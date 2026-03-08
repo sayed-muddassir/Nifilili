@@ -1,5 +1,6 @@
 package com.nifilili.auth.config;
 
+import jakarta.servlet.DispatcherType;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,8 @@ public class SpringSecurityConfig {
 
     private JwtAuthenticationFilter authenticationFilter;
 
+    private RestAccessDeniedHandler accessDeniedHandler;
+
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -38,10 +41,12 @@ public class SpringSecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> {
+                    authorize.dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll();
                     // Public endpoints are explicitly allowlisted.
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
                     authorize.requestMatchers("/api/v1/public/**").permitAll();
+                    authorize.requestMatchers("/error").permitAll();
                     authorize.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
                     authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
@@ -50,7 +55,8 @@ public class SpringSecurityConfig {
                 });
 
         http.exceptionHandling(exception -> exception
-                .authenticationEntryPoint(authenticationEntryPoint));
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler));
 
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
         log.info("Security filter chain initialized with stateless JWT policy");

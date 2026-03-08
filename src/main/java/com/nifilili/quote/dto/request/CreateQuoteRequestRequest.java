@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -22,7 +23,7 @@ public class CreateQuoteRequestRequest {
 
     private String budgetRange;
 
-    private String preferredTimeline;
+    private LocalDate preferredTimeline;
 
     @Valid
     private AddressDto deliveryAddress;

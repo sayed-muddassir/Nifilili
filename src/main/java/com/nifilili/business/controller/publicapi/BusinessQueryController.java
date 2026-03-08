@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/public/businesses")
 @RequiredArgsConstructor
 @Tag(
-        name = SwaggerConstants.BUSINESS_3,
+        name = SwaggerConstants.BUSINESS_4,
         description = "Public business discovery APIs."
 )
 public class BusinessQueryController {

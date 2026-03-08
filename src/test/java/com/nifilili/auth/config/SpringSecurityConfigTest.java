@@ -26,7 +26,7 @@ class SpringSecurityConfigTest {
     void authenticationManager_ShouldReturnManagerFromConfiguration() throws Exception {
         JwtAuthenticationEntryPoint entryPoint = mock(JwtAuthenticationEntryPoint.class);
         JwtAuthenticationFilter filter = mock(JwtAuthenticationFilter.class);
-        SpringSecurityConfig config = new SpringSecurityConfig(entryPoint, filter);
+        SpringSecurityConfig config = new SpringSecurityConfig(entryPoint, filter, mock(RestAccessDeniedHandler.class));
 
         AuthenticationConfiguration authConfig = mock(AuthenticationConfiguration.class);
         AuthenticationManager manager = mock(AuthenticationManager.class);

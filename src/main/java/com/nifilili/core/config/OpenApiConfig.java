@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
                 @Tag(name = SwaggerConstants.BUSINESS_1),
                 @Tag(name = SwaggerConstants.BUSINESS_2),
                 @Tag(name = SwaggerConstants.BUSINESS_3),
+                @Tag(name = SwaggerConstants.BUSINESS_4),
                 @Tag(name = SwaggerConstants.OFFERING_1),
                 @Tag(name = SwaggerConstants.OFFERING_2),
                 @Tag(name = SwaggerConstants.OFFERING_3),
