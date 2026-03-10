@@ -232,7 +232,8 @@
           "script": {
             "exec": [
               "pm.response.to.have.status(201);",
-              "pm.collectionVariables.set('business_id', pm.response.json().businessId);"
+              "pm.collectionVariables.set('business_id', pm.response.json().businessId);",
+              "pm.collectionVariables.set('admin_seeded_business_id', pm.response.json().businessId);"
             ]
           }
         }

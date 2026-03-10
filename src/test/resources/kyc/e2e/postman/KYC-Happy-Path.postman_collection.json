@@ -1,0 +1,377 @@
+{
+  "info": {
+    "name": "KYC Happy Path E2E",
+    "description": "Chronological happy-path for KYC module: admin review (approve & rejection loop), owner status check, and public verification badge.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Admin login is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.collectionVariables.set('admin_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 User Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{user_username}}\",\n  \"password\": \"{{user_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('User login is 200', function () { pm.response.to.have.status(200); });",
+              "pm.collectionVariables.set('user_token', pm.response.json().accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Admin – List KYC Applications (PENDING)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/admin/kyc?status=PENDING&page=0&size=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Response is paginated', function () {",
+              "  pm.expect(json).to.have.property('content');",
+              "  pm.expect(json).to.have.property('totalElements');",
+              "});",
+              "if (json.content && json.content.length > 0) {",
+              "  pm.collectionVariables.set('business_id', json.content[0].businessId);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Admin – Get KYC Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/admin/kyc/{{business_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Has KYC detail fields', function () {",
+              "  pm.expect(json).to.have.property('businessId');",
+              "  pm.expect(json).to.have.property('businessName');",
+              "  pm.expect(json).to.have.property('kycStatus');",
+              "  pm.expect(json).to.have.property('documents');",
+              "  pm.expect(json).to.have.property('submissionCount');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Admin – Reject KYC (with document feedback)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approve\": false,\n  \"adminMessage\": \"Business PAN document is blurred. Please upload a clear copy.\",\n  \"documentDecisions\": []\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/kyc/{{business_id}}/review"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Rejection returns 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Owner – Check KYC Status (correction banner)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/kyc/{{business_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('KYC was rejected with reason', function () {",
+              "  pm.expect(json.kycStatus).to.eql('REJECTED');",
+              "  pm.expect(json.rejectionReason).to.be.a('string').and.not.empty;",
+              "  pm.expect(json).to.have.property('adminMessage');",
+              "  pm.expect(json).to.have.property('submissionCount');",
+              "  pm.expect(json).to.have.property('updatedAt');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Owner – List Uploaded Documents",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/kyc/{{business_id}}/documents"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Response is array of documents', function () {",
+              "  pm.expect(json).to.be.an('array');",
+              "});",
+              "if (json.length > 0) {",
+              "  pm.test('Each document has review fields', function () {",
+              "    pm.expect(json[0]).to.have.property('id');",
+              "    pm.expect(json[0]).to.have.property('documentDefinitionId');",
+              "    pm.expect(json[0]).to.have.property('status');",
+              "    pm.expect(json[0]).to.have.property('fileName');",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Owner – Re-upload Document (after rejection)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documentDefinitionId\": {{document_definition_id}},\n  \"fileUrl\": \"https://example.com/docs/registration-v2-clear.pdf\",\n  \"fileName\": \"registration-v2-clear.pdf\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/{{business_id}}/documents"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Re-upload returns 202', function () { pm.response.to.have.status(202); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Owner – Resubmit For Review",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Re-uploaded clear document. Please review again.\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/business/{{business_id}}/submit"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Resubmit returns 202', function () { pm.response.to.have.status(202); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Admin – List KYC Applications (PENDING after resubmission)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/admin/kyc?status=PENDING&page=0&size=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Resubmitted business is in list', function () {",
+              "  pm.expect(json.content).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 Admin – Approve KYC",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approve\": true,\n  \"adminMessage\": \"All documents verified. Business approved.\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/kyc/{{business_id}}/review"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Approval returns 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Owner – Verify KYC Status (APPROVED)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/kyc/{{business_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('KYC is now APPROVED', function () {",
+              "  pm.expect(json.kycStatus).to.eql('APPROVED');",
+              "  pm.expect(json.rejectionReason).to.be.null;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 Admin – List KYC Applications (APPROVED)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{admin_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/admin/kyc?status=APPROVED&page=0&size=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Approved list contains entries', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.content).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Public – Check Verification Badge",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/public/kyc/{{business_id}}/verified"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Business is verified', function () {",
+              "  pm.expect(json).to.have.property('businessId');",
+              "  pm.expect(json.verified).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "admin_token", "value": ""},
+    {"key": "user_token", "value": ""},
+    {"key": "business_id", "value": ""},
+    {"key": "document_definition_id", "value": ""}
+  ]
+}

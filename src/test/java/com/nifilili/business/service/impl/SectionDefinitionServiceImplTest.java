@@ -12,6 +12,7 @@ import com.nifilili.business.mapper.SectionMapper;
 import com.nifilili.business.repository.CategoryRepository;
 import com.nifilili.business.repository.SectionFieldRepository;
 import com.nifilili.business.repository.SectionRepository;
+import com.nifilili.core.enums.business.BusinessSectionFieldType;
 import com.nifilili.core.exception.InvalidBusinessStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,6 @@ class SectionDefinitionServiceImplTest {
         when(sectionMapper.toResponse(savedSectionDefinition)).thenReturn(sectionResponse);
 
         assertSame(sectionResponse, sectionService.createSection(request));
-        assertEquals("Prompt", sectionDefinition.getPromptText());
         assertEquals("Prompt", sectionDefinition.getPrompt());
     }
 
@@ -103,7 +103,7 @@ class SectionDefinitionServiceImplTest {
         CreateSectionFieldRequest fieldRequest = new CreateSectionFieldRequest();
         fieldRequest.setName("phone");
         fieldRequest.setLabel("Phone");
-        fieldRequest.setType("TEXT");
+        fieldRequest.setType(BusinessSectionFieldType.valueOf("TEXT"));
 
         SectionField mappedField = new SectionField();
         when(sectionFieldMapper.toEntity(fieldRequest)).thenReturn(mappedField);

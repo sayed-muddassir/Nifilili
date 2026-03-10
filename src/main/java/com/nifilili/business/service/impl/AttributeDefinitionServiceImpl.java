@@ -35,7 +35,7 @@ public class AttributeDefinitionServiceImpl
         existing.setVerticalId(request.getVerticalId());
         existing.setName(request.getName());
         existing.setLabel(request.getLabel());
-        existing.setType(request.getType());
+        existing.setType(request.getType().name());
         existing.setOptions(request.getOptions());
         existing.setRequired(request.isRequired());
         existing.setAllowMultiple(request.isAllowMultiple());

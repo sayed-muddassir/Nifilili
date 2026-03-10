@@ -54,7 +54,7 @@ class BusinessDomainAndModuleContractTest {
         documentDefinition.setAllowedExtensions(List.of("pdf"));
 
         SectionDefinition sectionDefinition = new SectionDefinition();
-        sectionDefinition.setPromptText("Prompt");
+        sectionDefinition.setPrompt("Prompt");
 
         SectionField sectionField = new SectionField();
         sectionField.setType("TEXT");
@@ -70,7 +70,7 @@ class BusinessDomainAndModuleContractTest {
         assertEquals("group-1", businessSectionGroup.getName());
         assertEquals("Cafe", categoryDefinition.getName());
         assertEquals(List.of("pdf"), documentDefinition.getAllowedExtensions());
-        assertEquals("Prompt", sectionDefinition.getPromptText());
+        assertEquals("Prompt", sectionDefinition.getPrompt());
         assertEquals("TEXT", sectionField.getType());
         assertEquals("Food", verticalDefinition.getName());
     }

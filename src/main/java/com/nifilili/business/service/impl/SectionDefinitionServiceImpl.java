@@ -35,7 +35,7 @@ public class SectionDefinitionServiceImpl implements SectionDefinitionService {
         validateSectionCategoryConsistency(request.getVerticalId(), request.getCategoryId());
 
         SectionDefinition sectionToPersist = sectionMapper.toEntity(request);
-        applySectionPromptCompatibility(sectionToPersist, request);
+        sectionToPersist.setPrompt(request.getPromptText());
 
         SectionDefinition saved = sectionRepository.save(sectionToPersist);
         return sectionMapper.toResponse(saved);
@@ -52,7 +52,7 @@ public class SectionDefinitionServiceImpl implements SectionDefinitionService {
         existing.setCategoryId(request.getCategoryId());
         existing.setName(request.getName());
         existing.setLabel(request.getLabel());
-        applySectionPromptCompatibility(existing, request);
+        existing.setPrompt(request.getPromptText());
         existing.setRequired(request.isRequired());
         existing.setAllowMultiple(request.isAllowMultiple());
         existing.setGroupable(request.isGroupable());
@@ -74,7 +74,7 @@ public class SectionDefinitionServiceImpl implements SectionDefinitionService {
 
         existing.setName(request.getName());
         existing.setLabel(request.getLabel());
-        existing.setType(request.getType());
+        existing.setType(request.getType().name());
         existing.setOptions(request.getOptions());
         existing.setRequired(request.isRequired());
         existing.setAllowMultiple(request.isAllowMultiple());
@@ -109,14 +109,5 @@ public class SectionDefinitionServiceImpl implements SectionDefinitionService {
         if (!category.getBusinessVerticalId().equals(verticalId)) {
             throw new InvalidBusinessStateException("Section category must belong to the same vertical");
         }
-    }
-
-    private void applySectionPromptCompatibility(SectionDefinition sectionDefinition, CreateSectionRequest request) {
-        // Dual-write keeps old "prompt" and new "prompt_text" columns in sync during rollout.
-        String resolvedPromptText = request.getPromptText() != null
-                ? request.getPromptText()
-                : request.getPrompt();
-        sectionDefinition.setPromptText(resolvedPromptText);
-        sectionDefinition.setPrompt(resolvedPromptText);
     }
 }

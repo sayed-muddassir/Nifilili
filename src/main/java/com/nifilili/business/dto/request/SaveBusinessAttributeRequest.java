@@ -1,6 +1,7 @@
 package com.nifilili.business.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -11,8 +12,10 @@ import lombok.Data;
 public class SaveBusinessAttributeRequest {
 
     @Schema(description = "Identifier of the attribute definition being set for the business.", example = "41", nullable = true)
+    @NotNull
     private Long attributeId;
 
     @Schema(description = "Attribute value. Supported shapes depend on the attribute type and may be a boolean, number, string, or list of strings.", example = "[\"Delivery Available\",\"Pickup Available\"]", nullable = true)
+    @NotNull
     private Object attributeValue;
 }

@@ -1,0 +1,559 @@
+{
+  "info": {
+    "_postman_id": "quote-collection-001",
+    "name": "Quote Module - Happy Path",
+    "description": "End-to-end happy path for the quote module: login -> create request -> business drafts quote -> send -> revise -> customer accepts -> admin oversight",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "run_id", "value": "{{$timestamp}}"}
+  ],
+  "item": [
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Login as User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has token', () => pm.expect(json.accessToken).to.be.a('string'));",
+                  "pm.environment.set('token', json.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{user_email}}\", \"password\": \"{{user_password}}\"}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login as Owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('owner_token', pm.response.json().accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{owner_email}}\", \"password\": \"{{owner_password}}\"}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('admin_token', pm.response.json().accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{admin_email}}\", \"password\": \"{{admin_password}}\"}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Customer Submits Quote Request",
+      "item": [
+        {
+          "name": "Create Quote Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has requestId', () => pm.expect(json.requestId).to.be.a('number'));",
+                  "pm.test('Has requestNumber', () => pm.expect(json.requestNumber).to.be.a('string'));",
+                  "pm.test('Status is PENDING', () => pm.expect(json.status).to.equal('PENDING'));",
+                  "pm.test('Has submittedAt', () => pm.expect(json.submittedAt).to.be.a('string'));",
+                  "pm.environment.set('request_id', json.requestId);",
+                  "pm.environment.set('request_number', json.requestNumber);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"offeringId\": {{offering_id}}, \"businessId\": {{business_id}}, \"requirements\": \"Custom logo design with 3 revision rounds\", \"budgetRange\": \"500-1000 NPR\", \"preferredTimeline\": \"2026-04-15\", \"deliveryAddress\": {\"municipalityId\": 1, \"wardNumber\": 5, \"toleName\": \"Kathmandu\", \"addressField1\": \"123 Main St\"}, \"attachments\": [\"reference-image-1.png\"]}"
+            },
+            "url": "{{base_url}}/api/v1/quote-requests"
+          }
+        },
+        {
+          "name": "List My Quote Requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Is array', () => pm.expect(json).to.be.an('array'));",
+                  "pm.test('Has at least one request', () => pm.expect(json.length).to.be.greaterThan(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/quote-requests/mine"
+          }
+        },
+        {
+          "name": "Get Quote Request Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has requestId', () => pm.expect(json.requestId).to.equal(Number(pm.environment.get('request_id'))));",
+                  "pm.test('Has requirements', () => pm.expect(json.requirements).to.be.a('string'));",
+                  "pm.test('Has deliveryAddress', () => pm.expect(json.deliveryAddress).to.be.an('object'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/quote-requests/{{request_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Business Reviews Inbox",
+      "item": [
+        {
+          "name": "List Quote Request Inbox",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Is array', () => pm.expect(json).to.be.an('array'));",
+                  "pm.test('Has at least one request', () => pm.expect(json.length).to.be.greaterThan(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/quotes/inbox?businessId={{business_id}}"
+          }
+        },
+        {
+          "name": "Get Request Details (Business View)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has requestId', () => pm.expect(json.requestId).to.equal(Number(pm.environment.get('request_id'))));",
+                  "pm.test('Status is PENDING', () => pm.expect(json.status).to.equal('PENDING'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/quotes/requests/{{request_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Business Creates & Sends Quote",
+      "item": [
+        {
+          "name": "Create Draft Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has quoteId', () => pm.expect(json.quoteId).to.be.a('number'));",
+                  "pm.test('Has quoteNumber', () => pm.expect(json.quoteNumber).to.be.a('string'));",
+                  "pm.test('Status is DRAFT', () => pm.expect(json.status).to.equal('DRAFT'));",
+                  "pm.test('Has lineItems', () => pm.expect(json.lineItems).to.be.an('array'));",
+                  "pm.test('Has totalAmount', () => pm.expect(json.totalAmount).to.be.a('number'));",
+                  "pm.environment.set('quote_id', json.quoteId);",
+                  "pm.environment.set('quote_number', json.quoteNumber);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"serviceDetails\": \"Custom logo design package with 3 revision rounds and source files\", \"currency\": \"NPR\", \"estimatedDurationDays\": 14, \"validityDays\": 30, \"attachments\": [\"portfolio-sample.pdf\"], \"lineItems\": [{\"description\": \"Initial concept designs (3 options)\", \"quantity\": 1, \"unitPrice\": 300.00}, {\"description\": \"Revision rounds\", \"quantity\": 3, \"unitPrice\": 100.00}, {\"description\": \"Source file delivery\", \"quantity\": 1, \"unitPrice\": 100.00}]}"
+            },
+            "url": "{{base_url}}/api/v1/business/quotes/requests/{{request_id}}/draft"
+          }
+        },
+        {
+          "name": "Get Draft Quote Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Status is DRAFT', () => pm.expect(json.status).to.equal('DRAFT'));",
+                  "pm.test('Has 3 line items', () => pm.expect(json.lineItems.length).to.equal(3));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/quotes/{{quote_id}}"
+          }
+        },
+        {
+          "name": "Send Quote to Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Status is SENT', () => pm.expect(json.status).to.equal('SENT'));",
+                  "pm.test('Has sentAt', () => pm.expect(json.sentAt).to.be.a('string'));",
+                  "pm.test('Has validUntil', () => pm.expect(json.validUntil).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/quotes/{{quote_id}}/send"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Customer Views Quotes",
+      "item": [
+        {
+          "name": "List Quotes for Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Is array', () => pm.expect(json).to.be.an('array'));",
+                  "pm.test('Has at least one quote', () => pm.expect(json.length).to.be.greaterThan(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/quote-requests/{{request_id}}/quotes"
+          }
+        },
+        {
+          "name": "Get Latest Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has quoteId', () => pm.expect(json.quoteId).to.be.a('number'));",
+                  "pm.test('Status is SENT', () => pm.expect(json.status).to.equal('SENT'));",
+                  "pm.test('Has totalAmount', () => pm.expect(json.totalAmount).to.be.a('number'));",
+                  "pm.test('Has lineItems', () => pm.expect(json.lineItems).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/quote-requests/{{request_id}}/quotes/latest"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Business Revises Quote",
+      "item": [
+        {
+          "name": "Revise Sent Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has new quoteId', () => pm.expect(json.quoteId).to.be.a('number'));",
+                  "pm.test('Has parentQuoteId', () => pm.expect(json.parentQuoteId).to.equal(Number(pm.environment.get('quote_id'))));",
+                  "pm.test('Status is DRAFT', () => pm.expect(json.status).to.equal('DRAFT'));",
+                  "pm.test('Has 2 line items', () => pm.expect(json.lineItems.length).to.equal(2));",
+                  "pm.environment.set('revised_quote_id', json.quoteId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{owner_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"serviceDetails\": \"Custom logo design package — revised with discount for bulk order\", \"currency\": \"NPR\", \"estimatedDurationDays\": 10, \"validityDays\": 15, \"lineItems\": [{\"description\": \"Logo design (3 concepts + 3 revisions)\", \"quantity\": 1, \"unitPrice\": 600.00}, {\"description\": \"Source file delivery (AI, SVG, PNG)\", \"quantity\": 1, \"unitPrice\": 50.00}]}"
+            },
+            "url": "{{base_url}}/api/v1/business/quotes/{{quote_id}}/revise"
+          }
+        },
+        {
+          "name": "Verify Original Quote is REVISED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Original status is REVISED', () => pm.expect(json.status).to.equal('REVISED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/quotes/{{quote_id}}"
+          }
+        },
+        {
+          "name": "Send Revised Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Status is SENT', () => pm.expect(json.status).to.equal('SENT'));",
+                  "pm.test('Has sentAt', () => pm.expect(json.sentAt).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{owner_token}}"}],
+            "url": "{{base_url}}/api/v1/business/quotes/{{revised_quote_id}}/send"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Customer Reviews & Accepts",
+      "item": [
+        {
+          "name": "Get Latest Quote (Revised)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Is revised quote', () => pm.expect(json.quoteId).to.equal(Number(pm.environment.get('revised_quote_id'))));",
+                  "pm.test('Status is SENT', () => pm.expect(json.status).to.equal('SENT'));",
+                  "pm.test('Has parentQuoteId', () => pm.expect(json.parentQuoteId).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/quote-requests/{{request_id}}/quotes/latest"
+          }
+        },
+        {
+          "name": "List All Quotes (Should Have 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has 2 quote versions', () => pm.expect(json.length).to.equal(2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/quote-requests/{{request_id}}/quotes"
+          }
+        },
+        {
+          "name": "Accept Revised Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Status is ACCEPTED', () => pm.expect(json.status).to.equal('ACCEPTED'));",
+                  "pm.test('Has acceptedAt', () => pm.expect(json.acceptedAt).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/quote-requests/quotes/{{revised_quote_id}}/accept"
+          }
+        },
+        {
+          "name": "Verify Request Status is ACCEPTED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Request status is ACCEPTED', () => pm.expect(json.status).to.equal('ACCEPTED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/api/v1/quote-requests/{{request_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Admin Oversight",
+      "item": [
+        {
+          "name": "Admin Get Quote Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has requestId', () => pm.expect(json.requestId).to.equal(Number(pm.environment.get('request_id'))));",
+                  "pm.test('Status is ACCEPTED', () => pm.expect(json.status).to.equal('ACCEPTED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": "{{base_url}}/api/v1/admin/quotes/requests/{{request_id}}"
+          }
+        },
+        {
+          "name": "Admin Get Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has quoteId', () => pm.expect(json.quoteId).to.equal(Number(pm.environment.get('revised_quote_id'))));",
+                  "pm.test('Status is ACCEPTED', () => pm.expect(json.status).to.equal('ACCEPTED'));",
+                  "pm.test('Has lineItems', () => pm.expect(json.lineItems).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": "{{base_url}}/api/v1/admin/quotes/{{revised_quote_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}

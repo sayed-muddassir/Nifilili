@@ -3,7 +3,7 @@ package com.nifilili.kyc.dto.response;
 import com.nifilili.core.enums.kyc.KycStatus;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 public class AdminKycListItemResponse {
@@ -15,5 +15,5 @@ public class AdminKycListItemResponse {
     private KycStatus kycStatus;
     private Integer submissionCount;
 
-    private LocalDateTime lastUpdatedAt;
+    private Instant lastUpdatedAt;
 }

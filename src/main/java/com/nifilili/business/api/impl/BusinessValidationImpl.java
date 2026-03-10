@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-class BusinessValidationServiceImpl implements BusinessValidationApi {
+class BusinessValidationImpl implements BusinessValidationApi {
 
     private final BusinessRepository businessRepository;
 

@@ -2,6 +2,8 @@ package com.nifilili.business.dto.request;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -13,22 +15,27 @@ import java.util.List;
 )
 public class CreateDocumentDefinitionRequest {
 
+    @NotNull
     @Schema(description = "Identifier of the vertical this document requirement applies to.", example = "1", nullable = true)
     private Long verticalId;
 
+    @NotBlank
     @Schema(description = "Internal document definition name.", example = "business_pan")
     private String name;
 
+    @NotBlank
     @Schema(description = "Human-readable label shown to users uploading the document.", example = "Business PAN Certificate")
     private String label;
 
+    @NotNull
     @ArraySchema(
-            arraySchema = @Schema(description = "Allowed file extensions for uploads.", nullable = true),
+            arraySchema = @Schema(description = "Allowed file extensions for uploads."),
             schema = @Schema(example = "pdf")
     )
     private List<String> allowedExtensions;
 
-    @Schema(description = "Maximum allowed file size in bytes.", example = "5242880", nullable = true)
+    @NotNull
+    @Schema(description = "Maximum allowed file size in bytes.", example = "5242880")
     private Integer maxFileSize;
 
     @Schema(description = "Whether the document must be submitted before business review.", example = "true")

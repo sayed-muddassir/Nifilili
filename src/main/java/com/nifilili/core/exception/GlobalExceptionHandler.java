@@ -82,6 +82,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleInvalidKycState(InvalidKycStateException ex, HttpServletRequest request) {
+        log.warn("Invalid KYC state: {}", ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ErrorDto> handleSqlException(SQLException ex, HttpServletRequest request) {
         log.error("SQL error: {}", ex.getMessage());
         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);

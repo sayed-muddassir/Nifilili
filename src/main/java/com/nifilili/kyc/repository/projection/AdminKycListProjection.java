@@ -1,8 +1,6 @@
 package com.nifilili.kyc.repository.projection;
 
-import com.nifilili.core.enums.kyc.KycStatus;
-
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public interface AdminKycListProjection {
 
@@ -12,9 +10,9 @@ public interface AdminKycListProjection {
 
     Long getVerticalId();
 
-    KycStatus getKycStatus();
+    String getKycStatus();
 
     Integer getSubmissionCount();
 
-    LocalDateTime getUpdatedAt();
+    Instant getUpdatedAt();
 }

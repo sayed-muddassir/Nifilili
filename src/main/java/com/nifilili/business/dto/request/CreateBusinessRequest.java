@@ -12,7 +12,7 @@ import lombok.Data;
 )
 public class CreateBusinessRequest {
 
-    @Schema(description = "Identifier of the selected business vertical.", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Identifier of the selected business vertical.", example = "1")
     @NotNull
     private Long verticalId;
 
@@ -42,9 +42,11 @@ public class CreateBusinessRequest {
     @Schema(description = "Secondary address line such as landmark or floor.", example = "2nd Floor, Opposite City Mall", nullable = true)
     private String addressField2;
 
-    @Schema(description = "Postal code for the business address.", example = "44600", nullable = true)
+    @Schema(description = "Postal code for the business address.", example = "44600")
+    @NotBlank
     private String postalCode;
 
-    @Schema(description = "Official website URL of the business.", example = "https://www.nifilili.com", nullable = true)
+    @Schema(description = "Official website URL of the business.", example = "https://www.nifilili.com")
+    @NotBlank
     private String website;
 }

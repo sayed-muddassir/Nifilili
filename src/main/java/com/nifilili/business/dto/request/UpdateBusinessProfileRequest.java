@@ -1,6 +1,8 @@
 package com.nifilili.business.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.util.Map;
 public class UpdateBusinessProfileRequest {
 
     @Schema(description = "Short summary describing the business, offerings, or value proposition.", example = "Handcrafted home decor and locally sourced gift products.", nullable = true)
+    @NotBlank
     private String businessSummary;
 
     @Schema(description = "Registered legal name of the business.", example = "Nifilili Crafts Private Limited", nullable = true)
@@ -23,14 +26,18 @@ public class UpdateBusinessProfileRequest {
     private String addressField2;
 
     @Schema(description = "Contact metadata such as phone, email, or social handles.", example = "{\"phone\":\"+977-9800000000\",\"email\":\"hello@nifilili.com\"}", nullable = true)
+    @NotNull
     private Map<String, Object> contacts;
 
     @Schema(description = "Business operating hours keyed by day or schedule block.", example = "{\"monday\":\"09:00-18:00\",\"tuesday\":\"09:00-18:00\"}", nullable = true)
+    @NotNull
     private Map<String, Object> businessHours;
 
-    @Schema(description = "Latitude coordinate of the business location.", example = "27.7172", nullable = true)
+    @Schema(description = "Latitude coordinate of the business location.", example = "27.7172")
+    @NotNull
     private BigDecimal latitude;
 
-    @Schema(description = "Longitude coordinate of the business location.", example = "85.3240", nullable = true)
+    @Schema(description = "Longitude coordinate of the business location.", example = "85.3240")
+    @NotNull
     private BigDecimal longitude;
 }

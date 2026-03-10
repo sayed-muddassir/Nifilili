@@ -13,10 +13,10 @@ import java.util.Map;
 )
 public class SaveSectionDataRequest {
 
-    @Schema(description = "Existing section group identifier when updating a repeatable block. Leave null to create a new group.", example = "301", nullable = true)
+    @Schema(description = "Existing section group identifier when updating a repeatable block. Leave null to create a new group.", example = "301")
     private Long sectionGroupId; // null if new group
 
-    @Schema(description = "Map of section field names to submitted values for the section block.", example = "{\"business_registration_no\":\"REG-2026-001\",\"pan_no\":\"123456789\"}", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Map of section field names to submitted values for the section block.", example = "{\"business_registration_no\":\"REG-2026-001\",\"pan_no\":\"123456789\"}")
     @NotNull
     private Map<String, Object> fieldValues;
 }

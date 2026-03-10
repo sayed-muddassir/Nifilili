@@ -3,6 +3,8 @@ package com.nifilili.business.mapper;
 import com.nifilili.business.domain.*;
 import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
+import com.nifilili.core.enums.business.BusinessAttributeFieldType;
+import com.nifilili.core.enums.business.BusinessSectionFieldType;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -47,7 +49,7 @@ class BusinessMappersTest {
         CreateSectionRequest sectionRequest = new CreateSectionRequest();
         sectionRequest.setVerticalId(1L);
         sectionRequest.setName("General");
-        sectionRequest.setPrompt("Prompt");
+        sectionRequest.setPromptText("Prompt");
         SectionDefinition section = sectionMapper.toEntity(sectionRequest);
         assertEquals("General", section.getName());
 
@@ -56,7 +58,7 @@ class BusinessMappersTest {
 
         CreateSectionFieldRequest fieldRequest = new CreateSectionFieldRequest();
         fieldRequest.setName("phone");
-        fieldRequest.setType("TEXT");
+        fieldRequest.setType(BusinessSectionFieldType.valueOf("TEXT"));
         fieldRequest.setOptions(List.of("A", "B"));
 
         SectionField field = sectionFieldMapper.toEntity(fieldRequest);
@@ -70,7 +72,7 @@ class BusinessMappersTest {
         CreateAttributeDefinitionRequest attributeRequest = new CreateAttributeDefinitionRequest();
         attributeRequest.setVerticalId(8L);
         attributeRequest.setName("has_wifi");
-        attributeRequest.setType("BOOLEAN");
+        attributeRequest.setType(BusinessAttributeFieldType.valueOf("BOOLEAN"));
 
         AttributeDefinition attribute = attributeDefinitionMapper.toEntity(attributeRequest);
         assertEquals(8L, attribute.getVerticalId());

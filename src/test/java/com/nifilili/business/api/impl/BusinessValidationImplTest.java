@@ -12,13 +12,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BusinessValidationServiceImplTest {
+class BusinessValidationImplTest {
 
     @Mock
     private BusinessRepository businessRepository;
 
     @InjectMocks
-    private BusinessValidationServiceImpl businessValidationService;
+    private BusinessValidationImpl businessValidationService;
 
     @Test
     void existsAndActive_WhenRepositoryReturnsTrue_ShouldReturnTrue() {

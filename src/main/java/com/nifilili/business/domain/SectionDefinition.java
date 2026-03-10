@@ -21,7 +21,6 @@ public class SectionDefinition extends BaseEntity {
     private String name;
     private String label;
     private String prompt;
-    private String promptText;
     private boolean required;
     private boolean allowMultiple;
     private boolean groupable;

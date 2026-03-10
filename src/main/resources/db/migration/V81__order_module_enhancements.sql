@@ -21,53 +21,8 @@ VALUES
     (1, 'CASH_ON_DELIVERY', 'Payment collected at the time of delivery', TRUE, NOW(), NOW()),
     (2, 'MANUAL_BANK_TRANSFER', 'Customer transfers payment manually and submits proof', TRUE, NOW(), NOW());
 
--- 2. business_configurations — key-value operational settings per business
-CREATE TABLE "business_configurations" (
-    "id"           BIGINT NOT NULL,
-    "business_id"  BIGINT NOT NULL,
-    "config_key"   VARCHAR(255) NOT NULL,
-    "config_value" VARCHAR(255) NOT NULL,
-    "created_at"   TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-    "updated_at"   TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-    "created_by"   BIGINT,
-    "updated_by"   BIGINT
-);
-ALTER TABLE "business_configurations" ADD PRIMARY KEY ("id");
-ALTER TABLE "business_configurations"
-    ADD CONSTRAINT "uq_biz_config_key" UNIQUE ("business_id", "config_key");
-
--- 3. coupons — business-issued discount coupons
-CREATE TABLE "coupons" (
-    "id"               BIGINT NOT NULL,
-    "business_id"      BIGINT NOT NULL,
-    "code"             VARCHAR(255) NOT NULL,
-    "discount_type"    VARCHAR(50) NOT NULL,
-    "discount_value"   DECIMAL(8, 2) NOT NULL,
-    "max_discount"     DECIMAL(8, 2),
-    "min_order_amount" DECIMAL(8, 2),
-    "valid_from"       DATE NOT NULL,
-    "valid_to"         DATE NOT NULL,
-    "is_active"        BOOLEAN NOT NULL DEFAULT TRUE,
-    "created_at"       TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-    "updated_at"       TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-    "created_by"       BIGINT,
-    "updated_by"       BIGINT
-);
-ALTER TABLE "coupons" ADD PRIMARY KEY ("id");
-ALTER TABLE "coupons"
-    ADD CONSTRAINT "uq_coupon_biz_code" UNIQUE ("business_id", "code");
-
--- 4. coupon_usage — tracks which user used which coupon on which order
-CREATE TABLE "coupon_usage" (
-    "id"        BIGINT NOT NULL,
-    "coupon_id" BIGINT NOT NULL,
-    "user_id"   BIGINT NOT NULL,
-    "order_id"  BIGINT NOT NULL,
-    "used_at"   TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
-);
-ALTER TABLE "coupon_usage" ADD PRIMARY KEY ("id");
-ALTER TABLE "coupon_usage"
-    ADD CONSTRAINT "fk_coupon_usage_coupon" FOREIGN KEY ("coupon_id") REFERENCES "coupons" ("id");
+-- 2-4. business_configurations, coupons, and coupon_usage now belong to the
+-- consolidated business schema in V20. Order still adds the post-order FK.
 ALTER TABLE "coupon_usage"
     ADD CONSTRAINT "fk_coupon_usage_order" FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
 

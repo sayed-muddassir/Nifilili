@@ -2,6 +2,7 @@ package com.nifilili.business.dto;
 
 import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
+import com.nifilili.core.enums.business.BusinessSectionFieldType;
 import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.enums.kyc.KycStatus;
 import jakarta.validation.Validation;
@@ -57,7 +58,7 @@ class BusinessRequestValidationAndDtoSmokeTest {
         createDocumentDefinitionRequest.setAllowedExtensions(List.of("pdf"));
 
         CreateSectionFieldRequest createSectionFieldRequest = new CreateSectionFieldRequest();
-        createSectionFieldRequest.setType("TEXT");
+        createSectionFieldRequest.setType(BusinessSectionFieldType.valueOf("TEXT"));
 
         CreateSectionRequest createSectionRequest = new CreateSectionRequest();
         createSectionRequest.setPromptText("Prompt");
@@ -115,7 +116,7 @@ class BusinessRequestValidationAndDtoSmokeTest {
         assertEquals("has_wifi", createAttributeDefinitionRequest.getName());
         assertEquals("Cafe", createCategoryRequest.getName());
         assertEquals(List.of("pdf"), createDocumentDefinitionRequest.getAllowedExtensions());
-        assertEquals("TEXT", createSectionFieldRequest.getType());
+        assertEquals("TEXT", createSectionFieldRequest.getType().name());
         assertEquals("Prompt", createSectionRequest.getPromptText());
         assertEquals("food", createVerticalRequest.getSlug());
         assertEquals(true, saveBusinessAttributeRequest.getAttributeValue());

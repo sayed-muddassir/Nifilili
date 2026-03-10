@@ -1,14 +1,12 @@
 package com.nifilili.kyc.service.impl;
 
-import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.UploadBusinessDocumentRequest;
 import com.nifilili.business.events.BusinessClaimedEvent;
 import com.nifilili.business.events.BusinessDocumentReviewRequestedEvent;
 import com.nifilili.business.events.BusinessPublishRequestedEvent;
-import com.nifilili.business.repository.BusinessRepository;
-import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.enums.business.DocumentStatus;
 import com.nifilili.core.enums.kyc.KycStatus;
+import com.nifilili.core.exception.InvalidKycStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.core.security.SecurityUtil;
 import com.nifilili.kyc.domain.BusinessDocument;
@@ -16,25 +14,31 @@ import com.nifilili.kyc.domain.BusinessKyc;
 import com.nifilili.kyc.domain.BusinessKycHistory;
 import com.nifilili.kyc.dto.request.DocumentReviewDecisionRequest;
 import com.nifilili.kyc.dto.request.ReviewKycRequest;
+import com.nifilili.kyc.events.KycApprovedEvent;
+import com.nifilili.kyc.events.KycRejectedEvent;
+import com.nifilili.kyc.events.KycSubmittedEvent;
 import com.nifilili.kyc.repository.BusinessDocumentRepository;
 import com.nifilili.kyc.repository.BusinessKycHistoryRepository;
 import com.nifilili.kyc.repository.BusinessKycRepository;
 import com.nifilili.kyc.service.KycService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional
-//@PreAuthorize(value = "hasRole('ADMIN')")
 public class KycServiceImpl implements KycService {
 
-    private final BusinessRepository businessRepository;
+    private final ApplicationEventPublisher publisher;
     private final BusinessKycRepository kycRepository;
     private final BusinessDocumentRepository documentRepository;
     private final BusinessKycHistoryRepository historyRepository;
@@ -59,6 +63,7 @@ public class KycServiceImpl implements KycService {
         );
 
         documentRepository.save(document);
+        log.info("Document uploaded for businessId={}, definitionId={}", businessId, request.getDocumentDefinitionId());
     }
 
     @Override
@@ -66,9 +71,6 @@ public class KycServiceImpl implements KycService {
     public void submit(BusinessPublishRequestedEvent event) {
         Long businessId = event.businessId();
         String message = event.message();
-
-        Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
 
         BusinessKyc kyc = kycRepository.findByBusinessId(businessId)
                 .orElse(new BusinessKyc());
@@ -88,15 +90,19 @@ public class KycServiceImpl implements KycService {
         kycRepository.save(kyc);
         saveHistory(businessId, KycStatus.PENDING, message);
 
-        business.setStatus(BusinessStatus.PENDING);
-        businessRepository.save(business);
+        publisher.publishEvent(new KycSubmittedEvent(businessId));
+        log.info("KYC submitted for businessId={}, submissionCount={}", businessId, kyc.getSubmissionCount());
     }
 
     @Override
     public void review(Long businessId, ReviewKycRequest request) {
-
         BusinessKyc kyc = kycRepository.findByBusinessId(businessId)
-                .orElseThrow(() -> new ResourceNotFoundException("KYC not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("KYC not found for businessId: " + businessId));
+
+        if (kyc.getKycStatus() != KycStatus.PENDING) {
+            throw new InvalidKycStateException(
+                    "KYC for business " + businessId + " is in state " + kyc.getKycStatus() + ", expected PENDING");
+        }
 
         KycStatus status = request.isApprove()
                 ? KycStatus.APPROVED
@@ -111,22 +117,24 @@ public class KycServiceImpl implements KycService {
         saveHistory(businessId, status, request.getAdminMessage());
         applyDocumentReviewDecisions(businessId, request, status);
 
-        Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
-
         if (status == KycStatus.APPROVED) {
-            business.setStatus(BusinessStatus.PUBLISHED);
+            publisher.publishEvent(new KycApprovedEvent(businessId));
         } else {
-            business.setStatus(BusinessStatus.DRAFT);
+            publisher.publishEvent(new KycRejectedEvent(businessId, request.getAdminMessage()));
         }
-
-        businessRepository.save(business);
+        log.info("KYC reviewed for businessId={}, decision={}", businessId, status);
     }
 
     @Override
     @EventListener
     public void onBusinessClaimed(BusinessClaimedEvent event) {
         Long businessId = event.businessId();
+
+        Optional<BusinessKyc> existing = kycRepository.findByBusinessId(businessId);
+        if (existing.isPresent()) {
+            log.warn("KYC record already exists for businessId={}, skipping duplicate claim event", businessId);
+            return;
+        }
 
         BusinessKyc kyc = new BusinessKyc();
         kyc.setBusinessId(businessId);
@@ -137,6 +145,7 @@ public class KycServiceImpl implements KycService {
 
         kycRepository.save(kyc);
         saveHistory(businessId, KycStatus.NOT_STARTED, "Business claimed — awaiting document upload");
+        log.info("KYC record created for claimed businessId={}", businessId);
     }
 
     private void applyDocumentReviewDecisions(Long businessId, ReviewKycRequest request, KycStatus kycStatus) {

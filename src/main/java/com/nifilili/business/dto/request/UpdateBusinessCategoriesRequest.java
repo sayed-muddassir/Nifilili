@@ -3,6 +3,7 @@ package com.nifilili.business.dto.request;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class UpdateBusinessCategoriesRequest {
             arraySchema = @Schema(description = "List of category identifiers to attach to the business.", requiredMode = Schema.RequiredMode.REQUIRED),
             schema = @Schema(description = "Business category identifier.", example = "11")
     )
+    @NotNull
     @NotEmpty
     private List<Long> categoryIds;
 }
