@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
         tags = {
                 @Tag(name = SwaggerConstants.AUTH_1),
                 @Tag(name = SwaggerConstants.AUTH_2),
+                @Tag(name = SwaggerConstants.BUSINESS_0, description = "Admin management of province, district, and municipality masters."),
                 @Tag(name = SwaggerConstants.BUSINESS_1, description = "Admin APIs to manage business onboarding master definitions in a predictable sequence."),
                 @Tag(name = SwaggerConstants.BUSINESS_2, description = "Chronological onboarding APIs: fetch config, create business, complete profile, upload docs, submit for review."),
                 @Tag(name = SwaggerConstants.BUSINESS_3, description = "Public business discovery APIs."),

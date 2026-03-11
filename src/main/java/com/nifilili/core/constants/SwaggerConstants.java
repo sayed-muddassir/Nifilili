@@ -12,6 +12,7 @@ public class SwaggerConstants {
     public static final String ACCOUNT_2 = "1.11 - Account Profile [Owner]";
     public static final String ACCOUNT_3 = "1.12 - Account Sessions [Owner]";
 
+    public static final String BUSINESS_0 = "2.00 - Business Location Configuration [Admin]";
     public static final String BUSINESS_1 = "2.01 - Business Configuration [Admin]";
     public static final String BUSINESS_2 = "2.02 - Business Onboarding [User]";
     public static final String KYC_1 = "2.03 - Business KYC [Admin]";

@@ -36,14 +36,15 @@ import com.nifilili.core.constants.SwaggerConstants;
 @RequestMapping("/api/v1/admin/business-locations")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
-@Tag(name = SwaggerConstants.BUSINESS_1, description = "Admin management of province, district, and municipality masters.")
+@Tag(name = SwaggerConstants.BUSINESS_0)
 public class BusinessLocationAdminController {
 
     private final ProvinceAdminService provinceAdminService;
     private final DistrictAdminService districtAdminService;
     private final MunicipalityAdminService municipalityAdminService;
 
-    @Operation(summary = "Create Province", description = "Creates a new province master record.")
+    @Operation(summary = "Step 1.1: Create Province",
+            description = "Creates a new province master record. This is the first API to call in the location setup flow.")
     @ApiResponse(responseCode = "201", description = "Province created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -56,7 +57,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "List Provinces", description = "Returns all province master records.")
+    @Operation(summary = "Step 1.2: List Provinces",
+            description = "Returns all province master records. Use this after province creation to confirm available parent records.")
     @ApiResponse(responseCode = "200", description = "Province list returned")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
@@ -68,7 +70,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Get Province", description = "Returns one province master record by id.")
+    @Operation(summary = "Step 1.3: Get Province",
+            description = "Returns one province master record by id. Use this when validating a selected province before creating districts.")
     @ApiResponse(responseCode = "200", description = "Province returned")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
@@ -81,7 +84,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Update Province", description = "Updates an existing province master record.")
+    @Operation(summary = "Step 1.4: Update Province",
+            description = "Updates an existing province master record before downstream districts are created or when master data needs correction.")
     @ApiResponse(responseCode = "200", description = "Province updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -96,7 +100,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Delete Province", description = "Deletes a province that has no child districts.")
+    @Operation(summary = "Step 1.5: Delete Province",
+            description = "Deletes a province that has no child districts. This is only valid when no dependent district records exist.")
     @ApiResponse(responseCode = "204", description = "Province deleted successfully")
     @ApiResponse(responseCode = "400", description = "Province has child districts")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -110,7 +115,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Create District", description = "Creates a new district master record under a province.")
+    @Operation(summary = "Step 2.1: Create District",
+            description = "Creates a new district master record under an existing province. Call this after province setup is complete.")
     @ApiResponse(responseCode = "201", description = "District created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -124,8 +130,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "List Districts by Province",
-            description = "Returns all district master records under the specified province.")
+    @Operation(summary = "Step 2.2: List Districts by Province",
+            description = "Returns all district master records under the specified province. Use this after district creation to confirm available parent records for municipalities.")
     @ApiResponse(responseCode = "200", description = "District list returned")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
@@ -138,7 +144,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Get District", description = "Returns one district master record by id.")
+    @Operation(summary = "Step 2.3: Get District",
+            description = "Returns one district master record by id. Use this when validating a selected district before creating municipalities.")
     @ApiResponse(responseCode = "200", description = "District returned")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
@@ -151,7 +158,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Update District", description = "Updates an existing district master record.")
+    @Operation(summary = "Step 2.4: Update District",
+            description = "Updates an existing district master record before downstream municipalities are created or when master data needs correction.")
     @ApiResponse(responseCode = "200", description = "District updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -166,7 +174,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Delete District", description = "Deletes a district that has no child municipalities.")
+    @Operation(summary = "Step 2.5: Delete District",
+            description = "Deletes a district that has no child municipalities. This is only valid when no dependent municipality records exist.")
     @ApiResponse(responseCode = "204", description = "District deleted successfully")
     @ApiResponse(responseCode = "400", description = "District has child municipalities")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -180,7 +189,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Create Municipality", description = "Creates a new municipality master record under a district.")
+    @Operation(summary = "Step 3.1: Create Municipality",
+            description = "Creates a new municipality master record under an existing district. This is the final creation step before business onboarding can reference the location.")
     @ApiResponse(responseCode = "201", description = "Municipality created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -194,8 +204,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "List Municipalities by District",
-            description = "Returns all municipality master records under the specified district.")
+    @Operation(summary = "Step 3.2: List Municipalities by District",
+            description = "Returns all municipality master records under the specified district. Use this to confirm the municipality ids that business onboarding should reference.")
     @ApiResponse(responseCode = "200", description = "Municipality list returned")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
@@ -208,7 +218,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Get Municipality", description = "Returns one municipality master record by id.")
+    @Operation(summary = "Step 3.3: Get Municipality",
+            description = "Returns one municipality master record by id. Use this when validating the final location record before assigning it to a business.")
     @ApiResponse(responseCode = "200", description = "Municipality returned")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
@@ -221,7 +232,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Update Municipality", description = "Updates an existing municipality master record.")
+    @Operation(summary = "Step 3.4: Update Municipality",
+            description = "Updates an existing municipality master record when location master data needs correction.")
     @ApiResponse(responseCode = "200", description = "Municipality updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -236,8 +248,8 @@ public class BusinessLocationAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Delete Municipality",
-            description = "Deletes a municipality that is not referenced by any business record.")
+    @Operation(summary = "Step 3.5: Delete Municipality",
+            description = "Deletes a municipality that is not referenced by any business record. This is only valid when no businesses use the municipality.")
     @ApiResponse(responseCode = "204", description = "Municipality deleted successfully")
     @ApiResponse(responseCode = "400", description = "Municipality is still referenced by businesses")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
