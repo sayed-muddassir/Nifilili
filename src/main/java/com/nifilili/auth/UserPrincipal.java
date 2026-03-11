@@ -13,6 +13,8 @@ public class UserPrincipal implements UserDetails {
     private final String username;
     private final String password;
     private final boolean enabled;
+    private final boolean emailVerified;
+    private final boolean accountLocked;
     private final Collection<? extends GrantedAuthority> authorities;
 
     private UserPrincipal(
@@ -20,12 +22,16 @@ public class UserPrincipal implements UserDetails {
             String username,
             String password,
             boolean enabled,
+            boolean emailVerified,
+            boolean accountLocked,
             Collection<? extends GrantedAuthority> authorities
     ) {
         this.userId = userId;
         this.username = username;
         this.password = password;
         this.enabled = enabled;
+        this.emailVerified = emailVerified;
+        this.accountLocked = accountLocked;
         this.authorities = authorities;
     }
 
@@ -36,20 +42,23 @@ public class UserPrincipal implements UserDetails {
             String username,
             String password,
             boolean enabled,
+            boolean emailVerified,
+            boolean accountLocked,
             Collection<? extends GrantedAuthority> authorities
     ) {
-        return new UserPrincipal(userId, username, password, enabled, authorities);
+        return new UserPrincipal(userId, username, password, enabled, emailVerified, accountLocked, authorities);
     }
 
-    /** @deprecated Use {@link #of(Long, String, String, boolean, Collection)} to pass enabled from DB. */
-    @Deprecated(since = "v1.1", forRemoval = true)
+    /** @deprecated Use the full factory that passes emailVerified and accountLocked from DB. */
+    @Deprecated(since = "v1.2", forRemoval = true)
     public static UserPrincipal of(
             Long userId,
             String username,
             String password,
+            boolean enabled,
             Collection<? extends GrantedAuthority> authorities
     ) {
-        return new UserPrincipal(userId, username, password, true, authorities);
+        return new UserPrincipal(userId, username, password, enabled, true, false, authorities);
     }
 
     public static UserPrincipal anonymous() {
@@ -57,6 +66,8 @@ public class UserPrincipal implements UserDetails {
                 null,
                 "anonymous",
                 "",
+                false,
+                false,
                 false,
                 Collections.emptyList()
         );
@@ -66,6 +77,10 @@ public class UserPrincipal implements UserDetails {
 
     public Long getUserId() {
         return userId;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
     }
 
     /* ---------- UserDetails Contract ---------- */
@@ -80,9 +95,6 @@ public class UserPrincipal implements UserDetails {
         return password;
     }
 
-    /**
-     * Username is typically email or mobile number
-     */
     @Override
     public String getUsername() {
         return username;
@@ -90,17 +102,17 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // extend later if needed
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // extend later if needed
+        return !accountLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // extend later if needed
+        return true;
     }
 
     @Override

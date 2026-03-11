@@ -3,6 +3,7 @@ package com.nifilili.offering.controller.publicapi;
 import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.offering.dto.response.PricingResponse;
 import com.nifilili.offering.service.PricingService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/public/pricing")
 @RequiredArgsConstructor
 @Tag(name = SwaggerConstants.OFFERING_3, description = "Public offering discovery and pricing endpoints.")
+@Hidden
 public class PricingController {
 
     private final PricingService pricingService;

@@ -4,6 +4,7 @@ import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.order.dto.request.CreateCouponRequest;
 import com.nifilili.order.dto.response.CouponResponse;
 import com.nifilili.order.service.CouponService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_10, description = "Business coupon management endpoints")
+@Hidden
 public class BusinessCouponController {
 
     private final CouponService couponService;

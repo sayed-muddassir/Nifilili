@@ -8,6 +8,7 @@ import com.nifilili.order.dto.response.OrderSummaryResponse;
 import com.nifilili.order.dto.response.PlaceOrderResponse;
 import com.nifilili.order.service.OrderPlacementService;
 import com.nifilili.order.service.OrderQueryService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_3, description = "Order placement and query endpoints")
+@Hidden
 public class OrderController {
 
     private final OrderPlacementService orderPlacementService;

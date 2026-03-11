@@ -4,6 +4,7 @@ import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.order.dto.request.CancellationRequest;
 import com.nifilili.order.dto.response.CancellationResponse;
 import com.nifilili.order.service.CancellationService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_4, description = "Order cancellation request endpoints")
+@Hidden
 public class CancellationController {
 
     private final CancellationService cancellationService;

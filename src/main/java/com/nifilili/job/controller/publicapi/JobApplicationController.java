@@ -4,6 +4,7 @@ import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.job.dto.request.ApplyJobRequest;
 import com.nifilili.job.dto.response.MyApplicationResponse;
 import com.nifilili.job.service.JobApplicationService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +22,7 @@ import java.util.List;
 @RequestMapping("/api/v1/public/jobs")
 @RequiredArgsConstructor
 @Tag(name = SwaggerConstants.JOB_4, description = "Job seeker application lifecycle APIs.")
+@Hidden
 public class JobApplicationController {
 
     private final JobApplicationService jobApplicationService;

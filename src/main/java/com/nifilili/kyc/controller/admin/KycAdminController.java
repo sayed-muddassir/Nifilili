@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @PreAuthorize(value = "hasRole('ADMIN')")
-@Tag(name = SwaggerConstants.BUSINESS_3, description = "KYC management endpoints for admin users to review and manage KYC applications.")
+@Tag(name = SwaggerConstants.KYC_1)
 public class KycAdminController {
 
     private final KycService kycService;

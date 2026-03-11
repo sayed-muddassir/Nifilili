@@ -108,6 +108,30 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleAccountLocked(AccountLockedException ex, HttpServletRequest request) {
+        log.warn("Account locked: {}", ex.getMessage());
+        return buildError(HttpStatus.LOCKED, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleEmailNotVerified(EmailNotVerifiedException ex, HttpServletRequest request) {
+        log.warn("Email not verified: {}", ex.getMessage());
+        return buildError(HttpStatus.FORBIDDEN, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleInvalidToken(InvalidTokenException ex, HttpServletRequest request) {
+        log.warn("Invalid token: {}", ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleInvalidPassword(InvalidPasswordException ex, HttpServletRequest request) {
+        log.warn("Invalid password: {}", ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ErrorDto> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         log.warn("Access denied for '{}': {}", request.getRequestURI(), ex.getMessage());
         return buildError(HttpStatus.FORBIDDEN, "You do not have permission to access this resource", request);

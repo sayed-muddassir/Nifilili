@@ -48,7 +48,7 @@ class AuthDtoTest {
         assertEquals("abc", response.getAccessToken());
         assertEquals("Bearer", response.getTokenType());
 
-        JwtAuthResponse fromAllArgs = new JwtAuthResponse("xyz", "Bearer", new UserProfileResponse());
+        JwtAuthResponse fromAllArgs = new JwtAuthResponse("xyz", "Bearer", "xyz", new UserProfileResponse());
         assertEquals("xyz", fromAllArgs.getAccessToken());
         assertEquals("Bearer", fromAllArgs.getTokenType());
     }

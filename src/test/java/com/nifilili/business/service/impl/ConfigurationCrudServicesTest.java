@@ -5,6 +5,7 @@ import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
 import com.nifilili.business.mapper.*;
 import com.nifilili.business.repository.*;
+import com.nifilili.core.enums.business.BusinessAttributeFieldType;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -104,6 +105,7 @@ class ConfigurationCrudServicesTest {
         CreateAttributeDefinitionRequest request = new CreateAttributeDefinitionRequest();
         request.setVerticalId(10L);
         request.setName("has_wifi");
+        request.setType(BusinessAttributeFieldType.TEXT);
 
         AttributeDefinition mappedEntity = new AttributeDefinition();
         AttributeDefinition existingEntity = new AttributeDefinition();

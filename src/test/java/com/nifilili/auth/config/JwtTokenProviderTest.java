@@ -1,12 +1,7 @@
 package com.nifilili.auth.config;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,7 +13,7 @@ class JwtTokenProviderTest {
     void validateSecret_WhenSecretMissing_ShouldThrow() {
         JwtTokenProvider provider = new JwtTokenProvider();
         ReflectionTestUtils.setField(provider, "jwtSecret", "");
-        ReflectionTestUtils.setField(provider, "jwtExpirationDate", 1000L);
+        ReflectionTestUtils.setField(provider, "accessExpirationMs", 1000L);
 
         assertThrows(IllegalStateException.class, provider::validateSecret);
     }
@@ -27,25 +22,21 @@ class JwtTokenProviderTest {
     void validateSecret_WhenSecretTooShort_ShouldThrow() {
         JwtTokenProvider provider = new JwtTokenProvider();
         ReflectionTestUtils.setField(provider, "jwtSecret", "short-secret");
-        ReflectionTestUtils.setField(provider, "jwtExpirationDate", 1000L);
+        ReflectionTestUtils.setField(provider, "accessExpirationMs", 1000L);
 
         assertThrows(IllegalStateException.class, provider::validateSecret);
     }
 
     @Test
-    void generateGetAndValidateToken_WhenTokenIsValid_ShouldSucceed() {
+    void generateAccessToken_WhenCalled_ShouldReturnValidTokenWithClaims() {
         JwtTokenProvider provider = createProvider(VALID_SECRET, 60_000L);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                "john",
-                "ignored",
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))
-        );
 
-        String token = provider.generateToken(authentication);
+        String token = provider.generateAccessToken(1L, "john");
 
         assertNotNull(token);
         assertTrue(provider.validateToken(token));
         assertEquals("john", provider.getUsername(token));
+        assertEquals(1L, provider.getUserId(token));
     }
 
     @Test
@@ -58,18 +49,24 @@ class JwtTokenProviderTest {
     @Test
     void validateToken_WhenTokenExpired_ShouldReturnFalse() {
         JwtTokenProvider provider = createProvider(VALID_SECRET, -1L);
-        Authentication authentication = new UsernamePasswordAuthenticationToken("john", "ignored");
-        String token = provider.generateToken(authentication);
+        String token = provider.generateAccessToken(1L, "john");
 
         assertFalse(provider.validateToken(token));
+    }
+
+    @Test
+    void getUserId_WhenTokenValid_ShouldReturnUserId() {
+        JwtTokenProvider provider = createProvider(VALID_SECRET, 60_000L);
+        String token = provider.generateAccessToken(42L, "jane");
+
+        assertEquals(42L, provider.getUserId(token));
     }
 
     private JwtTokenProvider createProvider(String secret, long expirationMillis) {
         JwtTokenProvider provider = new JwtTokenProvider();
         ReflectionTestUtils.setField(provider, "jwtSecret", secret);
-        ReflectionTestUtils.setField(provider, "jwtExpirationDate", expirationMillis);
+        ReflectionTestUtils.setField(provider, "accessExpirationMs", expirationMillis);
         provider.validateSecret();
         return provider;
     }
 }
-

@@ -19,8 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/public/kyc")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = SwaggerConstants.BUSINESS_6,
-        description = "Public endpoint for checking business verification badge status.")
+@Tag(name = SwaggerConstants.KYC_3)
 public class KycPublicController {
 
     private final BusinessKycRepository kycRepository;

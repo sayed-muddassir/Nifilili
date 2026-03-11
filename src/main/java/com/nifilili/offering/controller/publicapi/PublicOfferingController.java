@@ -8,6 +8,7 @@ import com.nifilili.offering.dto.response.PublicOfferingSummary;
 import com.nifilili.offering.dto.response.PublicVariantResponse;
 import com.nifilili.offering.service.PricingService;
 import com.nifilili.offering.service.PublicOfferingService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ import java.util.List;
 @RequestMapping("/api/v1/public/offerings")
 @RequiredArgsConstructor
 @Tag(name = SwaggerConstants.OFFERING_3, description = "Public offering discovery and pricing endpoints.")
+@Hidden
 public class PublicOfferingController {
 
     private final PublicOfferingService service;

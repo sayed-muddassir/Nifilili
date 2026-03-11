@@ -37,6 +37,9 @@ public class UserProfileResponse {
     @Schema(description = "Whether the account is currently enabled for login and access.", example = "true")
     private boolean enabled;
 
+    @Schema(description = "Whether the user's email address has been verified.", example = "false")
+    private boolean emailVerified;
+
     @ArraySchema(
             schema = @Schema(description = "Role granted to the user.", example = "ROLE_USER"),
             arraySchema = @Schema(description = "Set of security roles assigned to the user.")

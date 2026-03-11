@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/config")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
-@Tag(name = SwaggerConstants.BUSINESS_1, description = "Admin APIs to manage business onboarding master definitions in a predictable sequence.")
+@Tag(name = SwaggerConstants.BUSINESS_1)
 public class BusinessAdminController {
 
     private final VerticalDefinitionService verticalDefinitionService;

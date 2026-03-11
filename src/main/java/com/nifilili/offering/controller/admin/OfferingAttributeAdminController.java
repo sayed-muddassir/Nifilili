@@ -7,6 +7,7 @@ import com.nifilili.offering.dto.request.UpdateAttributeRequest;
 import com.nifilili.offering.dto.response.AttributeResponse;
 import com.nifilili.offering.dto.response.StatusResponse;
 import com.nifilili.offering.service.OfferingAttributeService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
 @Tag(name = SwaggerConstants.OFFERING_1, description = "Admin setup for offering categories and attributes.")
+@Hidden
 public class OfferingAttributeAdminController {
 
     private final OfferingAttributeService attributeService;

@@ -4,6 +4,7 @@ import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.order.dto.request.CreateRefundRequest;
 import com.nifilili.order.dto.response.RefundResponse;
 import com.nifilili.order.service.RefundService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_6, description = "Refund request endpoints")
+@Hidden
 public class RefundController {
 
     private final RefundService refundService;

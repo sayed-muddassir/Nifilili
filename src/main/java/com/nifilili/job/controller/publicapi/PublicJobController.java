@@ -4,6 +4,7 @@ import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.job.dto.response.JobDetailsResponse;
 import com.nifilili.job.dto.response.JobSummaryResponse;
 import com.nifilili.job.service.JobQueryService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequestMapping("/api/v1/public/jobs")
 @RequiredArgsConstructor
 @Tag(name = SwaggerConstants.JOB_3, description = "Public job search and detail APIs.")
+@Hidden
 public class PublicJobController {
 
     private final JobQueryService jobQueryService;

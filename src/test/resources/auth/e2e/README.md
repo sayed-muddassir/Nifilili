@@ -6,13 +6,16 @@ End-to-end tests for the auth module using Postman + Newman.
 
 | Step | Request | Expectation |
 |---|---|---|
-| 01 | `POST /api/auth/register` (new user) | 201 + token + user profile |
+| 01 | `POST /api/auth/register` (new user) | 201 + access token + refresh token + user profile |
 | 02 | `POST /api/auth/register` (duplicate email) | 409 Conflict |
 | 03 | `POST /api/auth/register` (weak password) | 400 Bad Request |
-| 04 | `POST /api/auth/login` (registered user) | 200 + token + roles |
-| 05 | `GET  /api/auth/me` (valid Bearer token) | 200 + profile |
-| 06 | `GET  /api/auth/me` (no token) | 401 Unauthorized |
-| 07 | `POST /api/auth/login` (admin — regression) | 200 + ROLE_ADMIN |
+| 04 | `POST /api/auth/login` (registered user) | 200 + dual tokens + roles |
+| 05 | `POST /api/auth/refresh` (token rotation) | 200 + new access token + rotated refresh token |
+| 06 | `GET  /api/auth/me` (valid Bearer token) | 200 + profile + emailVerified |
+| 07 | `GET  /api/auth/me` (no token) | 401 Unauthorized |
+| 08 | `POST /api/auth/logout` (single device) | 204 No Content |
+| 09 | `POST /api/auth/login` (admin — regression) | 200 + ROLE_ADMIN + dual tokens |
+| 10 | `POST /api/auth/logout-all` (all devices) | 204 No Content |
 
 ## Prerequisites
 

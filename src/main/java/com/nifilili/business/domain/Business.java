@@ -70,4 +70,8 @@ public class Business extends BaseEntity {
     private Date registrationDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

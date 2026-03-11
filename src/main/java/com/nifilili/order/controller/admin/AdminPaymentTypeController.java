@@ -5,6 +5,7 @@ import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.order.domain.PaymentTypeEntity;
 import com.nifilili.order.dto.response.PaymentTypeResponse;
 import com.nifilili.order.repository.PaymentTypeRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = SwaggerConstants.ORDER_12, description = "Admin management of payment types")
+@Hidden
 public class AdminPaymentTypeController {
 
     private final PaymentTypeRepository paymentTypeRepository;

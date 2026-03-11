@@ -7,6 +7,7 @@ import com.nifilili.offering.dto.request.UpdateVariantRequest;
 import com.nifilili.offering.dto.response.StatusResponse;
 import com.nifilili.offering.dto.response.VariantResponse;
 import com.nifilili.offering.service.OfferingVariantService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
 @Tag(name = SwaggerConstants.OFFERING_2, description = "Owner offering lifecycle, variants, and pricing controls.")
+@Hidden
 public class OfferingVariantController {
 
     private final OfferingVariantService variantService;

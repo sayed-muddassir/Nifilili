@@ -5,6 +5,7 @@ import com.nifilili.quote.dto.response.QuoteRequestResponse;
 import com.nifilili.quote.dto.response.QuoteResponse;
 import com.nifilili.quote.service.QuoteRequestService;
 import com.nifilili.quote.service.QuoteService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = SwaggerConstants.QUOTE_3, description = "Admin quote oversight endpoints")
+@Hidden
 public class AdminQuoteController {
 
     private final QuoteRequestService quoteRequestService;

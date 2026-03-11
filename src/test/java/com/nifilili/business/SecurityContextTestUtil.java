@@ -15,7 +15,12 @@ public final class SecurityContextTestUtil {
     }
 
     public static void setAuthenticatedUser(long userId) {
-        UserPrincipal principal = UserPrincipal.of(userId, "test@example.com", "pwd", List.of());
+        setAuthenticatedUser(userId, true);
+    }
+
+    public static void setAuthenticatedUser(long userId, boolean emailVerified) {
+        UserPrincipal principal = UserPrincipal.of(
+                userId, "test@example.com", "pwd", true, emailVerified, false, List.of());
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -17,27 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/public/businesses")
 @RequiredArgsConstructor
-@Tag(
-        name = SwaggerConstants.BUSINESS_4,
-        description = "Public business discovery APIs."
-)
+@Tag(name = SwaggerConstants.BUSINESS_3)
 public class BusinessQueryController {
 
     private final BusinessQueryService businessQueryService;
 
-    @Operation(
-            summary = "Step 1: List Published Businesses",
-            description = "Returns paginated published businesses with sections and attributes."
-    )
+    @Operation(summary = "Step 1: List Published Businesses", description = "Returns paginated published businesses with sections and attributes.")
     @GetMapping
     public Page<BusinessResponse> getAllBusinesses(@ParameterObject Pageable pageable) {
         return businessQueryService.getAllBusinesses(pageable);
     }
 
-    @Operation(
-            summary = "Step 2: Get Business Details",
-            description = "Returns full details for one published business id."
-    )
+    @Operation(summary = "Step 2: Get Business Details", description = "Returns full details for one published business id.")
     @GetMapping("/{businessId}")
     public BusinessResponse getBusinessById(@PathVariable Long businessId) {
         return businessQueryService.getBusinessById(businessId);

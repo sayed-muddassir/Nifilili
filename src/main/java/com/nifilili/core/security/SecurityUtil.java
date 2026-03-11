@@ -11,7 +11,33 @@ public final class SecurityUtil {
     private SecurityUtil() {
     }
 
+    /**
+     * Extracts the authenticated user's ID from the security context.
+     *
+     * @return user ID
+     * @throws IllegalStateException if user not authenticated or principal invalid
+     */
     public static Long getCurrentUserId() {
+        return getCurrentPrincipal().getUserId();
+    }
+
+    /**
+     * Returns whether the current authenticated user has a verified email.
+     *
+     * @return true if email is verified
+     * @throws IllegalStateException if user not authenticated
+     */
+    public static boolean isEmailVerified() {
+        return getCurrentPrincipal().isEmailVerified();
+    }
+
+    /**
+     * Extracts the full {@link UserPrincipal} from the security context.
+     *
+     * @return the authenticated user principal
+     * @throws IllegalStateException if user not authenticated or principal invalid
+     */
+    public static UserPrincipal getCurrentPrincipal() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated()) {
@@ -25,6 +51,6 @@ public final class SecurityUtil {
             throw new IllegalStateException("User not authenticated");
         }
 
-        return userPrincipal.getUserId();
+        return userPrincipal;
     }
 }

@@ -4,6 +4,7 @@ import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.order.dto.request.CheckoutPreviewRequest;
 import com.nifilili.order.dto.response.CheckoutPreviewResponse;
 import com.nifilili.order.service.CheckoutService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_2, description = "Checkout preview and pricing calculation")
+@Hidden
 public class CheckoutController {
 
     private final CheckoutService checkoutService;

@@ -23,8 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @PreAuthorize("hasRole('USER')")
-@Tag(name = SwaggerConstants.BUSINESS_5,
-        description = "Owner-facing KYC endpoints: check verification status, view correction banner, and uploaded documents.")
+@Tag(name = SwaggerConstants.KYC_2)
 public class KycOwnerController {
 
     private final OwnerKycQueryService ownerKycQueryService;

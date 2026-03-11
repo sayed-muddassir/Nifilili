@@ -9,6 +9,7 @@ import com.nifilili.job.dto.response.JobApplicationResponse;
 import com.nifilili.job.dto.response.JobApplicationTimelineResponse;
 import com.nifilili.job.dto.response.JobQuestionResponse;
 import com.nifilili.job.service.RecruiterJobService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
 @Tag(name = SwaggerConstants.JOB_2, description = "Recruiter APIs for job lifecycle and hiring pipeline.")
+@Hidden
 public class RecruiterJobController {
 
     private final RecruiterJobService recruiterJobService;

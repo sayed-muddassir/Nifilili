@@ -1,0 +1,296 @@
+{
+  "info": {
+    "name": "Account Happy Path E2E",
+    "description": "Account module happy-path flows: profile CRUD, password change, email verification, session management, and login history. Requires a registered user token from the Auth collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "token",         "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "user_id",       "value": "" }
+  ],
+  "item": [
+    {
+      "name": "00 Setup — Register and Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Account E2E {{run_id}}\",\n  \"username\": \"acct_{{run_id}}\",\n  \"email\": \"acct_{{run_id}}@nifilili.com\",\n  \"password\": \"E2eTest@123\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Setup register returns 201', function () { pm.response.to.have.status(201); });",
+              "const payload = pm.response.json();",
+              "pm.collectionVariables.set('token', payload.accessToken);",
+              "pm.collectionVariables.set('refresh_token', payload.refreshToken);",
+              "pm.collectionVariables.set('user_id', payload.user.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 Get Profile (initial)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/account/profile"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get profile returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Username present', function () { pm.expect(payload.username).to.eql('acct_' + pm.variables.get('run_id')); });",
+              "pm.test('Email present', function () { pm.expect(payload.email).to.be.a('string').and.not.empty; });",
+              "pm.test('Roles present', function () { pm.expect(payload.roles).to.be.an('array').and.not.empty; });",
+              "pm.test('emailVerified field present', function () { pm.expect(payload).to.have.property('emailVerified'); });",
+              "pm.test('Extended profile fields null initially', function () { pm.expect(payload.bio).to.be.null; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Update Profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"bio\": \"E2E test bio\",\n  \"city\": \"Kathmandu\",\n  \"country\": \"Nepal\",\n  \"gender\": \"Other\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/account/profile"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update profile returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Bio updated', function () { pm.expect(payload.bio).to.eql('E2E test bio'); });",
+              "pm.test('City updated', function () { pm.expect(payload.city).to.eql('Kathmandu'); });",
+              "pm.test('Country updated', function () { pm.expect(payload.country).to.eql('Nepal'); });",
+              "pm.test('Gender updated', function () { pm.expect(payload.gender).to.eql('Other'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Get Profile (after update)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/account/profile"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get profile returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Bio persisted', function () { pm.expect(payload.bio).to.eql('E2E test bio'); });",
+              "pm.test('City persisted', function () { pm.expect(payload.city).to.eql('Kathmandu'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Change Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currentPassword\": \"E2eTest@123\",\n  \"newPassword\": \"NewE2ePass@456\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/account/security/change-password"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Change password returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Success message returned', function () { pm.expect(payload.message).to.include('Password changed'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Login with New Password",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"acct_{{run_id}}\",\n  \"password\": \"NewE2ePass@456\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login with new password returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Access token present', function () { pm.expect(payload.accessToken).to.be.a('string').and.not.empty; });",
+              "pm.collectionVariables.set('token', payload.accessToken);",
+              "pm.collectionVariables.set('refresh_token', payload.refreshToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Request Password Reset (Silent — no error for unknown email)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"nonexistent_{{run_id}}@nifilili.com\",\n  \"type\": \"LINK\"\n}"
+        },
+        "url": "{{base_url}}/api/v1/account/security/request-password-reset"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Password reset request returns 200 (no email enum)', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Generic message returned', function () { pm.expect(payload.message).to.include('If an account exists'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Resend Email Verification",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/account/security/resend-verification"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Resend verification returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Message confirms sent', function () { pm.expect(payload.message).to.include('Verification email sent'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 List Active Sessions",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Refresh-Token", "value": "{{refresh_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/account/sessions"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('List sessions returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Sessions is an array', function () { pm.expect(payload).to.be.an('array'); });",
+              "pm.test('At least one session exists', function () { pm.expect(payload.length).to.be.greaterThan(0); });",
+              "pm.test('Session has expected fields', function () {",
+              "  const s = payload[0];",
+              "  pm.expect(s).to.have.property('sessionId');",
+              "  pm.expect(s).to.have.property('deviceName');",
+              "  pm.expect(s).to.have.property('ipAddress');",
+              "  pm.expect(s).to.have.property('current');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Login History",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/account/sessions/history?page=0&size=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login history returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Content is an array', function () { pm.expect(payload.content).to.be.an('array'); });",
+              "pm.test('At least one history entry', function () { pm.expect(payload.content.length).to.be.greaterThan(0); });",
+              "pm.test('History entry has expected fields', function () {",
+              "  const h = payload.content[0];",
+              "  pm.expect(h).to.have.property('ipAddress');",
+              "  pm.expect(h).to.have.property('deviceName');",
+              "  pm.expect(h).to.have.property('loggedInAt');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Get Profile (No Token — 401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/v1/account/profile"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Unauthenticated profile request returns 401', function () { pm.response.to.have.status(401); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

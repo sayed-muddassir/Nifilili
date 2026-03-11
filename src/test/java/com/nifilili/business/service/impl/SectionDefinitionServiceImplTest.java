@@ -88,7 +88,7 @@ class SectionDefinitionServiceImplTest {
         sectionRequest.setCategoryId(2L);
         sectionRequest.setName("General");
         sectionRequest.setLabel("General");
-        sectionRequest.setPrompt("legacy");
+        sectionRequest.setPromptText("legacy");
 
         CategoryDefinition category = new CategoryDefinition();
         category.setBusinessVerticalId(1L);

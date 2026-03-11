@@ -5,6 +5,7 @@ import com.nifilili.core.security.SecurityUtil;
 import com.nifilili.order.dto.request.UpdateBusinessConfigRequest;
 import com.nifilili.order.dto.response.BusinessConfigResponse;
 import com.nifilili.order.service.BusinessConfigService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_11, description = "Business configuration management (tax rate, delivery charge, etc.)")
+@Hidden
 public class BusinessConfigController {
 
     private final BusinessConfigService businessConfigService;

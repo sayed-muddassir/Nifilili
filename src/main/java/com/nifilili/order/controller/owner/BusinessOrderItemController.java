@@ -7,6 +7,7 @@ import com.nifilili.order.dto.request.UpdateOrderItemStatusRequest;
 import com.nifilili.order.dto.response.CancellationResponse;
 import com.nifilili.order.service.CancellationService;
 import com.nifilili.order.service.OrderItemLifecycleService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_7, description = "Business order item management endpoints")
+@Hidden
 public class BusinessOrderItemController {
 
     private final OrderItemLifecycleService orderItemLifecycleService;

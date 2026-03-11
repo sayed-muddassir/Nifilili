@@ -6,6 +6,7 @@ import com.nifilili.offering.domain.OfferingEntity;
 import com.nifilili.offering.dto.request.AdminStatusChangeRequest;
 import com.nifilili.offering.dto.response.OfferingResponse;
 import com.nifilili.offering.service.OfferingAdminService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
 @Tag(name = SwaggerConstants.OFFERING_1, description = "Admin oversight and moderation for offerings.")
+@Hidden
 public class OfferingAdminController {
 
     private final OfferingAdminService offeringAdminService;

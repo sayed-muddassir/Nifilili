@@ -21,10 +21,7 @@ import java.util.List;
 @RequestMapping("/api/v1/business")
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('USER')")
-@Tag(
-        name = SwaggerConstants.BUSINESS_2,
-        description = "Chronological onboarding APIs: fetch config, create business, complete profile, upload docs, submit for review."
-)
+@Tag(name = SwaggerConstants.BUSINESS_2)
 public class BusinessOnboardingController {
 
     private final BusinessOnboardingService businessOnboardingService;
@@ -80,80 +77,54 @@ public class BusinessOnboardingController {
     public ResponseEntity<CreateBusinessResponse> createBusiness(@Valid @RequestBody CreateBusinessRequest request) {
         Long businessId = businessOnboardingService.createBusiness(request);
 
-        CreateBusinessResponse response = new CreateBusinessResponse(
-                businessId,
-                BusinessStatus.DRAFT,
-                "Business created successfully. Continue with profile completion."
-        );
+        CreateBusinessResponse response = new CreateBusinessResponse(businessId, BusinessStatus.DRAFT, "Business created successfully. Continue with profile completion.");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "Step 2: Update Business Profile", description = "Updates core profile information.")
     @PutMapping("/{businessId}/profile")
-    public ResponseEntity<Void> updateBusinessProfile(
-            @PathVariable Long businessId,
-            @Valid @RequestBody UpdateBusinessProfileRequest request
-    ) {
+    public ResponseEntity<Void> updateBusinessProfile(@PathVariable Long businessId, @Valid @RequestBody UpdateBusinessProfileRequest request) {
         businessProfileService.updateProfile(businessId, request);
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Step 3: Update Business Categories", description = "Assigns categories for the business.")
     @PutMapping("/{businessId}/categories")
-    public ResponseEntity<Void> updateBusinessCategories(
-            @PathVariable Long businessId,
-            @Valid @RequestBody UpdateBusinessCategoriesRequest request
-    ) {
+    public ResponseEntity<Void> updateBusinessCategories(@PathVariable Long businessId, @Valid @RequestBody UpdateBusinessCategoriesRequest request) {
         businessCategoryService.updateCategories(businessId, request.getCategoryIds());
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Step 4: Save Section Data", description = "Saves values for one section block.")
     @PostMapping("/{businessId}/sections/{sectionId}")
-    public ResponseEntity<Void> saveSectionData(
-            @PathVariable Long businessId,
-            @PathVariable Long sectionId,
-            @Valid @RequestBody SaveSectionDataRequest request
-    ) {
+    public ResponseEntity<Void> saveSectionData(@PathVariable Long businessId, @PathVariable Long sectionId, @Valid @RequestBody SaveSectionDataRequest request) {
         businessSectionService.saveSectionData(businessId, sectionId, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(summary = "Step 5: Save Attribute Data", description = "Saves one attribute value for the business.")
     @PutMapping("/{businessId}/attributes")
-    public ResponseEntity<Void> saveAttributeData(
-            @PathVariable Long businessId,
-            @Valid @RequestBody SaveBusinessAttributeRequest request
-    ) {
+    public ResponseEntity<Void> saveAttributeData(@PathVariable Long businessId, @Valid @RequestBody SaveBusinessAttributeRequest request) {
         businessAttributeService.saveAttributeData(businessId, request);
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Step 6: Upload KYC Document", description = "Uploads one KYC document for review.")
     @PostMapping("/{businessId}/documents")
-    public ResponseEntity<Void> uploadDocument(
-            @PathVariable Long businessId,
-            @Valid @RequestBody UploadBusinessDocumentRequest request
-    ) {
+    public ResponseEntity<Void> uploadDocument(@PathVariable Long businessId, @Valid @RequestBody UploadBusinessDocumentRequest request) {
         businessPublishService.uploadVerificationDocuments(businessId, request);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     @Operation(summary = "Step 7: Submit for Review", description = "Submits onboarding + KYC for admin review.")
     @PostMapping("/{businessId}/submit")
-    public ResponseEntity<Void> submitForReview(
-            @PathVariable Long businessId,
-            @Valid @RequestBody SubmitBusinessForReviewRequest request
-    ) {
+    public ResponseEntity<Void> submitForReview(@PathVariable Long businessId, @Valid @RequestBody SubmitBusinessForReviewRequest request) {
         businessPublishService.submitForVerification(businessId, request);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    @Operation(
-            summary = "Step 8: Claim Admin-Seeded Business",
-            description = "Claims an unclaimed admin-seeded business listing. Sets the authenticated user as the owner and initiates the KYC verification process."
-    )
+    @Operation(summary = "Step 8: Claim Admin-Seeded Business", description = "Claims an unclaimed admin-seeded business listing. Sets the authenticated user as the owner and initiates the KYC verification process.")
     @ApiResponse(responseCode = "202", description = "Business claimed, KYC process initiated")
     @ApiResponse(responseCode = "400", description = "Business is not claimable (not admin-seeded or already claimed)")
     @ApiResponse(responseCode = "404", description = "Business not found")

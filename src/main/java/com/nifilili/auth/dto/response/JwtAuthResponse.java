@@ -33,6 +33,12 @@ public class JwtAuthResponse {
     private String tokenType = "Bearer";
 
     @Schema(
+            description = "Refresh token used to obtain new access tokens without re-authenticating.",
+            example = "550e8400-e29b-41d4-a716-446655440000"
+    )
+    private String refreshToken;
+
+    @Schema(
             description = "Authenticated user profile returned together with the access token."
     )
     private UserProfileResponse user;

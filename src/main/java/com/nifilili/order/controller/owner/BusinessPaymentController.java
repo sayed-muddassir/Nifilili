@@ -8,6 +8,7 @@ import com.nifilili.order.dto.response.PaymentStatusResponse;
 import com.nifilili.order.dto.response.RefundResponse;
 import com.nifilili.order.service.PaymentService;
 import com.nifilili.order.service.RefundService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_9, description = "Business payment and refund management")
+@Hidden
 public class BusinessPaymentController {
 
     private final PaymentService paymentService;

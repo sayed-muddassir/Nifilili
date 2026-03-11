@@ -8,12 +8,16 @@ public class SwaggerConstants {
     public static final String AUTH_1 = "1.00 - Auth [Public]";
     public static final String AUTH_2 = "1.01 - Auth [Protected]";
 
+    public static final String ACCOUNT_1 = "1.10 - Account Security [Public/Owner]";
+    public static final String ACCOUNT_2 = "1.11 - Account Profile [Owner]";
+    public static final String ACCOUNT_3 = "1.12 - Account Sessions [Owner]";
+
     public static final String BUSINESS_1 = "2.01 - Business Configuration [Admin]";
     public static final String BUSINESS_2 = "2.02 - Business Onboarding [User]";
-    public static final String BUSINESS_3 = "2.03 - Business KYC [Admin]";
-    public static final String BUSINESS_4 = "2.04 - Business Discovery [Public]";
-    public static final String BUSINESS_5 = "2.05 - Business KYC Status [Owner]";
-    public static final String BUSINESS_6 = "2.06 - Business Verification [Public]";
+    public static final String KYC_1 = "2.03 - Business KYC [Admin]";
+    public static final String KYC_2 = "2.04 - Business KYC Status [Owner]";
+    public static final String KYC_3 = "2.05 - Business KYC Verification [Public]";
+    public static final String BUSINESS_3 = "2.06 - Business Discovery [Public]";
 
     public static final String OFFERING_1 = "3.01 - Offering Configuration [Admin]";
     public static final String OFFERING_2 = "3.02 - Offering Management [Owner]";

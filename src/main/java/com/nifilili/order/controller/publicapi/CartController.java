@@ -5,6 +5,7 @@ import com.nifilili.order.dto.request.AddCartItemRequest;
 import com.nifilili.order.dto.request.UpdateCartItemRequest;
 import com.nifilili.order.dto.response.CartResponse;
 import com.nifilili.order.service.CartService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.ORDER_1, description = "Shopping cart management endpoints")
+@Hidden
 public class CartController {
 
     private final CartService cartService;

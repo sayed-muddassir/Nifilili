@@ -45,6 +45,12 @@ public class SpringSecurityConfig {
                     // Public endpoints are explicitly allowlisted.
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll();
+                    // Account security: public endpoints for password reset and email verification
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/account/security/request-password-reset").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/account/security/reset-password-link").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/account/security/reset-password-otp").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/account/security/verify-email").permitAll();
                     authorize.requestMatchers("/api/v1/public/**").permitAll();
                     authorize.requestMatchers("/error").permitAll();
                     authorize.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();

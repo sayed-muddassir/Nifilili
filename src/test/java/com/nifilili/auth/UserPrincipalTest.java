@@ -10,12 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserPrincipalTest {
 
     @Test
-    void of_ShouldCreateEnabledPrincipalWithProvidedValues() {
+    void of_ShouldCreatePrincipalWithAllFields() {
         UserPrincipal principal = UserPrincipal.of(
-                10L,
-                "john",
-                "secret",
-                true,
+                10L, "john", "secret", true, true, false,
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
 
@@ -23,10 +20,21 @@ class UserPrincipalTest {
         assertEquals("john", principal.getUsername());
         assertEquals("secret", principal.getPassword());
         assertTrue(principal.isEnabled());
-        assertTrue(principal.isAccountNonExpired());
+        assertTrue(principal.isEmailVerified());
         assertTrue(principal.isAccountNonLocked());
+        assertTrue(principal.isAccountNonExpired());
         assertTrue(principal.isCredentialsNonExpired());
         assertEquals(1, principal.getAuthorities().size());
+    }
+
+    @Test
+    void of_WhenAccountLocked_ShouldReturnAccountNonLockedFalse() {
+        UserPrincipal principal = UserPrincipal.of(
+                10L, "john", "secret", true, true, true,
+                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+
+        assertFalse(principal.isAccountNonLocked());
     }
 
     @Test
@@ -37,14 +45,17 @@ class UserPrincipalTest {
         assertEquals("anonymous", principal.getUsername());
         assertEquals("", principal.getPassword());
         assertFalse(principal.isEnabled());
+        assertFalse(principal.isEmailVerified());
+        assertTrue(principal.isAccountNonLocked());
         assertTrue(principal.getAuthorities().isEmpty());
     }
 
     @Test
     void equalsAndHashCode_ShouldDependOnUserIdOnly() {
-        UserPrincipal left = UserPrincipal.of(5L, "u1", "p1", true, List.of());
-        UserPrincipal right = UserPrincipal.of(5L, "u2", "p2", true, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
-        UserPrincipal different = UserPrincipal.of(6L, "u1", "p1", true, List.of());
+        UserPrincipal left = UserPrincipal.of(5L, "u1", "p1", true, true, false, List.of());
+        UserPrincipal right = UserPrincipal.of(5L, "u2", "p2", true, false, true,
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        UserPrincipal different = UserPrincipal.of(6L, "u1", "p1", true, true, false, List.of());
 
         assertEquals(left, right);
         assertEquals(left.hashCode(), right.hashCode());
@@ -52,4 +63,3 @@ class UserPrincipalTest {
         assertNotEquals(null, left);
     }
 }
-

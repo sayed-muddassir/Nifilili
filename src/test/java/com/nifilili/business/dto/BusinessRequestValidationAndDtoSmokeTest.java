@@ -31,6 +31,8 @@ class BusinessRequestValidationAndDtoSmokeTest {
         validRequest.setWardNumber(3);
         validRequest.setToleName("Downtown");
         validRequest.setAddressField1("Main street");
+        validRequest.setPostalCode("12345");
+        validRequest.setWebsite("https://www.nifililili.com");
         assertTrue(validator.validate(validRequest).isEmpty());
     }
 

@@ -4,6 +4,7 @@ import com.nifilili.core.constants.SwaggerConstants;
 import com.nifilili.job.dto.request.CreateJobCategoryRequest;
 import com.nifilili.job.dto.response.JobCategoryResponse;
 import com.nifilili.job.service.JobCategoryService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize(value = "hasRole('ADMIN')")
 @Tag(name = SwaggerConstants.JOB_1, description = "Admin setup APIs for job categories.")
+@Hidden
 public class JobAdminController {
 
     private final JobCategoryService jobCategoryService;

@@ -7,6 +7,7 @@ import com.nifilili.quote.dto.response.QuoteRequestResponse;
 import com.nifilili.quote.dto.response.QuoteResponse;
 import com.nifilili.quote.service.QuoteRequestService;
 import com.nifilili.quote.service.QuoteService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,6 +32,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
 @Tag(name = SwaggerConstants.QUOTE_1, description = "Customer quote request and quote decision endpoints")
+@Hidden
 public class CustomerQuoteRequestController {
 
     private final QuoteRequestService quoteRequestService;
