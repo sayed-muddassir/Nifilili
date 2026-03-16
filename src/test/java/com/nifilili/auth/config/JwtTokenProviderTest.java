@@ -62,6 +62,14 @@ class JwtTokenProviderTest {
         assertEquals(42L, provider.getUserId(token));
     }
 
+    @Test
+    void getUsername_WhenTokenValid_ShouldReturnUsername() {
+        JwtTokenProvider provider = createProvider(VALID_SECRET, 60_000L);
+        String token = provider.generateAccessToken(1L, "johndoe");
+
+        assertEquals("johndoe", provider.getUsername(token));
+    }
+
     private JwtTokenProvider createProvider(String secret, long expirationMillis) {
         JwtTokenProvider provider = new JwtTokenProvider();
         ReflectionTestUtils.setField(provider, "jwtSecret", secret);

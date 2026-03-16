@@ -33,8 +33,7 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
                 .attemptedAt(LocalDateTime.now())
                 .build();
 
-        log.info("Trying to save : {}", attempt.toString());
-        log.info("Saved etity: {}", loginAttemptRepository.save(attempt));
+        loginAttemptRepository.save(attempt);
 
         if (!success && userId != null) {
             long failedCount = loginAttemptRepository.countRecentFailedAttempts(username);

@@ -40,6 +40,9 @@ public class UserProfileResponse {
     @Schema(description = "Whether the user's email address has been verified.", example = "false")
     private boolean emailVerified;
 
+    @Schema(description = "Whether the user's phone number has been verified.", example = "false")
+    private boolean phoneVerified;
+
     @ArraySchema(
             schema = @Schema(description = "Role granted to the user.", example = "ROLE_USER"),
             arraySchema = @Schema(description = "Set of security roles assigned to the user.")

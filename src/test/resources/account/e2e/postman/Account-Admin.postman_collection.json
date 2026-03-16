@@ -1,0 +1,499 @@
+{
+  "info": {
+    "name": "Account Admin E2E",
+    "description": "Admin user management E2E flows: list/search users, create user, update status/roles, unlock, force password reset, login history. Includes validation (400), auth (401/403), not-found (404), and conflict (409) scenarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "run_id",             "value": "{{$timestamp}}" },
+    { "key": "admin_token",        "value": "" },
+    { "key": "admin_refresh_token","value": "" },
+    { "key": "user_token",         "value": "" },
+    { "key": "created_user_id",    "value": "" }
+  ],
+  "item": [
+    {
+      "name": "00 Setup — Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/v1auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Admin login returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Admin token present', function () { pm.expect(payload.accessToken).to.be.a('string').and.not.empty; });",
+              "pm.test('Admin has ROLE_ADMIN', function () { pm.expect(payload.user.roles).to.include('ROLE_ADMIN'); });",
+              "pm.collectionVariables.set('admin_token', payload.accessToken);",
+              "pm.collectionVariables.set('admin_refresh_token', payload.refreshToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "00b Setup — Register Regular User (for 403 test)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Regular User {{run_id}}\",\n  \"username\": \"regular_{{run_id}}\",\n  \"email\": \"regular_{{run_id}}@nifilili.com\",\n  \"password\": \"E2eTest@123\"\n}"
+        },
+        "url": "{{base_url}}/api/v1auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Register regular user returns 201', function () { pm.response.to.have.status(201); });",
+              "const payload = pm.response.json();",
+              "pm.collectionVariables.set('user_token', payload.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 List Users (No Filters)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/admin/users?page=0&size=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('List users returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Content is an array', function () { pm.expect(payload.content).to.be.an('array'); });",
+              "pm.test('Pagination metadata present', function () {",
+              "  pm.expect(payload).to.have.property('totalElements');",
+              "  pm.expect(payload).to.have.property('totalPages');",
+              "  pm.expect(payload).to.have.property('size');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 List Users (With Filters)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/admin/users?role=ROLE_USER&enabled=true&page=0&size=5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Filtered list returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Content is an array', function () { pm.expect(payload.content).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Create User (Email + Password)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Admin Created {{run_id}}\",\n  \"email\": \"admcreated_{{run_id}}@nifilili.com\",\n  \"password\": \"TempPass@123\",\n  \"roles\": [\"ROLE_USER\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/users"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Create user returns 201', function () { pm.response.to.have.status(201); });",
+              "const payload = pm.response.json();",
+              "pm.test('User has id', function () { pm.expect(payload.id).to.be.a('number'); });",
+              "pm.test('Name matches', function () { pm.expect(payload.name).to.include('Admin Created'); });",
+              "pm.test('Email matches', function () { pm.expect(payload.email).to.include('admcreated_'); });",
+              "pm.test('Roles assigned', function () { pm.expect(payload.roles).to.include('ROLE_USER'); });",
+              "pm.test('Account is enabled', function () { pm.expect(payload.enabled).to.be.true; });",
+              "pm.collectionVariables.set('created_user_id', payload.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Create User — Duplicate Email (409)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Duplicate User\",\n  \"email\": \"admcreated_{{run_id}}@nifilili.com\",\n  \"password\": \"TempPass@123\",\n  \"roles\": [\"ROLE_USER\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/users"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Duplicate email returns 409', function () { pm.response.to.have.status(409); });",
+              "const payload = pm.response.json();",
+              "pm.test('Error message mentions already', function () { pm.expect(payload.message.toLowerCase()).to.include('already'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Create User — Missing Name (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"\",\n  \"email\": \"noname_{{run_id}}@nifilili.com\",\n  \"password\": \"TempPass@123\",\n  \"roles\": [\"ROLE_USER\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/users"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Missing name returns 400', function () { pm.response.to.have.status(400); });",
+              "const payload = pm.response.json();",
+              "pm.test('Validation error present', function () { pm.expect(payload.message).to.be.a('string').and.not.empty; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Create User — Empty Roles (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"No Roles User\",\n  \"email\": \"noroles_{{run_id}}@nifilili.com\",\n  \"password\": \"TempPass@123\",\n  \"roles\": []\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/users"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Empty roles returns 400', function () { pm.response.to.have.status(400); });",
+              "const payload = pm.response.json();",
+              "pm.test('Validation error present', function () { pm.expect(payload.message).to.be.a('string').and.not.empty; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Get User By ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/admin/users/{{created_user_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Get user returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('User ID matches', function () { pm.expect(String(payload.id)).to.eql(String(pm.collectionVariables.get('created_user_id'))); });",
+              "pm.test('User has expected fields', function () {",
+              "  pm.expect(payload).to.have.property('name');",
+              "  pm.expect(payload).to.have.property('email');",
+              "  pm.expect(payload).to.have.property('enabled');",
+              "  pm.expect(payload).to.have.property('roles');",
+              "  pm.expect(payload).to.have.property('createdAt');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Get User By ID — Not Found (404)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/admin/users/999999999"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Non-existent user returns 404', function () { pm.response.to.have.status(404); });",
+              "const payload = pm.response.json();",
+              "pm.test('Error message present', function () { pm.expect(payload.message).to.be.a('string').and.not.empty; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Update User Status (Disable)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"enabled\": false\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/users/{{created_user_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Disable user returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('User is disabled', function () { pm.expect(payload.enabled).to.be.false; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Update User Status (Re-enable)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"enabled\": true\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/users/{{created_user_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Re-enable user returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('User is enabled', function () { pm.expect(payload.enabled).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 Update User Roles",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"roles\": [\"ROLE_USER\", \"ROLE_ADMIN\"]\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/users/{{created_user_id}}/roles"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Update roles returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Roles updated', function () {",
+              "  pm.expect(payload.roles).to.include('ROLE_USER');",
+              "  pm.expect(payload.roles).to.include('ROLE_ADMIN');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Update User Roles — Empty (400)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"roles\": []\n}"
+        },
+        "url": "{{base_url}}/api/v1/admin/users/{{created_user_id}}/roles"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Empty roles returns 400', function () { pm.response.to.have.status(400); });",
+              "const payload = pm.response.json();",
+              "pm.test('Validation error present', function () { pm.expect(payload.message).to.be.a('string').and.not.empty; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 Unlock User Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/admin/users/{{created_user_id}}/unlock"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Unlock user returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Account is unlocked', function () { pm.expect(payload.accountLocked).to.be.false; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Force Password Reset",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/admin/users/{{created_user_id}}/force-password-reset"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Force password reset returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Message present', function () { pm.expect(payload.message).to.be.a('string').and.not.empty; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 Get User Login History",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/admin/users/{{created_user_id}}/login-history?page=0&size=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login history returns 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "pm.test('Content is an array', function () { pm.expect(payload.content).to.be.an('array'); });",
+              "pm.test('Pagination metadata present', function () {",
+              "  pm.expect(payload).to.have.property('totalElements');",
+              "  pm.expect(payload).to.have.property('totalPages');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 List Users — Unauthorized (401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/v1/admin/users"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('No token returns 401', function () { pm.response.to.have.status(401); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 List Users — Forbidden (403)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{user_token}}" }
+        ],
+        "url": "{{base_url}}/api/v1/admin/users"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Non-admin user returns 403', function () { pm.response.to.have.status(403); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

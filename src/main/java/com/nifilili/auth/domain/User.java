@@ -19,13 +19,12 @@ public class User extends BaseEntity {
 
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     @Column(name = "phone")
@@ -38,6 +37,10 @@ public class User extends BaseEntity {
     @Builder.Default
     @Column(name = "email_verified", nullable = false)
     private boolean emailVerified = false;
+
+    @Builder.Default
+    @Column(name = "phone_verified", nullable = false)
+    private boolean phoneVerified = false;
 
     @Builder.Default
     @Column(name = "account_locked", nullable = false)

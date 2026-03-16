@@ -9,6 +9,7 @@ import com.nifilili.business.SecurityContextTestUtil;
 import com.nifilili.core.email.EmailService;
 import com.nifilili.core.exception.InvalidPasswordException;
 import com.nifilili.core.exception.InvalidTokenException;
+import com.nifilili.core.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -141,5 +142,91 @@ class AccountSecurityServiceImplTest {
         when(resetTokenRepository.findByToken("expired")).thenReturn(Optional.of(token));
 
         assertThrows(InvalidTokenException.class, () -> service.resetPasswordByLink("expired", "newPass"));
+    }
+
+    @Test
+    void resetPasswordByLink_WhenTokenNotFound_ShouldThrowInvalidTokenException() {
+        when(resetTokenRepository.findByToken("nonexistent")).thenReturn(Optional.empty());
+
+        assertThrows(InvalidTokenException.class, () -> service.resetPasswordByLink("nonexistent", "NewPass@1"));
+    }
+
+    @Test
+    void resetPasswordByLink_WhenTokenAlreadyUsed_ShouldThrowInvalidTokenException() {
+        PasswordResetToken token = PasswordResetToken.builder()
+                .token("used-token")
+                .expiresAt(LocalDateTime.now().plusHours(1))
+                .used(true)
+                .build();
+
+        when(resetTokenRepository.findByToken("used-token")).thenReturn(Optional.of(token));
+
+        assertThrows(InvalidTokenException.class, () -> service.resetPasswordByLink("used-token", "NewPass@1"));
+    }
+
+    @Test
+    void resetPasswordByOtp_WhenValidOtp_ShouldResetPasswordAndRevokeTokens() {
+        User user = User.builder().password("old").accountLocked(false).build();
+        user.setId(1L);
+        PasswordResetToken token = PasswordResetToken.builder()
+                .userId(1L).token("otp-token").otp("123456").type("OTP")
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .used(false).createdAt(LocalDateTime.now()).build();
+
+        when(userRepository.findByUsernameOrEmail("john@test.com", "john@test.com")).thenReturn(Optional.of(user));
+        when(resetTokenRepository.findByUserIdAndOtpAndUsedFalse(1L, "123456")).thenReturn(Optional.of(token));
+        when(resetTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("NewPass@1")).thenReturn("encoded-new");
+        when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        service.resetPasswordByOtp("john@test.com", "123456", "NewPass@1");
+
+        assertTrue(token.isUsed());
+        assertEquals("encoded-new", user.getPassword());
+        verify(tokenService).revokeAllRefreshTokens(1L);
+    }
+
+    @Test
+    void resetPasswordByOtp_WhenEmailNotFound_ShouldThrowInvalidTokenException() {
+        when(userRepository.findByUsernameOrEmail("unknown@test.com", "unknown@test.com")).thenReturn(Optional.empty());
+
+        assertThrows(InvalidTokenException.class,
+                () -> service.resetPasswordByOtp("unknown@test.com", "123456", "NewPass@1"));
+    }
+
+    @Test
+    void resetPasswordByOtp_WhenOtpNotFound_ShouldThrowInvalidTokenException() {
+        User user = User.builder().build();
+        user.setId(1L);
+        when(userRepository.findByUsernameOrEmail("john@test.com", "john@test.com")).thenReturn(Optional.of(user));
+        when(resetTokenRepository.findByUserIdAndOtpAndUsedFalse(1L, "000000")).thenReturn(Optional.empty());
+
+        assertThrows(InvalidTokenException.class,
+                () -> service.resetPasswordByOtp("john@test.com", "000000", "NewPass@1"));
+    }
+
+    @Test
+    void resetPasswordByOtp_WhenOtpExpired_ShouldThrowInvalidTokenException() {
+        User user = User.builder().build();
+        user.setId(1L);
+        PasswordResetToken token = PasswordResetToken.builder()
+                .userId(1L).token("expired-otp").otp("123456").type("OTP")
+                .expiresAt(LocalDateTime.now().minusMinutes(1))
+                .used(false).build();
+
+        when(userRepository.findByUsernameOrEmail("john@test.com", "john@test.com")).thenReturn(Optional.of(user));
+        when(resetTokenRepository.findByUserIdAndOtpAndUsedFalse(1L, "123456")).thenReturn(Optional.of(token));
+
+        assertThrows(InvalidTokenException.class,
+                () -> service.resetPasswordByOtp("john@test.com", "123456", "NewPass@1"));
+    }
+
+    @Test
+    void changePassword_WhenUserNotFound_ShouldThrowResourceNotFoundException() {
+        SecurityContextTestUtil.setAuthenticatedUser(99L);
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.changePassword("old", "new"));
     }
 }

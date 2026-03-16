@@ -43,9 +43,13 @@ public class SpringSecurityConfig {
                 .authorizeHttpRequests((authorize) -> {
                     authorize.dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll();
                     // Public endpoints are explicitly allowlisted.
-                    authorize.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
-                    authorize.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
-                    authorize.requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/auth/otp/request").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/auth/otp/verify").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll();
                     // Account security: public endpoints for password reset and email verification
                     authorize.requestMatchers(HttpMethod.POST, "/api/v1/account/security/request-password-reset").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/api/v1/account/security/reset-password-link").permitAll();

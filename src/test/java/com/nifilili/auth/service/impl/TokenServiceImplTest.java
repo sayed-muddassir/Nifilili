@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -104,5 +106,64 @@ class TokenServiceImplTest {
         tokenService.revokeAllRefreshTokens(1L);
 
         verify(refreshTokenRepository).revokeAllByUserId(1L);
+    }
+
+    // ── getActiveSessions ─────────────────────────────────────────────────
+
+    @Test
+    void getActiveSessions_WhenActiveTokensExist_ShouldReturnOnlyNonExpired() {
+        RefreshToken active = RefreshToken.builder()
+                .userId(1L).token("active-token")
+                .expiresAt(LocalDateTime.now().plusDays(30)).revoked(false).build();
+        RefreshToken expired = RefreshToken.builder()
+                .userId(1L).token("expired-token")
+                .expiresAt(LocalDateTime.now().minusHours(1)).revoked(false).build();
+
+        when(refreshTokenRepository.findByUserIdAndRevokedFalse(1L)).thenReturn(List.of(active, expired));
+
+        List<RefreshToken> result = tokenService.getActiveSessions(1L);
+
+        assertEquals(1, result.size());
+        assertEquals("active-token", result.get(0).getToken());
+    }
+
+    @Test
+    void getActiveSessions_WhenNoActiveTokens_ShouldReturnEmptyList() {
+        when(refreshTokenRepository.findByUserIdAndRevokedFalse(1L)).thenReturn(Collections.emptyList());
+
+        List<RefreshToken> result = tokenService.getActiveSessions(1L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    // ── rotateRefreshToken (missing branches) ─────────────────────────────
+
+    @Test
+    void rotateRefreshToken_WhenTokenRevoked_ShouldThrowInvalidTokenException() {
+        RefreshToken revoked = RefreshToken.builder()
+                .token("revoked-token")
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .revoked(true)
+                .build();
+
+        when(refreshTokenRepository.findByToken("revoked-token")).thenReturn(Optional.of(revoked));
+
+        assertThrows(InvalidTokenException.class, () -> tokenService.rotateRefreshToken("revoked-token"));
+    }
+
+    @Test
+    void rotateRefreshToken_WhenTokenNotFound_ShouldThrowInvalidTokenException() {
+        when(refreshTokenRepository.findByToken("missing-token")).thenReturn(Optional.empty());
+
+        assertThrows(InvalidTokenException.class, () -> tokenService.rotateRefreshToken("missing-token"));
+    }
+
+    // ── revokeRefreshToken (missing branch) ───────────────────────────────
+
+    @Test
+    void revokeRefreshToken_WhenTokenNotFound_ShouldThrowInvalidTokenException() {
+        when(refreshTokenRepository.findByToken("missing-token")).thenReturn(Optional.empty());
+
+        assertThrows(InvalidTokenException.class, () -> tokenService.revokeRefreshToken("missing-token"));
     }
 }

@@ -77,4 +77,35 @@ class LoginAttemptServiceImplTest {
 
         assertFalse(loginAttemptService.isAccountLocked("john"));
     }
+
+    @Test
+    void recordAttempt_WhenFailedButUserIdNull_ShouldNotCheckLockThreshold() {
+        when(loginAttemptRepository.save(any(LoginAttempt.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        loginAttemptService.recordAttempt(null, "unknown", "192.168.1.1", false);
+
+        verify(loginAttemptRepository).save(any(LoginAttempt.class));
+        verify(loginAttemptRepository, never()).countRecentFailedAttempts(any());
+    }
+
+    @Test
+    void isAccountLocked_WhenUserNotFound_ShouldReturnFalse() {
+        when(userRepository.findByUsernameOrEmail("ghost", "ghost")).thenReturn(Optional.empty());
+
+        assertFalse(loginAttemptService.isAccountLocked("ghost"));
+    }
+
+    @Test
+    void recordAttempt_WhenAccountAlreadyLocked_ShouldNotSaveAgain() {
+        when(loginAttemptRepository.save(any(LoginAttempt.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(loginAttemptRepository.countRecentFailedAttempts("john")).thenReturn(5L);
+
+        User user = User.builder().enabled(true).accountLocked(true).build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        loginAttemptService.recordAttempt(1L, "john", "192.168.1.1", false);
+
+        // Account already locked, should not save user again
+        verify(userRepository, never()).save(any(User.class));
+    }
 }

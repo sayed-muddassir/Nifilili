@@ -1,180 +1,118 @@
 package com.nifilili.auth.service.impl;
 
-import com.nifilili.auth.UserPrincipal;
 import com.nifilili.auth.config.JwtTokenProvider;
-import com.nifilili.auth.domain.LoginHistory;
 import com.nifilili.auth.domain.RefreshToken;
 import com.nifilili.auth.domain.Role;
 import com.nifilili.auth.domain.User;
+import com.nifilili.auth.domain.enums.AuthType;
+import com.nifilili.auth.domain.enums.OtpPurpose;
+import com.nifilili.auth.dto.request.AuthRequest;
 import com.nifilili.auth.dto.request.LoginDto;
+import com.nifilili.auth.dto.request.OtpRequestDto;
+import com.nifilili.auth.dto.request.OtpVerifyDto;
 import com.nifilili.auth.dto.request.RegisterDto;
+import com.nifilili.auth.dto.request.RegistrationRequest;
+import com.nifilili.auth.dto.response.AuthResult;
 import com.nifilili.auth.dto.response.JwtAuthResponse;
 import com.nifilili.auth.dto.response.UserProfileResponse;
-import com.nifilili.auth.repository.LoginHistoryRepository;
-import com.nifilili.auth.repository.RoleRepository;
 import com.nifilili.auth.repository.UserRepository;
 import com.nifilili.auth.service.AuthService;
-import com.nifilili.auth.service.LoginAttemptService;
+import com.nifilili.auth.service.OtpService;
 import com.nifilili.auth.service.TokenService;
-import com.nifilili.account.events.UserRegisteredEvent;
-import com.nifilili.core.exception.AccountLockedException;
-import com.nifilili.core.exception.EmailAlreadyExistsException;
-import com.nifilili.core.exception.UsernameAlreadyExistsException;
+import com.nifilili.core.exception.InvalidTokenException;
+import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.core.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Orchestrates authentication flows by delegating to the strategy-based
+ * {@link AuthProviderRouter} and handling token generation centrally.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
-    private final LoginAttemptService loginAttemptService;
-    private final LoginHistoryRepository loginHistoryRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final AuthProviderRouter authProviderRouter;
+    private final OtpService otpService;
+
+    // ── Unified login (strategy-based) ──────────────────────────────────
 
     @Override
     @Transactional
-    public JwtAuthResponse login(LoginDto loginDto, String ipAddress, String userAgent, String deviceName) {
-        String usernameOrEmail = loginDto.getUsernameOrEmail();
-        log.debug("Authenticating principal '{}'", usernameOrEmail);
+    public JwtAuthResponse login(AuthRequest request, String ipAddress, String userAgent, String deviceName) {
+        log.debug("Unified login: authType={}", request.getAuthType());
 
-        // Check lockout before attempting authentication
-        if (loginAttemptService.isAccountLocked(usernameOrEmail)) {
-            throw new AccountLockedException(
-                    "Account is locked due to too many failed login attempts. Please reset your password.");
+        AuthResult result = authProviderRouter.authenticate(request, ipAddress, userAgent, deviceName);
+        return buildJwtResponse(result.getUserId(), result.getUsername(), deviceName, ipAddress, userAgent);
+    }
+
+    // ── Unified registration (strategy-based) ───────────────────────────
+
+    @Override
+    @Transactional
+    public JwtAuthResponse register(RegistrationRequest request, String ipAddress, String userAgent, String deviceName) {
+        log.debug("Unified registration: authType={}", request.getAuthType());
+
+        AuthResult result = authProviderRouter.register(request, ipAddress, userAgent, deviceName);
+        return buildJwtResponse(result.getUserId(), result.getUsername(), deviceName, ipAddress, userAgent);
+    }
+
+    // ── OTP endpoints ───────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public void requestOtp(OtpRequestDto otpRequest) {
+        log.debug("OTP request: identifier='{}' purpose={}", otpRequest.getIdentifier(), otpRequest.getPurpose());
+
+        // For SIGNUP purpose, check if phone/email is already registered
+        if (otpRequest.getPurpose() == OtpPurpose.SIGNUP) {
+            validateIdentifierNotRegistered(otpRequest);
         }
 
-        // Resolve userId for attempt tracking
-        Long userId = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-                .map(User::getId)
-                .orElse(null);
-
-        Authentication authentication;
-        try {
-            authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(usernameOrEmail, loginDto.getPassword())
-            );
-        } catch (BadCredentialsException ex) {
-            loginAttemptService.recordAttempt(userId, usernameOrEmail, ipAddress, false);
-            throw ex;
+        // For LOGIN purpose, check if account exists
+        if (otpRequest.getPurpose() == OtpPurpose.LOGIN) {
+            validateIdentifierRegistered(otpRequest);
         }
 
-        // Record successful attempt
-        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
-        loginAttemptService.recordAttempt(principal.getUserId(), usernameOrEmail, ipAddress, true);
-
-        // Record login history
-        recordLoginHistory(principal.getUserId(), ipAddress, userAgent, deviceName);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Generate dual tokens
-        String accessToken = jwtTokenProvider.generateAccessToken(principal.getUserId(), principal.getUsername());
-        RefreshToken refreshToken = tokenService.createRefreshToken(
-                principal.getUserId(), deviceName, ipAddress, userAgent);
-
-        User user = userRepository.findById(principal.getUserId())
-                .orElseThrow(() -> new IllegalStateException("Authenticated user not found in repository"));
-
-        log.info("User '{}' logged in successfully", user.getUsername());
-
-        return JwtAuthResponse.builder()
-                .accessToken(accessToken)
-                .tokenType("Bearer")
-                .refreshToken(refreshToken.getToken())
-                .user(buildProfileResponse(user))
-                .build();
+        otpService.generateAndSendOtp(
+                otpRequest.getIdentifier(), otpRequest.getIdentifierType(), otpRequest.getPurpose());
     }
 
     @Override
     @Transactional
-    public JwtAuthResponse register(RegisterDto registerDto, String ipAddress, String userAgent, String deviceName) {
-        log.debug("Registering new user with email '{}'", registerDto.getEmail());
+    public JwtAuthResponse verifyOtpAndLogin(OtpVerifyDto verifyDto, String ipAddress, String userAgent,
+                                             String deviceName) {
+        log.debug("OTP verify-and-login for phone='{}'", verifyDto.getPhone());
 
-        if (userRepository.existsByEmail(registerDto.getEmail())) {
-            throw new EmailAlreadyExistsException(
-                    "Email address is already registered: " + registerDto.getEmail());
-        }
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
-            throw new UsernameAlreadyExistsException(
-                    "Username is already taken: " + registerDto.getUsername());
-        }
+        AuthRequest authRequest = new AuthRequest();
+        authRequest.setAuthType(AuthType.PHONE_OTP);
+        authRequest.setPhone(verifyDto.getPhone());
+        authRequest.setOtp(verifyDto.getOtp());
 
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new IllegalStateException("ROLE_USER not seeded in database"));
-
-        User newUser = User.builder()
-                .name(registerDto.getName())
-                .username(registerDto.getUsername())
-                .email(registerDto.getEmail())
-                .password(passwordEncoder.encode(registerDto.getPassword()))
-                .phone(registerDto.getPhone())
-                .enabled(true)
-                .emailVerified(false)
-                .accountLocked(false)
-                .roles(Set.of(userRole))
-                .build();
-
-        User saved = userRepository.save(newUser);
-        log.info("Registered new user id='{}' username='{}'", saved.getId(), saved.getUsername());
-
-        // Authenticate the new user
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(registerDto.getUsername(), registerDto.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
-
-        // Generate dual tokens
-        String accessToken = jwtTokenProvider.generateAccessToken(principal.getUserId(), principal.getUsername());
-        RefreshToken refreshToken = tokenService.createRefreshToken(
-                principal.getUserId(), deviceName, ipAddress, userAgent);
-
-        // Record login history
-        recordLoginHistory(principal.getUserId(), ipAddress, userAgent, deviceName);
-
-        // Publish event for email verification
-        eventPublisher.publishEvent(new UserRegisteredEvent(saved.getId(), saved.getEmail()));
-
-        return JwtAuthResponse.builder()
-                .accessToken(accessToken)
-                .tokenType("Bearer")
-                .refreshToken(refreshToken.getToken())
-                .user(buildProfileResponse(saved))
-                .build();
+        AuthResult result = authProviderRouter.authenticate(authRequest, ipAddress, userAgent, deviceName);
+        return buildJwtResponse(result.getUserId(), result.getUsername(), deviceName, ipAddress, userAgent);
     }
+
+    // ── Token management ────────────────────────────────────────────────
 
     @Override
     @Transactional
     public JwtAuthResponse refresh(String refreshTokenStr) {
         RefreshToken newRefreshToken = tokenService.rotateRefreshToken(refreshTokenStr);
-
         User user = userRepository.findById(newRefreshToken.getUserId())
                 .orElseThrow(() -> new IllegalStateException("User not found for refresh token"));
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUsername());
-
         log.debug("Refreshed access token for userId={}", user.getId());
 
         return JwtAuthResponse.builder()
@@ -207,15 +145,22 @@ public class AuthServiceImpl implements AuthService {
         return buildProfileResponse(user);
     }
 
-    private void recordLoginHistory(Long userId, String ipAddress, String userAgent, String deviceName) {
-        LoginHistory history = LoginHistory.builder()
-                .userId(userId)
-                .ipAddress(ipAddress)
-                .userAgent(userAgent)
-                .deviceName(deviceName)
-                .loggedInAt(LocalDateTime.now())
+    // ── Private helpers ─────────────────────────────────────────────────
+
+    private JwtAuthResponse buildJwtResponse(Long userId, String username,
+                                             String deviceName, String ipAddress, String userAgent) {
+        String accessToken = jwtTokenProvider.generateAccessToken(userId, username);
+        RefreshToken refreshToken = tokenService.createRefreshToken(userId, deviceName, ipAddress, userAgent);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
+
+        return JwtAuthResponse.builder()
+                .accessToken(accessToken)
+                .tokenType("Bearer")
+                .refreshToken(refreshToken.getToken())
+                .user(buildProfileResponse(user))
                 .build();
-        loginHistoryRepository.save(history);
     }
 
     private UserProfileResponse buildProfileResponse(User user) {
@@ -230,7 +175,42 @@ public class AuthServiceImpl implements AuthService {
                 .phone(user.getPhone())
                 .enabled(user.isEnabled())
                 .emailVerified(user.isEmailVerified())
+                .phoneVerified(user.isPhoneVerified())
                 .roles(roleNames)
                 .build();
+    }
+
+    private void validateIdentifierNotRegistered(OtpRequestDto otpRequest) {
+        switch (otpRequest.getIdentifierType()) {
+            case PHONE -> {
+                if (userRepository.existsByPhone(otpRequest.getIdentifier())) {
+                    throw new InvalidTokenException(
+                            "This phone number is already associated with an account. Please login instead.");
+                }
+            }
+            case EMAIL -> {
+                if (userRepository.existsByEmail(otpRequest.getIdentifier())) {
+                    throw new InvalidTokenException(
+                            "This email is already associated with an account. Please login instead.");
+                }
+            }
+        }
+    }
+
+    private void validateIdentifierRegistered(OtpRequestDto otpRequest) {
+        switch (otpRequest.getIdentifierType()) {
+            case PHONE -> {
+                if (!userRepository.existsByPhone(otpRequest.getIdentifier())) {
+                    throw new ResourceNotFoundException(
+                            "No account found for this phone number. Please register first.");
+                }
+            }
+            case EMAIL -> {
+                if (!userRepository.existsByEmail(otpRequest.getIdentifier())) {
+                    // Silent — same as password reset (anti-enumeration)
+                    log.debug("OTP login requested for non-existent email, silently ignoring");
+                }
+            }
+        }
     }
 }

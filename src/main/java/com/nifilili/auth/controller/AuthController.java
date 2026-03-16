@@ -1,16 +1,19 @@
 package com.nifilili.auth.controller;
 
+import com.nifilili.auth.dto.request.AuthRequest;
 import com.nifilili.auth.dto.request.LoginDto;
 import com.nifilili.auth.dto.request.LogoutRequest;
+import com.nifilili.auth.dto.request.OtpRequestDto;
+import com.nifilili.auth.dto.request.OtpVerifyDto;
 import com.nifilili.auth.dto.request.RefreshTokenRequest;
 import com.nifilili.auth.dto.request.RegisterDto;
+import com.nifilili.auth.dto.request.RegistrationRequest;
 import com.nifilili.auth.dto.response.JwtAuthResponse;
 import com.nifilili.auth.dto.response.UserProfileResponse;
 import com.nifilili.auth.service.AuthService;
 import com.nifilili.core.constants.SwaggerConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,51 +26,88 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @Slf4j
 public class AuthController {
 
     private final AuthService authService;
 
     @Operation(
-            summary = "User Registration",
-            description = "Creates a new user account and returns access + refresh tokens with user profile. "
-                    + "Email verification email is sent automatically.",
+            summary = "Unified Registration",
+            description = "Registers a new user via the specified auth method (EMAIL_PASSWORD or PHONE_OTP). "
+                    + "For PHONE_OTP: request OTP first via /api/auth/otp/request, then include phone+otp+password.",
             tags = {SwaggerConstants.AUTH_1}
     )
     @ApiResponse(responseCode = "201", description = "User registered successfully")
-    @ApiResponse(responseCode = "409", description = "Email or username already exists")
-    @ApiResponse(responseCode = "400", description = "Validation failed")
+    @ApiResponse(responseCode = "409", description = "Email, username, or phone already exists")
+    @ApiResponse(responseCode = "400", description = "Validation failed or invalid OTP")
     @PostMapping("/register")
-    public ResponseEntity<JwtAuthResponse> register(@Valid @RequestBody RegisterDto registerDto,
-                                                    HttpServletRequest request) {
-        log.info("Registration attempt for email '{}'", registerDto.getEmail());
+    public ResponseEntity<JwtAuthResponse> register(@Valid @RequestBody RegistrationRequest registrationRequest,
+                                                      HttpServletRequest request) {
+        log.info("V1 registration: authType={}", registrationRequest.getAuthType());
         JwtAuthResponse response = authService.register(
-                registerDto, getClientIp(request), getUserAgent(request), getDeviceName(request));
-        log.info("Registration succeeded for username '{}'", registerDto.getUsername());
+                registrationRequest, getClientIp(request), getUserAgent(request), getDeviceName(request));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(
-            summary = "User Login",
-            description = "Authenticates a user and returns access + refresh tokens with user profile. "
-                    + "Account is locked after 5 consecutive failed attempts.",
+            summary = "Unified Login",
+            description = "Authenticates via the specified auth method (EMAIL_PASSWORD or PHONE_OTP). "
+                    + "For PHONE_OTP: request OTP first via /api/auth/otp/request.",
             tags = {SwaggerConstants.AUTH_1}
     )
     @ApiResponse(responseCode = "200", description = "Login successful")
-    @ApiResponse(responseCode = "401", description = "Invalid credentials")
+    @ApiResponse(responseCode = "401", description = "Invalid credentials or OTP")
     @ApiResponse(responseCode = "423", description = "Account locked")
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody LoginDto loginDto,
-                                                 HttpServletRequest request) {
-        log.info("Login attempt for identifier '{}'", loginDto.getUsernameOrEmail());
+    public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody AuthRequest authRequest,
+                                                   HttpServletRequest request) {
+        log.info("V1 login: authType={}", authRequest.getAuthType());
         JwtAuthResponse response = authService.login(
-                loginDto, getClientIp(request), getUserAgent(request), getDeviceName(request));
-        log.info("Login succeeded for identifier '{}'", loginDto.getUsernameOrEmail());
+                authRequest, getClientIp(request), getUserAgent(request), getDeviceName(request));
         return ResponseEntity.ok(response);
     }
+
+    // ── OTP endpoints ───────────────────────────────────────────────────
+
+    @Operation(
+            summary = "Request OTP",
+            description = "Generates and sends an OTP to the specified phone/email. "
+                    + "Rate-limited to 3 requests per 5 minutes per identifier.",
+            tags = {SwaggerConstants.AUTH_1}
+    )
+    @ApiResponse(responseCode = "200", description = "OTP sent successfully")
+    @ApiResponse(responseCode = "429", description = "Too many OTP requests")
+    @ApiResponse(responseCode = "400", description = "Validation failed")
+    @PostMapping("/otp/request")
+    public ResponseEntity<Map<String, String>> requestOtp(@Valid @RequestBody OtpRequestDto otpRequest) {
+        log.info("OTP request: identifier='{}' purpose={}", otpRequest.getIdentifier(), otpRequest.getPurpose());
+        authService.requestOtp(otpRequest);
+        return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
+    }
+
+    @Operation(
+            summary = "Verify OTP and Login",
+            description = "Verifies the OTP and returns JWT tokens. The user must have an existing account.",
+            tags = {SwaggerConstants.AUTH_1}
+    )
+    @ApiResponse(responseCode = "200", description = "OTP verified, login successful")
+    @ApiResponse(responseCode = "400", description = "Invalid or expired OTP")
+    @ApiResponse(responseCode = "404", description = "No account found for phone number")
+    @PostMapping("/otp/verify")
+    public ResponseEntity<JwtAuthResponse> verifyOtp(@Valid @RequestBody OtpVerifyDto verifyDto,
+                                                     HttpServletRequest request) {
+        log.info("OTP verify for phone '{}'", verifyDto.getPhone());
+        JwtAuthResponse response = authService.verifyOtpAndLogin(
+                verifyDto, getClientIp(request), getUserAgent(request), getDeviceName(request));
+        return ResponseEntity.ok(response);
+    }
+
+    // ── Token management ────────────────────────────────────────────────
 
     @Operation(
             summary = "Refresh Access Token",
@@ -124,6 +164,8 @@ public class AuthController {
         return ResponseEntity.ok(profile);
     }
 
+    // ── Request helpers ─────────────────────────────────────────────────
+
     private String getClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {
@@ -137,7 +179,6 @@ public class AuthController {
     }
 
     private String getDeviceName(HttpServletRequest request) {
-        // Custom header for device name; falls back to User-Agent summary
         String deviceName = request.getHeader("X-Device-Name");
         if (deviceName != null && !deviceName.isBlank()) {
             return deviceName;

@@ -132,6 +132,24 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleOtpRateLimit(OtpRateLimitException ex, HttpServletRequest request) {
+        log.warn("OTP rate limit exceeded: {}", ex.getMessage());
+        return buildError(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handlePhoneAlreadyExists(PhoneAlreadyExistsException ex, HttpServletRequest request) {
+        log.warn("Registration conflict - phone: {}", ex.getMessage());
+        return buildError(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleUnsupportedAuthMethod(UnsupportedAuthMethodException ex, HttpServletRequest request) {
+        log.warn("Unsupported auth method: {}", ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ErrorDto> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         log.warn("Access denied for '{}': {}", request.getRequestURI(), ex.getMessage());
         return buildError(HttpStatus.FORBIDDEN, "You do not have permission to access this resource", request);

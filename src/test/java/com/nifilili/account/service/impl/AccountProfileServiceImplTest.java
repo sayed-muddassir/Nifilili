@@ -191,4 +191,15 @@ class AccountProfileServiceImplTest {
         assertEquals("NewCity", response.getCity());
         assertEquals("KeepCountry", response.getCountry());
     }
+
+    @Test
+    void updateProfile_WhenUserNotFound_ShouldThrowResourceNotFoundException() {
+        SecurityContextTestUtil.setAuthenticatedUser(99L);
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        UpdateProfileRequest request = new UpdateProfileRequest();
+        request.setBio("Test bio");
+
+        assertThrows(ResourceNotFoundException.class, () -> service.updateProfile(request));
+    }
 }
