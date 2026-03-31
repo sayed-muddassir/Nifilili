@@ -26,6 +26,25 @@ app:
   jwt-secret: daf66e01593f61a15b857cf433aae03a005812b31234e149036bcc8dee755dbb
   jwt-access-expiration-ms: 900000
   jwt-refresh-expiration-ms: 2592000000
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allowed-headers:
+      - Authorization
+      - Content-Type
+      - X-Requested-With
+      - X-Refresh-Token
+      - X-Device-Name
+    exposed-headers: []
+    allow-credentials: false
+    max-age: 3600
 
 springdoc:
   swagger-ui:
