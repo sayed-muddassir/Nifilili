@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface VerticalDefinitionService {
 
+    List<VerticalResponse> getAll();
     VerticalResponse create(CreateVerticalRequest request);
     VerticalResponse update(Long verticalId, CreateVerticalRequest request);
     List<VerticalResponse> getAllActive();

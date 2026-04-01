@@ -20,6 +20,14 @@ public class VerticalDefinitionServiceImpl implements VerticalDefinitionService 
     private final VerticalMapper mapper;
 
     @Override
+    public List<VerticalResponse> getAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
     public VerticalResponse create(CreateVerticalRequest request) {
         VerticalDefinition saved = repository.save(mapper.toEntity(request));
         return mapper.toResponse(saved);
