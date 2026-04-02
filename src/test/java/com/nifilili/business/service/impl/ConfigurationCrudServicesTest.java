@@ -69,6 +69,7 @@ class ConfigurationCrudServicesTest {
         assertSame(response, verticalService.update(11L, request));
         assertThrows(ResourceNotFoundException.class, () -> verticalService.update(12L, request));
         assertEquals(1, verticalService.getAllActive().size());
+        assertEquals(2, verticalService.getAll().size());
     }
 
     @Test

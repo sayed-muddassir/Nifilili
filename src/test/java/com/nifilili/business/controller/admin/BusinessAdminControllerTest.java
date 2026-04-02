@@ -9,6 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +31,9 @@ class BusinessAdminControllerTest {
     void allAdminEndpoints_WhenServicesReturnResponses_ShouldDelegateAndReturnSameInstance() {
         CreateVerticalRequest verticalRequest = new CreateVerticalRequest();
         VerticalResponse verticalResponse = new VerticalResponse();
+        List<VerticalResponse> allVerticalResponses = List.of(verticalResponse);
+
+        when(verticalDefinitionService.getAll()).thenReturn(allVerticalResponses);
         when(verticalDefinitionService.create(verticalRequest)).thenReturn(verticalResponse);
         when(verticalDefinitionService.update(1L, verticalRequest)).thenReturn(verticalResponse);
 
@@ -56,6 +62,7 @@ class BusinessAdminControllerTest {
         when(documentDefinitionService.create(documentRequest)).thenReturn(documentResponse);
         when(documentDefinitionService.update(6L, documentRequest)).thenReturn(documentResponse);
 
+        assertSame(allVerticalResponses, businessAdminController.getAllVerticals());
         assertSame(verticalResponse, businessAdminController.createVertical(verticalRequest));
         assertSame(verticalResponse, businessAdminController.updateVertical(1L, verticalRequest));
         assertSame(categoryResponse, businessAdminController.createCategory(categoryRequest));

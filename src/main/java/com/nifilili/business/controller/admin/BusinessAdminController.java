@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/admin/config")
 @RequiredArgsConstructor
@@ -23,6 +25,12 @@ public class BusinessAdminController {
     private final SectionDefinitionService sectionDefinitionService;
     private final AttributeDefinitionService attributeDefinitionService;
     private final DocumentDefinitionService documentDefinitionService;
+
+    @Operation(summary = "1.0 Verticals: List All", description = "Retrieves all business verticals.")
+    @GetMapping("/verticals")
+    public List<VerticalResponse> getAllVerticals() {
+        return verticalDefinitionService.getAll();
+    }
 
     @Operation(summary = "1.1 Verticals: Create", description = "Creates a new top-level business vertical.")
     @PostMapping("/verticals")
