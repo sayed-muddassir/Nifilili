@@ -39,40 +39,60 @@ class BusinessAdminControllerTest {
 
         CreateCategoryRequest categoryRequest = new CreateCategoryRequest();
         CategoryResponse categoryResponse = new CategoryResponse();
+        List<CategoryResponse> categoryResponses = List.of(categoryResponse);
+
+        when(categoryDefinitionService.getByVertical(1L)).thenReturn(categoryResponses);
         when(categoryDefinitionService.create(categoryRequest)).thenReturn(categoryResponse);
         when(categoryDefinitionService.update(2L, categoryRequest)).thenReturn(categoryResponse);
 
         CreateSectionRequest sectionRequest = new CreateSectionRequest();
         SectionResponse sectionResponse = SectionResponse.builder().build();
+        List<SectionResponse> sectionResponses = List.of(sectionResponse);
+
+        when(sectionDefinitionService.getByVertical(1L)).thenReturn(sectionResponses);
         when(sectionDefinitionService.createSection(sectionRequest)).thenReturn(sectionResponse);
         when(sectionDefinitionService.updateSection(3L, sectionRequest)).thenReturn(sectionResponse);
 
         CreateSectionFieldRequest fieldRequest = new CreateSectionFieldRequest();
         SectionFieldResponse fieldResponse = new SectionFieldResponse();
+        List<SectionFieldResponse> fieldResponses = List.of(fieldResponse);
+
+        when(sectionDefinitionService.getFields(1L)).thenReturn(fieldResponses);
         when(sectionDefinitionService.addField(3L, fieldRequest)).thenReturn(fieldResponse);
         when(sectionDefinitionService.updateField(4L, fieldRequest)).thenReturn(fieldResponse);
 
         CreateAttributeDefinitionRequest attributeRequest = new CreateAttributeDefinitionRequest();
         AttributeDefinitionResponse attributeResponse = new AttributeDefinitionResponse();
+        List<AttributeDefinitionResponse> attributeResponses = List.of(attributeResponse);
+
+        when(attributeDefinitionService.getByVertical(1L)).thenReturn(attributeResponses);
         when(attributeDefinitionService.create(attributeRequest)).thenReturn(attributeResponse);
         when(attributeDefinitionService.update(5L, attributeRequest)).thenReturn(attributeResponse);
 
         CreateDocumentDefinitionRequest documentRequest = new CreateDocumentDefinitionRequest();
         DocumentDefinitionResponse documentResponse = new DocumentDefinitionResponse();
+        List<DocumentDefinitionResponse> documentResponses = List.of(documentResponse);
+
+        when(documentDefinitionService.getByVertical(1L)).thenReturn(documentResponses);
         when(documentDefinitionService.create(documentRequest)).thenReturn(documentResponse);
         when(documentDefinitionService.update(6L, documentRequest)).thenReturn(documentResponse);
 
         assertSame(allVerticalResponses, businessAdminController.getAllVerticals());
         assertSame(verticalResponse, businessAdminController.createVertical(verticalRequest));
         assertSame(verticalResponse, businessAdminController.updateVertical(1L, verticalRequest));
+        assertSame(categoryResponses, businessAdminController.getCategoriesByVertical(1L));
         assertSame(categoryResponse, businessAdminController.createCategory(categoryRequest));
         assertSame(categoryResponse, businessAdminController.updateCategory(2L, categoryRequest));
+        assertSame(sectionResponses, businessAdminController.getSectionsByVertical(1L));
         assertSame(sectionResponse, businessAdminController.createSection(sectionRequest));
         assertSame(sectionResponse, businessAdminController.updateSection(3L, sectionRequest));
+        assertSame(fieldResponses, businessAdminController.getSectionFields(1L));
         assertSame(fieldResponse, businessAdminController.createSectionField(3L, fieldRequest));
         assertSame(fieldResponse, businessAdminController.updateSectionField(4L, fieldRequest));
+        assertSame(attributeResponses, businessAdminController.getAttributesByVertical(1L));
         assertSame(attributeResponse, businessAdminController.createAttribute(attributeRequest));
         assertSame(attributeResponse, businessAdminController.updateAttribute(5L, attributeRequest));
+        assertSame(documentResponses, businessAdminController.getDocumentByVertical(1L));
         assertSame(documentResponse, businessAdminController.createDocument(documentRequest));
         assertSame(documentResponse, businessAdminController.updateDocument(6L, documentRequest));
     }

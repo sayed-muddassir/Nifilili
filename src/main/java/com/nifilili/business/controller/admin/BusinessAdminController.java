@@ -44,6 +44,12 @@ public class BusinessAdminController {
         return verticalDefinitionService.update(verticalId, request);
     }
 
+    @Operation(summary = "Step 2.0: Get Categories by Vertical", description = "Loads categories under selected vertical.")
+    @GetMapping("/vertical/{verticalId}/categories")
+    public List<CategoryResponse> getCategoriesByVertical(@PathVariable Long verticalId) {
+        return categoryDefinitionService.getByVertical(verticalId);
+    }
+
     @Operation(summary = "2.1 Categories: Create", description = "Creates a category under a vertical.")
     @PostMapping("/categories")
     public CategoryResponse createCategory(@Valid @RequestBody CreateCategoryRequest request) {
@@ -54,6 +60,12 @@ public class BusinessAdminController {
     @PutMapping("/categories/{categoryId}")
     public CategoryResponse updateCategory(@PathVariable Long categoryId, @Valid @RequestBody CreateCategoryRequest request) {
         return categoryDefinitionService.update(categoryId, request);
+    }
+
+    @Operation(summary = "Step 3.0: Get Sections by Vertical", description = "Loads sections for selected vertical.")
+    @GetMapping("/vertical/{verticalId}/sections")
+    public List<SectionResponse> getSectionsByVertical(@PathVariable Long verticalId) {
+        return sectionDefinitionService.getByVertical(verticalId);
     }
 
     @Operation(summary = "3.1 Sections: Create", description = "Creates a section definition for a vertical and optional category.")
@@ -68,6 +80,12 @@ public class BusinessAdminController {
         return sectionDefinitionService.updateSection(sectionId, request);
     }
 
+    @Operation(summary = "Step 4.0: Get Section Fields", description = "Loads field definitions for a selected section.")
+    @GetMapping("/sections/{sectionId}/fields")
+    public List<SectionFieldResponse> getSectionFields(@PathVariable Long sectionId) {
+        return sectionDefinitionService.getFields(sectionId);
+    }
+
     @Operation(summary = "4.1 Section Fields: Create", description = "Adds a field to an existing section.")
     @PostMapping("/sections/{sectionId}/fields")
     public SectionFieldResponse createSectionField(@PathVariable Long sectionId, @Valid @RequestBody CreateSectionFieldRequest request) {
@@ -80,6 +98,12 @@ public class BusinessAdminController {
         return sectionDefinitionService.updateField(fieldId, request);
     }
 
+    @Operation(summary = "Step 5.0: Get Attributes by Vertical", description = "Loads attribute definitions for selected vertical.")
+    @GetMapping("/vertical/{verticalId}/attributes")
+    public List<AttributeDefinitionResponse> getAttributesByVertical(@PathVariable Long verticalId) {
+        return attributeDefinitionService.getByVertical(verticalId);
+    }
+
     @Operation(summary = "5.1 Attributes: Create", description = "Creates a reusable attribute definition.")
     @PostMapping("/attributes")
     public AttributeDefinitionResponse createAttribute(@Valid @RequestBody CreateAttributeDefinitionRequest request) {
@@ -90,6 +114,12 @@ public class BusinessAdminController {
     @PutMapping("/attributes/{attributeId}")
     public AttributeDefinitionResponse updateAttribute(@PathVariable Long attributeId, @Valid @RequestBody CreateAttributeDefinitionRequest request) {
         return attributeDefinitionService.update(attributeId, request);
+    }
+
+    @Operation(summary = "Step 6.0: Get Documents by Vertical", description = "Loads required KYC documents for selected vertical.")
+    @GetMapping("/vertical/{verticalId}/documents")
+    public List<DocumentDefinitionResponse> getDocumentByVertical(@PathVariable Long verticalId) {
+        return documentDefinitionService.getByVertical(verticalId);
     }
 
     @Operation(summary = "6.1 Document Definitions: Create", description = "Creates a KYC document requirement definition.")
