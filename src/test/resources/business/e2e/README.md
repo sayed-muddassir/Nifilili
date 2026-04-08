@@ -32,6 +32,8 @@ This folder provides a self-explanatory, handover-ready happy-path automation pa
 13. Save attribute data
 14. Upload document
 15. Submit for review
+16. Upload business file (local storage API)
+17. Download business file (by relative path)
 
 ## Prerequisites
 

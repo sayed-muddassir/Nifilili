@@ -333,7 +333,56 @@
       "event": [{"listen": "test", "script": {"exec": ["pm.response.to.have.status(202);"]}}]
     },
     {
-      "name": "16 Claim Admin-Seeded Business",
+      "name": "16 Upload Business File",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {"key": "file", "type": "file", "src": "{{upload_file_path}}"}
+          ]
+        },
+        "url": "{{base_url}}/api/v1/files/upload"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(201);",
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('uploaded_file_path', json.relativePath);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 Download Business File",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{user_token}}"}
+        ],
+        "url": "{{base_url}}/api/v1/files/download?filePath={{uploaded_file_path}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.headers.get('Content-Disposition')).to.include('attachment');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 Claim Admin-Seeded Business",
       "request": {
         "method": "POST",
         "header": [
@@ -365,6 +414,8 @@
     {"key": "attribute_id", "value": ""},
     {"key": "document_definition_id", "value": ""},
     {"key": "business_id", "value": ""},
+    {"key": "upload_file_path", "value": ""},
+    {"key": "uploaded_file_path", "value": ""},
     {"key": "admin_seeded_business_id", "value": ""}
   ]
 }

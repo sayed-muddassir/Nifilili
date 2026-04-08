@@ -22,6 +22,7 @@ public class SwaggerConstants {
     public static final String KYC_3 = "2.05 - Business KYC Verification [Public]";
     public static final String BUSINESS_3 = "2.06 - Business Discovery [Public]";
     public static final String BUSINESS_4 = "2.07 - Business Location Configuration [User]";
+    public static final String BUSINESS_5 = "2.08 - Business File Storage [Admin/User]";
 
     public static final String OFFERING_1 = "3.01 - Offering Configuration [Admin]";
     public static final String OFFERING_2 = "3.02 - Offering Management [Owner]";

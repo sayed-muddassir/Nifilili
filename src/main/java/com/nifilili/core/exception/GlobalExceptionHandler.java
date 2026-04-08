@@ -58,6 +58,24 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleFileConflict(FileConflictException ex, HttpServletRequest request) {
+        log.warn("File conflict: {}", ex.getMessage());
+        return buildError(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleInvalidFilePath(InvalidFilePathException ex, HttpServletRequest request) {
+        log.warn("Invalid file path: {}", ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleFileStorage(FileStorageException ex, HttpServletRequest request) {
+        log.error("File storage error: {}", ex.getMessage(), ex);
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to process file request", request);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ErrorDto> handleInvalidBusinessState(InvalidBusinessStateException ex, HttpServletRequest request) {
         log.warn("Invalid business state: {}", ex.getMessage());
         return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
