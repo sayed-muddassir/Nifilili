@@ -14,9 +14,9 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+          "raw": "{\n  \"authType\": \"EMAIL_PASSWORD\",\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
         },
-        "url": "{{base_url}}/api/auth/login"
+        "url": "{{base_url}}/api/v1/auth/login"
       },
       "event": [
         {
@@ -196,9 +196,9 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"usernameOrEmail\": \"{{user_username}}\",\n  \"password\": \"{{user_password}}\"\n}"
+          "raw": "{\n  \"authType\": \"EMAIL_PASSWORD\",\n  \"usernameOrEmail\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
         },
-        "url": "{{base_url}}/api/auth/login"
+        "url": "{{base_url}}/api/v1/auth/login"
       },
       "event": [
         {
@@ -222,7 +222,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"verticalId\": {{vertical_id}},\n  \"name\": \"Happy Path Cafe {{run_id}}\",\n  \"legalName\": \"Happy Path Cafe Pvt Ltd\",\n  \"municipalityId\": 1,\n  \"wardNumber\": 1,\n  \"toleName\": \"Downtown\",\n  \"addressField1\": \"Main Road\",\n  \"addressField2\": \"Near Landmark\",\n  \"postalCode\": \"44600\",\n  \"website\": \"https://happy.example.com\"\n}"
+          "raw": "{\n  \"verticalId\": {{vertical_id}},\n  \"name\": \"Happy Path Cafe {{run_id}}\",\n  \"legalName\": \"Happy Path Cafe Pvt Ltd\",\n  \"municipalityId\": 1,\n  \"wardNumber\": 1,\n  \"toleName\": \"Downtown\",\n  \"addressField1\": \"Main Road\",\n  \"addressField2\": \"Near Landmark\",\n  \"postalCode\": \"44600\",\n  \"website\": \"https://happy.example.com\"\n, \n  \"profileImageUrl\": \"https://happy.example.profile.com\"\n, \n  \"bannerImageUrl\": \"https://happy.example.banner.com\"\n}"
         },
         "url": "{{base_url}}/api/v1/business"
       },

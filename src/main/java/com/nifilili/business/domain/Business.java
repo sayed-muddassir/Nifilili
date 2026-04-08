@@ -53,6 +53,9 @@ public class Business extends BaseEntity {
 
     private String website;
 
+    private String profileImageUrl;
+    private String bannerImageUrl;
+
     @Enumerated(EnumType.STRING)
     private BusinessStatus status;
 
