@@ -49,4 +49,10 @@ public class CreateBusinessRequest {
     @Schema(description = "Official website URL of the business.", example = "https://www.nifilili.com")
     @NotBlank
     private String website;
+
+    @Schema(description = "URL of the business profile image.", example = "https://example.com/profile.jpg", nullable = true)
+    private String profileImageUrl;
+
+    @Schema(description = "URL of the business banner image.", example = "https://example.com/banner.jpg", nullable = true)
+    private String bannerImageUrl;
 }

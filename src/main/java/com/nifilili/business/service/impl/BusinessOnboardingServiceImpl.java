@@ -62,6 +62,8 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
                 .contacts(Map.of())
                 .businessHours(Map.of())
                 .website(request.getWebsite())
+                .profileImageUrl(request.getProfileImageUrl())
+                .bannerImageUrl(request.getBannerImageUrl())
                 .status(BusinessStatus.DRAFT)
                 .source(BusinessSource.USER_REGISTERED)
                 .isClaimed(true)

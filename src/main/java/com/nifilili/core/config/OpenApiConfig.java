@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
                 @Tag(name = SwaggerConstants.BUSINESS_1, description = "Admin APIs to manage business onboarding master definitions in a predictable sequence."),
                 @Tag(name = SwaggerConstants.BUSINESS_2, description = "Chronological onboarding APIs: fetch config, create business, complete profile, upload docs, submit for review."),
                 @Tag(name = SwaggerConstants.BUSINESS_3, description = "Public business discovery APIs."),
+                @Tag(name = SwaggerConstants.BUSINESS_5, description = "Admin and User APIs for storing and serving files from backend local storage."),
                 @Tag(name = SwaggerConstants.KYC_1, description = "KYC management endpoints for admin users to review and manage KYC applications."),
                 @Tag(name = SwaggerConstants.KYC_2, description = "KYC owner-facing endpoints: check verification status, view correction banner, and uploaded documents."),
                 @Tag(name = SwaggerConstants.KYC_3, description = "KYC public endpoint for checking business verification badge status."),
