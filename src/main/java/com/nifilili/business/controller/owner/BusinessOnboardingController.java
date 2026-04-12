@@ -48,6 +48,12 @@ public class BusinessOnboardingController {
         return categoryDefinitionService.getByVertical(verticalId);
     }
 
+    @Operation(summary = "Step 0.21: Get all available Categories", description = "Loads all categories available.")
+    @GetMapping("/vertical/all/categories")
+    public List<CategoryResponse> getAllCategories() {
+        return categoryDefinitionService.getAll();
+    }
+
     @Operation(summary = "Step 0.3: Get Sections by Vertical", description = "Loads sections for selected vertical.")
     @GetMapping("/vertical/{verticalId}/sections")
     public List<SectionResponse> getSectionsByVertical(@PathVariable Long verticalId) {

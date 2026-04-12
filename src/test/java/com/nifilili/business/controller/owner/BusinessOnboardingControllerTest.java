@@ -47,6 +47,7 @@ class BusinessOnboardingControllerTest {
 
         when(verticalDefinitionService.getAllActive()).thenReturn(verticals);
         when(categoryDefinitionService.getByVertical(11L)).thenReturn(categories);
+        when(categoryDefinitionService.getAll()).thenReturn(categories);
         when(sectionDefinitionService.getByVertical(11L)).thenReturn(sections);
         when(sectionDefinitionService.getFields(55L)).thenReturn(fields);
         when(attributeDefinitionService.getByVertical(11L)).thenReturn(attributes);
@@ -54,6 +55,7 @@ class BusinessOnboardingControllerTest {
 
         assertSame(verticals, controller.getAllActiveVerticals());
         assertSame(categories, controller.getCategoriesByVertical(11L));
+        assertSame(categories, controller.getAllCategories());
         assertSame(sections, controller.getSectionsByVertical(11L));
         assertSame(fields, controller.getSectionFields(55L));
         assertSame(attributes, controller.getAttributesByVertical(11L));

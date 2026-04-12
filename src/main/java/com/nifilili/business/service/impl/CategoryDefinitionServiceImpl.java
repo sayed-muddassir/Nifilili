@@ -48,4 +48,12 @@ public class CategoryDefinitionServiceImpl implements CategoryDefinitionService 
                 .map(mapper::toResponse)
                 .toList();
     }
+
+    @Override
+    public List<CategoryResponse> getAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
 }
