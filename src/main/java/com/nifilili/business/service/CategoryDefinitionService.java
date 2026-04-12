@@ -11,4 +11,5 @@ public interface CategoryDefinitionService {
     CategoryResponse update(Long categoryId, CreateCategoryRequest request);
 
     List<CategoryResponse> getByVertical(Long verticalId);
+    List<CategoryResponse> getAll();
 }
