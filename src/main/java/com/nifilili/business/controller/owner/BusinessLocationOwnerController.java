@@ -37,7 +37,7 @@ public class BusinessLocationOwnerController {
     @ApiResponse(responseCode = "403", description = "Forbidden")
     @GetMapping("/provinces")
     public ResponseEntity<List<ProvinceResponse>> getProvinces() {
-        log.info("GET /api/v1/admin/business-locations/provinces");
+        log.info("GET /api/v1/business-locations/provinces");
         List<ProvinceResponse> response = provinceAdminService.getAll();
         log.info("Returning {} provinces", response.size());
         return ResponseEntity.ok(response);
@@ -51,7 +51,7 @@ public class BusinessLocationOwnerController {
     @ApiResponse(responseCode = "404", description = "Province not found")
     @GetMapping("/provinces/{provinceId}")
     public ResponseEntity<ProvinceResponse> getProvince(@PathVariable Long provinceId) {
-        log.info("GET /api/v1/admin/business-locations/provinces/{}", provinceId);
+        log.info("GET /api/v1/business-locations/provinces/{}", provinceId);
         ProvinceResponse response = provinceAdminService.getById(provinceId);
         log.info("Returning province id={}", response.getId());
         return ResponseEntity.ok(response);
@@ -65,7 +65,7 @@ public class BusinessLocationOwnerController {
     @ApiResponse(responseCode = "404", description = "Province not found")
     @GetMapping("/provinces/{provinceId}/districts")
     public ResponseEntity<List<DistrictResponse>> getDistrictsByProvince(@PathVariable Long provinceId) {
-        log.info("GET /api/v1/admin/business-locations/provinces/{}/districts", provinceId);
+        log.info("GET /api/v1/business-locations/provinces/{}/districts", provinceId);
         List<DistrictResponse> response = districtAdminService.getByProvince(provinceId);
         log.info("Returning {} districts for provinceId={}", response.size(), provinceId);
         return ResponseEntity.ok(response);
@@ -79,7 +79,7 @@ public class BusinessLocationOwnerController {
     @ApiResponse(responseCode = "404", description = "District not found")
     @GetMapping("/districts/{districtId}")
     public ResponseEntity<DistrictResponse> getDistrict(@PathVariable Long districtId) {
-        log.info("GET /api/v1/admin/business-locations/districts/{}", districtId);
+        log.info("GET /api/v1/business-locations/districts/{}", districtId);
         DistrictResponse response = districtAdminService.getById(districtId);
         log.info("Returning district id={}", response.getId());
         return ResponseEntity.ok(response);
@@ -93,7 +93,7 @@ public class BusinessLocationOwnerController {
     @ApiResponse(responseCode = "404", description = "District not found")
     @GetMapping("/districts/{districtId}/municipalities")
     public ResponseEntity<List<MunicipalityResponse>> getMunicipalitiesByDistrict(@PathVariable Long districtId) {
-        log.info("GET /api/v1/admin/business-locations/districts/{}/municipalities", districtId);
+        log.info("GET /api/v1/business-locations/districts/{}/municipalities", districtId);
         List<MunicipalityResponse> response = municipalityAdminService.getByDistrict(districtId);
         log.info("Returning {} municipalities for districtId={}", response.size(), districtId);
         return ResponseEntity.ok(response);
@@ -107,7 +107,7 @@ public class BusinessLocationOwnerController {
     @ApiResponse(responseCode = "404", description = "Municipality not found")
     @GetMapping("/municipalities/{municipalityId}")
     public ResponseEntity<MunicipalityResponse> getMunicipality(@PathVariable Long municipalityId) {
-        log.info("GET /api/v1/admin/business-locations/municipalities/{}", municipalityId);
+        log.info("GET /api/v1/business-locations/municipalities/{}", municipalityId);
         MunicipalityResponse response = municipalityAdminService.getById(municipalityId);
         log.info("Returning municipality id={}", response.getId());
         return ResponseEntity.ok(response);
