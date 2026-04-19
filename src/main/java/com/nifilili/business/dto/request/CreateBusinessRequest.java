@@ -1,9 +1,14 @@
 package com.nifilili.business.dto.request;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Schema(
@@ -55,4 +60,20 @@ public class CreateBusinessRequest {
 
     @Schema(description = "URL of the business banner image.", example = "https://example.com/banner.jpg", nullable = true)
     private String bannerImageUrl;
+
+    @Schema(description = "Contact metadata such as phone, email, or social handles.", example = "{\"phone\":\"+977-9800000000\",\"email\":\"hello@nifilili.com\"}", nullable = true)
+    @NotNull
+    private Map<String, Object> contacts;
+
+    @Schema(description = "Business operating hours keyed by day or schedule block.", example = "{\"monday\":\"09:00-18:00\",\"tuesday\":\"09:00-18:00\"}", nullable = true)
+    @NotNull
+    private Map<String, Object> businessHours;
+
+    @ArraySchema(
+            arraySchema = @Schema(description = "List of category identifiers to attach to the business.", requiredMode = Schema.RequiredMode.REQUIRED),
+            schema = @Schema(description = "Business category identifier.", example = "11")
+    )
+    @NotNull
+    @NotEmpty
+    private List<Long> categoryIds;
 }
