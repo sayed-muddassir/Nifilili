@@ -4,6 +4,7 @@ import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.CreateBusinessRequest;
 import com.nifilili.business.events.BusinessCreatedEvent;
 import com.nifilili.business.repository.BusinessRepository;
+import com.nifilili.business.service.BusinessCategoryService;
 import com.nifilili.business.service.BusinessOnboardingService;
 import com.nifilili.core.enums.business.BusinessSource;
 import com.nifilili.core.enums.business.BusinessStatus;
@@ -27,17 +28,21 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
     private final ApplicationEventPublisher publisher;
 
     private final BusinessRepository businessRepository;
+    private final BusinessCategoryService businessCategoryService;
 
     /* --------------------------------------------------------
        STEP 1: CREATE BUSINESS
        -------------------------------------------------------- */
     @Override
+    @Transactional
     public Long createBusiness(CreateBusinessRequest request) {
         Long currentUserId = SecurityUtil.getCurrentUserId();
 
         Business business = buildInitialBusinessEntity(request, currentUserId);
 
-        businessRepository.save(business);
+        Business persistedBusiness = businessRepository.save(business);
+
+        businessCategoryService.updateCategories(persistedBusiness.getId(), request.getCategoryIds());
 
         publisher.publishEvent(new BusinessCreatedEvent(business.getId()));
 
@@ -71,6 +76,8 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
                 .reviewCount(0)
                 .businessSummary("")
                 .registrationDate(Date.valueOf(LocalDate.now()))
+                .contacts(request.getContacts())
+                .businessHours(request.getBusinessHours())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

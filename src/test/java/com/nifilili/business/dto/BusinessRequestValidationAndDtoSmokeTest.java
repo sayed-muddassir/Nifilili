@@ -33,6 +33,9 @@ class BusinessRequestValidationAndDtoSmokeTest {
         validRequest.setAddressField1("Main street");
         validRequest.setPostalCode("12345");
         validRequest.setWebsite("https://www.nifililili.com");
+        validRequest.setContacts(Map.of("phone", "1234567890"));
+        validRequest.setBusinessHours(Map.of("hour", "12"));
+        validRequest.setCategoryIds(List.of(10L, 20L));
         assertTrue(validator.validate(validRequest).isEmpty());
     }
 

@@ -5,6 +5,7 @@ import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.CreateBusinessRequest;
 import com.nifilili.business.events.BusinessCreatedEvent;
 import com.nifilili.business.repository.BusinessRepository;
+import com.nifilili.business.service.BusinessCategoryService;
 import com.nifilili.core.enums.business.BusinessSource;
 import com.nifilili.core.enums.business.BusinessStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,6 +32,9 @@ class BusinessOnboardingServiceImplTest {
 
     @Mock
     private BusinessRepository businessRepository;
+
+    @Mock
+    BusinessCategoryService businessCategoryService;
 
     @InjectMocks
     private BusinessOnboardingServiceImpl businessOnboardingService;
@@ -51,6 +57,9 @@ class BusinessOnboardingServiceImplTest {
         request.setAddressField2("Near clock tower");
         request.setPostalCode("12345");
         request.setWebsite("https://nifilili.com");
+        request.setContacts(Map.of("phone", "1234567890", "email", "nifilili.com"));
+        request.setBusinessHours(Map.of("Timings", "9 AM - 9 PM"));
+        request.setCategoryIds(List.of(1L));
 
         SecurityContextTestUtil.setAuthenticatedUser(99L);
 
