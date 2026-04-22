@@ -3,7 +3,9 @@ package com.nifilili.business.service.impl;
 import com.nifilili.business.SecurityContextTestUtil;
 import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.CreateBusinessRequest;
+import com.nifilili.business.dto.response.UserCreatedBusinessResponse;
 import com.nifilili.business.events.BusinessCreatedEvent;
+import com.nifilili.business.mapper.BusinessMapper;
 import com.nifilili.business.repository.BusinessRepository;
 import com.nifilili.business.service.BusinessCategoryService;
 import com.nifilili.core.enums.business.BusinessSource;
@@ -16,10 +18,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -35,6 +42,9 @@ class BusinessOnboardingServiceImplTest {
 
     @Mock
     BusinessCategoryService businessCategoryService;
+
+    @Mock
+    BusinessMapper  businessMapper;
 
     @InjectMocks
     private BusinessOnboardingServiceImpl businessOnboardingService;
@@ -89,5 +99,31 @@ class BusinessOnboardingServiceImplTest {
         ArgumentCaptor<BusinessCreatedEvent> eventCaptor = ArgumentCaptor.forClass(BusinessCreatedEvent.class);
         verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
         assertEquals(1001L, eventCaptor.getValue().businessId());
+    }
+
+    @Test
+    void no_LoggedInUserBusiness_test() {
+        SecurityContextTestUtil.setAuthenticatedUser(99L);
+        Pageable pageable = Pageable.unpaged();
+        when(businessRepository.findByOwnerUserId(99L, pageable)).thenReturn(Page.empty());
+
+        List<UserCreatedBusinessResponse> loggedInUserBusinesses = businessOnboardingService.getLoggedInUserBusinesses(pageable);
+
+        assertEquals(0, loggedInUserBusinesses.size());
+
+    }
+
+    @Test
+    void non_Empty_LoggedInUserBusiness_test() {
+        SecurityContextTestUtil.setAuthenticatedUser(99L);
+        List<Business> businesses = List.of(Business.builder().name("Test").build());
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Business> page = new PageImpl<>(businesses, pageable, businesses.size());
+        when(businessRepository.findByOwnerUserId(99L, pageable)).thenReturn(page);
+
+        List<UserCreatedBusinessResponse> loggedInUserBusinesses = businessOnboardingService.getLoggedInUserBusinesses(pageable);
+
+        assertEquals(1, loggedInUserBusinesses.size());
+
     }
 }
