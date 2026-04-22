@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -86,6 +88,12 @@ public class BusinessOnboardingController {
         CreateBusinessResponse response = new CreateBusinessResponse(businessId, BusinessStatus.DRAFT, "Business created successfully. Continue with profile completion.");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Step 1.1: Get Businesses of logged in user", description = "Returns paginated list of businesses owned by the authenticated user.")
+    @PostMapping("/my")
+    public List<UserCreatedBusinessResponse> getLoggedInUserBusiness(@ParameterObject Pageable pageable) {
+        return businessOnboardingService.getLoggedInUserBusinesses(pageable);
     }
 
     @Operation(summary = "Step 2: Update Business Profile", description = "Updates core profile information.")

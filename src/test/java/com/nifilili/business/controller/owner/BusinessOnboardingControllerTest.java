@@ -9,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -98,5 +100,15 @@ class BusinessOnboardingControllerTest {
         verify(businessAttributeService).saveAttributeData(7L, attributeRequest);
         verify(businessPublishService).uploadVerificationDocuments(7L, uploadRequest);
         verify(businessPublishService).submitForVerification(7L, submitRequest);
+    }
+
+    @Test
+    void getLoggedInUserBusinesses_WhenPayloadIsValid_ShouldDelegateAndReturnExpectedStatuses() {
+        Pageable  pageable = PageRequest.of(0, 10);
+        List<UserCreatedBusinessResponse> businesses = List.of(new UserCreatedBusinessResponse());
+
+        when(businessOnboardingService.getLoggedInUserBusinesses(pageable)).thenReturn(businesses);
+        List<UserCreatedBusinessResponse> response = controller.getLoggedInUserBusiness(pageable);
+        assertEquals(businesses, response);
     }
 }
