@@ -39,13 +39,13 @@ class BusinessKycEventListenerTest {
 
         ArgumentCaptor<Business> captor = ArgumentCaptor.forClass(Business.class);
         verify(businessRepository).save(captor.capture());
-        assertEquals(BusinessStatus.PENDING, captor.getValue().getStatus());
+        assertEquals(BusinessStatus.DRAFT, captor.getValue().getStatus());
     }
 
     @Test
     void onKycApproved_WhenBusinessExists_ShouldSetStatusToPublished() {
         Business business = TestEntityIdUtil.withId(new Business(), 2L);
-        business.setStatus(BusinessStatus.PENDING);
+        business.setStatus(BusinessStatus.PUBLISHED);
         when(businessRepository.findById(2L)).thenReturn(Optional.of(business));
         when(businessRepository.save(business)).thenReturn(business);
 
@@ -59,7 +59,7 @@ class BusinessKycEventListenerTest {
     @Test
     void onKycRejected_WhenBusinessExists_ShouldSetStatusToDraft() {
         Business business = TestEntityIdUtil.withId(new Business(), 3L);
-        business.setStatus(BusinessStatus.PENDING);
+        business.setStatus(BusinessStatus.DRAFT);
         when(businessRepository.findById(3L)).thenReturn(Optional.of(business));
         when(businessRepository.save(business)).thenReturn(business);
 

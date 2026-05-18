@@ -88,7 +88,7 @@ class BusinessOnboardingServiceImplTest {
 
         Business savedBusiness = businessCaptor.getValue();
         assertEquals(99L, savedBusiness.getOwnerUserId());
-        assertEquals(BusinessStatus.DRAFT, savedBusiness.getStatus());
+        assertEquals(BusinessStatus.PUBLISHED, savedBusiness.getStatus());
         assertEquals(BusinessSource.USER_REGISTERED, savedBusiness.getSource());
         assertTrue(savedBusiness.isClaimed());
         assertEquals(BigDecimal.ZERO, savedBusiness.getLatitude());

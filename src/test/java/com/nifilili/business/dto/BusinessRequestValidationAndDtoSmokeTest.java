@@ -112,7 +112,7 @@ class BusinessRequestValidationAndDtoSmokeTest {
         SectionResponse sectionResponse = SectionResponse.builder().id(11L).name("General").build();
 
         SubmitBusinessResponse submitBusinessResponse = new SubmitBusinessResponse(
-                100L, BusinessStatus.PENDING, KycStatus.PENDING, "submitted"
+                100L, BusinessStatus.DRAFT, KycStatus.PENDING, "submitted"
         );
 
         VerticalResponse verticalResponse = new VerticalResponse();
@@ -140,7 +140,7 @@ class BusinessRequestValidationAndDtoSmokeTest {
 
         // SubmitBusinessResponse intentionally has constructor-only fields (no Lombok @Data).
         assertEquals(100L, ReflectionTestUtils.getField(submitBusinessResponse, "businessId"));
-        assertEquals(BusinessStatus.PENDING, ReflectionTestUtils.getField(submitBusinessResponse, "status"));
+        assertEquals(BusinessStatus.DRAFT, ReflectionTestUtils.getField(submitBusinessResponse, "status"));
         assertEquals(KycStatus.PENDING, ReflectionTestUtils.getField(submitBusinessResponse, "kycStatus"));
     }
 }

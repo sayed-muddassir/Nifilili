@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class KycAdminController {
     @ApiResponse(responseCode = "403", description = "Forbidden — admin role required")
     @GetMapping
     public ResponseEntity<Page<AdminKycListItemResponse>> getByStatus(@RequestParam KycStatus status,
-                                                                       Pageable pageable) {
+                                                                      @ParameterObject Pageable pageable) {
         log.info("Admin requesting KYC list with status={}", status);
         Page<AdminKycListItemResponse> result = kycQueryService.getByStatus(status, pageable);
         log.info("Returning {} KYC records for status={}", result.getTotalElements(), status);

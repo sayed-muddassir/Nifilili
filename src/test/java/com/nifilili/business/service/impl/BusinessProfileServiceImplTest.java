@@ -40,7 +40,7 @@ class BusinessProfileServiceImplTest {
         Business business = new Business();
         com.nifilili.business.TestEntityIdUtil.withId(business, 1L);
         business.setOwnerUserId(77L);
-        business.setStatus(BusinessStatus.DRAFT);
+        business.setStatus(BusinessStatus.PUBLISHED);
 
         when(businessRepository.findById(1L)).thenReturn(Optional.of(business));
 
@@ -63,11 +63,11 @@ class BusinessProfileServiceImplTest {
     }
 
     @Test
-    void updateProfile_WhenBusinessIsPublished_ShouldRejectUpdate() {
+    void updateProfile_WhenBusinessIsDraft_ShouldRejectUpdate() {
         Business business = new Business();
         com.nifilili.business.TestEntityIdUtil.withId(business, 1L);
         business.setOwnerUserId(77L);
-        business.setStatus(BusinessStatus.PUBLISHED);
+        business.setStatus(BusinessStatus.DRAFT);
         when(businessRepository.findById(1L)).thenReturn(Optional.of(business));
 
         SecurityContextTestUtil.setAuthenticatedUser(77L);

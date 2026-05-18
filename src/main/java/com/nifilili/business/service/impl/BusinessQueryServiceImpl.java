@@ -178,6 +178,7 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                 .reviewCount(business.getReviewCount())
                 .sections(sections)
                 .attributes(attributes)
+                .isKycVerified(business.isKycVerified())
                 .build();
     }
 }

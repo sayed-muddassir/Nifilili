@@ -92,4 +92,7 @@ public class BusinessResponse {
             schema = @Schema(implementation = BusinessAttributeResponse.class)
     )
     private List<BusinessAttributeResponse> attributes;
+
+    @Schema(description = "KYC verification status of the business.", example = "true")
+    private boolean isKycVerified;
 }
