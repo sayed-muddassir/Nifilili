@@ -63,6 +63,7 @@ public class Business extends BaseEntity {
     private BusinessSource source;
 
     private boolean isClaimed;
+    private boolean isKycVerified;
 
     private BigDecimal averageRating;
     private Integer reviewCount;

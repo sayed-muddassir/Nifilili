@@ -51,8 +51,7 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
     }
 
     private void ensureEditable(Business business) {
-        if (business.getStatus() == BusinessStatus.PENDING
-                || business.getStatus() == BusinessStatus.PUBLISHED) {
+        if (business.getStatus() == BusinessStatus.DRAFT) {
             throw new InvalidBusinessStateException(
                     "Business cannot be edited in current state");
         }

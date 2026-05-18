@@ -46,7 +46,7 @@ class BusinessAttributeServiceImplTest {
         Business business = new Business();
         com.nifilili.business.TestEntityIdUtil.withId(business, 1L);
         business.setOwnerUserId(200L);
-        business.setStatus(BusinessStatus.DRAFT);
+        business.setStatus(BusinessStatus.PUBLISHED);
 
         AttributeDefinition definition = new AttributeDefinition();
         com.nifilili.business.TestEntityIdUtil.withId(definition, 9L);
@@ -72,7 +72,7 @@ class BusinessAttributeServiceImplTest {
         Business business = new Business();
         com.nifilili.business.TestEntityIdUtil.withId(business, 1L);
         business.setOwnerUserId(200L);
-        business.setStatus(BusinessStatus.PUBLISHED);
+        business.setStatus(BusinessStatus.DRAFT);
         when(businessRepository.findById(1L)).thenReturn(Optional.of(business));
 
         SaveBusinessAttributeRequest request = new SaveBusinessAttributeRequest();
@@ -98,7 +98,7 @@ class BusinessAttributeServiceImplTest {
         Business business = new Business();
         com.nifilili.business.TestEntityIdUtil.withId(business, 1L);
         business.setOwnerUserId(200L);
-        business.setStatus(BusinessStatus.DRAFT);
+        business.setStatus(BusinessStatus.PUBLISHED);
         when(businessRepository.findById(1L)).thenReturn(Optional.of(business));
         when(definitionRepository.findById(9L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> businessAttributeService.saveAttributeData(1L, request));
@@ -109,7 +109,7 @@ class BusinessAttributeServiceImplTest {
         Business business = new Business();
         com.nifilili.business.TestEntityIdUtil.withId(business, 1L);
         business.setOwnerUserId(200L);
-        business.setStatus(BusinessStatus.DRAFT);
+        business.setStatus(BusinessStatus.PUBLISHED);
 
         AttributeDefinition textDefinition = new AttributeDefinition();
         textDefinition.setType("TEXT");

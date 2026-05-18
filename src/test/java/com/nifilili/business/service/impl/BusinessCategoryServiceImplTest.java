@@ -45,7 +45,7 @@ class BusinessCategoryServiceImplTest {
         com.nifilili.business.TestEntityIdUtil.withId(business, 10L);
         business.setOwnerUserId(50L);
         business.setVerticalId(1L);
-        business.setStatus(BusinessStatus.DRAFT);
+        business.setStatus(BusinessStatus.PUBLISHED);
 
         CategoryDefinition category = new CategoryDefinition();
         com.nifilili.business.TestEntityIdUtil.withId(category, 100L);
@@ -68,7 +68,7 @@ class BusinessCategoryServiceImplTest {
         com.nifilili.business.TestEntityIdUtil.withId(business, 10L);
         business.setOwnerUserId(50L);
         business.setVerticalId(1L);
-        business.setStatus(BusinessStatus.DRAFT);
+        business.setStatus(BusinessStatus.PUBLISHED);
 
         CategoryDefinition category = new CategoryDefinition();
         com.nifilili.business.TestEntityIdUtil.withId(category, 100L);

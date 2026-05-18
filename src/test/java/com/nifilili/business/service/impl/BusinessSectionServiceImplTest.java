@@ -53,7 +53,7 @@ class BusinessSectionServiceImplTest {
         com.nifilili.business.TestEntityIdUtil.withId(business, 5L);
         business.setOwnerUserId(7L);
         business.setVerticalId(1L);
-        business.setStatus(BusinessStatus.DRAFT);
+        business.setStatus(BusinessStatus.PUBLISHED);
 
         SectionDefinition sectionDefinition = new SectionDefinition();
         com.nifilili.business.TestEntityIdUtil.withId(sectionDefinition, 11L);
@@ -85,7 +85,7 @@ class BusinessSectionServiceImplTest {
         com.nifilili.business.TestEntityIdUtil.withId(business, 5L);
         business.setOwnerUserId(7L);
         business.setVerticalId(1L);
-        business.setStatus(BusinessStatus.DRAFT);
+        business.setStatus(BusinessStatus.PUBLISHED);
 
         SectionDefinition sectionDefinition = new SectionDefinition();
         com.nifilili.business.TestEntityIdUtil.withId(sectionDefinition, 11L);

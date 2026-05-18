@@ -85,7 +85,7 @@ public class BusinessOnboardingController {
     public ResponseEntity<CreateBusinessResponse> createBusiness(@Valid @RequestBody CreateBusinessRequest request) {
         Long businessId = businessOnboardingService.createBusiness(request);
 
-        CreateBusinessResponse response = new CreateBusinessResponse(businessId, BusinessStatus.DRAFT, "Business created successfully. Continue with profile completion.");
+        CreateBusinessResponse response = new CreateBusinessResponse(businessId, BusinessStatus.PUBLISHED, "Business created successfully. Continue with profile completion.");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
