@@ -4,10 +4,14 @@ import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
 import com.nifilili.business.service.*;
 import com.nifilili.core.constants.SwaggerConstants;
+import com.nifilili.core.enums.business.BusinessSource;
+import com.nifilili.core.enums.business.BusinessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,112 +29,123 @@ public class BusinessAdminController {
     private final SectionDefinitionService sectionDefinitionService;
     private final AttributeDefinitionService attributeDefinitionService;
     private final DocumentDefinitionService documentDefinitionService;
+    private final BusinessOnboardingService businessOnboardingService;
 
-    @Operation(summary = "1.0 Verticals: List All", description = "Retrieves all business verticals.")
+    @Operation(summary = "Step 1.0: List Verticals", description = "Retrieves all business verticals.")
     @GetMapping("/verticals")
     public List<VerticalResponse> getAllVerticals() {
         return verticalDefinitionService.getAll();
     }
 
-    @Operation(summary = "1.1 Verticals: Create", description = "Creates a new top-level business vertical.")
+    @Operation(summary = "Step 1.1: Create Vertical", description = "Creates a new top-level business vertical.")
     @PostMapping("/verticals")
     public VerticalResponse createVertical(@Valid @RequestBody CreateVerticalRequest request) {
         return verticalDefinitionService.create(request);
     }
 
-    @Operation(summary = "1.2 Verticals: Update", description = "Updates an existing vertical.")
+    @Operation(summary = "Step 1.2: Update Vertical", description = "Updates an existing vertical.")
     @PutMapping("/verticals/{verticalId}")
     public VerticalResponse updateVertical(@PathVariable Long verticalId, @Valid @RequestBody CreateVerticalRequest request) {
         return verticalDefinitionService.update(verticalId, request);
     }
 
-    @Operation(summary = "Step 2.0: Get Categories by Vertical", description = "Loads categories under selected vertical.")
+    @Operation(summary = "Step 2.0: List Categories by Vertical", description = "Loads categories under selected vertical.")
     @GetMapping("/vertical/{verticalId}/categories")
     public List<CategoryResponse> getCategoriesByVertical(@PathVariable Long verticalId) {
         return categoryDefinitionService.getByVertical(verticalId);
     }
 
-    @Operation(summary = "2.1 Categories: Create", description = "Creates a category under a vertical.")
+    @Operation(summary = "Step 2.1: Create Category", description = "Creates a category under a vertical.")
     @PostMapping("/categories")
     public CategoryResponse createCategory(@Valid @RequestBody CreateCategoryRequest request) {
         return categoryDefinitionService.create(request);
     }
 
-    @Operation(summary = "2.2 Categories: Update", description = "Updates an existing category.")
+    @Operation(summary = "Step 2.2: Update Category", description = "Updates an existing category.")
     @PutMapping("/categories/{categoryId}")
     public CategoryResponse updateCategory(@PathVariable Long categoryId, @Valid @RequestBody CreateCategoryRequest request) {
         return categoryDefinitionService.update(categoryId, request);
     }
 
-    @Operation(summary = "Step 3.0: Get Sections by Vertical", description = "Loads sections for selected vertical.")
+    @Operation(summary = "Step 3.0: List Sections by Vertical", description = "Loads sections for selected vertical.")
     @GetMapping("/vertical/{verticalId}/sections")
     public List<SectionResponse> getSectionsByVertical(@PathVariable Long verticalId) {
         return sectionDefinitionService.getByVertical(verticalId);
     }
 
-    @Operation(summary = "3.1 Sections: Create", description = "Creates a section definition for a vertical and optional category.")
+    @Operation(summary = "Step 3.1: Create Section", description = "Creates a section definition for a vertical and optional category.")
     @PostMapping("/sections")
     public SectionResponse createSection(@Valid @RequestBody CreateSectionRequest request) {
         return sectionDefinitionService.createSection(request);
     }
 
-    @Operation(summary = "3.2 Sections: Update", description = "Updates a section definition.")
+    @Operation(summary = "Step 3.2: Update Section", description = "Updates a section definition.")
     @PutMapping("/sections/{sectionId}")
     public SectionResponse updateSection(@PathVariable Long sectionId, @Valid @RequestBody CreateSectionRequest request) {
         return sectionDefinitionService.updateSection(sectionId, request);
     }
 
-    @Operation(summary = "Step 4.0: Get Section Fields", description = "Loads field definitions for a selected section.")
+    @Operation(summary = "Step 4.0: List Section Fields", description = "Loads field definitions for a selected section.")
     @GetMapping("/sections/{sectionId}/fields")
     public List<SectionFieldResponse> getSectionFields(@PathVariable Long sectionId) {
         return sectionDefinitionService.getFields(sectionId);
     }
 
-    @Operation(summary = "4.1 Section Fields: Create", description = "Adds a field to an existing section.")
+    @Operation(summary = "Step 4.1: Create Section Field", description = "Adds a field to an existing section.")
     @PostMapping("/sections/{sectionId}/fields")
     public SectionFieldResponse createSectionField(@PathVariable Long sectionId, @Valid @RequestBody CreateSectionFieldRequest request) {
         return sectionDefinitionService.addField(sectionId, request);
     }
 
-    @Operation(summary = "4.2 Section Fields: Update", description = "Updates an existing section field.")
+    @Operation(summary = "Step 4.2: Update Section Field", description = "Updates an existing section field.")
     @PutMapping("/sections/fields/{fieldId}")
     public SectionFieldResponse updateSectionField(@PathVariable Long fieldId, @Valid @RequestBody CreateSectionFieldRequest request) {
         return sectionDefinitionService.updateField(fieldId, request);
     }
 
-    @Operation(summary = "Step 5.0: Get Attributes by Vertical", description = "Loads attribute definitions for selected vertical.")
+    @Operation(summary = "Step 5.0: List Attributes by Vertical", description = "Loads attribute definitions for selected vertical.")
     @GetMapping("/vertical/{verticalId}/attributes")
     public List<AttributeDefinitionResponse> getAttributesByVertical(@PathVariable Long verticalId) {
         return attributeDefinitionService.getByVertical(verticalId);
     }
 
-    @Operation(summary = "5.1 Attributes: Create", description = "Creates a reusable attribute definition.")
+    @Operation(summary = "Step 5.1: Create Attribute", description = "Creates a reusable attribute definition.")
     @PostMapping("/attributes")
     public AttributeDefinitionResponse createAttribute(@Valid @RequestBody CreateAttributeDefinitionRequest request) {
         return attributeDefinitionService.create(request);
     }
 
-    @Operation(summary = "5.2 Attributes: Update", description = "Updates an existing attribute definition.")
+    @Operation(summary = "Step 5.2: Update Attribute", description = "Updates an existing attribute definition.")
     @PutMapping("/attributes/{attributeId}")
     public AttributeDefinitionResponse updateAttribute(@PathVariable Long attributeId, @Valid @RequestBody CreateAttributeDefinitionRequest request) {
         return attributeDefinitionService.update(attributeId, request);
     }
 
-    @Operation(summary = "Step 6.0: Get Documents by Vertical", description = "Loads required KYC documents for selected vertical.")
+    @Operation(summary = "Step 6.0: List Documents by Vertical", description = "Loads required KYC documents for selected vertical.")
     @GetMapping("/vertical/{verticalId}/documents")
     public List<DocumentDefinitionResponse> getDocumentByVertical(@PathVariable Long verticalId) {
         return documentDefinitionService.getByVertical(verticalId);
     }
 
-    @Operation(summary = "6.1 Document Definitions: Create", description = "Creates a KYC document requirement definition.")
+    @Operation(summary = "Step 6.1: Create Document Definition", description = "Creates a KYC document requirement definition.")
     @PostMapping("/documents")
     public DocumentDefinitionResponse createDocument(@Valid @RequestBody CreateDocumentDefinitionRequest request) {
         return documentDefinitionService.create(request);
     }
 
-    @Operation(summary = "6.2 Document Definitions: Update", description = "Updates an existing KYC document requirement definition.")
+    @Operation(summary = "Step 6.2: Update Document Definition", description = "Updates an existing KYC document requirement definition.")
     @PutMapping("/documents/{documentDefinitionId}")
     public DocumentDefinitionResponse updateDocument(@PathVariable Long documentDefinitionId, @Valid @RequestBody CreateDocumentDefinitionRequest request) {
         return documentDefinitionService.update(documentDefinitionId, request);
+    }
+
+    @Operation(summary = "Step 7.0: Create Business (Admin Seed)", description = "Creates a admin seeded business record and returns onboarding id.")
+    @PostMapping("/businesses")
+    public ResponseEntity<CreateBusinessResponse> createBusiness(@Valid @RequestBody CreateBusinessRequest request) {
+        Long businessId = businessOnboardingService.createBusiness(request, BusinessSource.ADMIN_SEEDED);
+
+        CreateBusinessResponse response = new CreateBusinessResponse(businessId, BusinessStatus.PUBLISHED, "Admin Seeded business created successfully");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

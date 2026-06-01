@@ -3,6 +3,7 @@ package com.nifilili.business.controller.owner;
 import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
 import com.nifilili.business.service.*;
+import com.nifilili.core.enums.business.BusinessSource;
 import com.nifilili.core.enums.business.BusinessStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,16 +66,16 @@ class BusinessOnboardingControllerTest {
     }
 
     @Test
-    void createBusiness_WhenServiceReturnsId_ShouldReturnCreatedResponseWithDraftStatus() {
+    void createBusiness_WhenServiceReturnsId_ShouldReturnCreatedResponseWithPublishedStatus() {
         CreateBusinessRequest request = new CreateBusinessRequest();
-        when(businessOnboardingService.createBusiness(request)).thenReturn(101L);
+        when(businessOnboardingService.createBusiness(request, BusinessSource.USER_REGISTERED)).thenReturn(101L);
 
         ResponseEntity<CreateBusinessResponse> response = controller.createBusiness(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(101L, response.getBody().getBusinessId());
-        assertEquals(BusinessStatus.DRAFT, response.getBody().getStatus());
+        assertEquals(BusinessStatus.PUBLISHED, response.getBody().getStatus());
     }
 
     @Test

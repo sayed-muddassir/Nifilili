@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -41,10 +40,10 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
        -------------------------------------------------------- */
     @Override
     @Transactional
-    public Long createBusiness(CreateBusinessRequest request) {
+    public Long createBusiness(CreateBusinessRequest request, BusinessSource businessSource) {
         Long currentUserId = SecurityUtil.getCurrentUserId();
 
-        Business business = buildInitialBusinessEntity(request, currentUserId);
+        Business business = buildInitialBusinessEntity(request, currentUserId, businessSource);
 
         Business persistedBusiness = businessRepository.save(business);
 
@@ -70,7 +69,7 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
         return businesses.stream().map(businessMapper::toDtoResponse).toList();
     }
 
-    private Business buildInitialBusinessEntity(CreateBusinessRequest request, Long ownerUserId) {
+    private Business buildInitialBusinessEntity(CreateBusinessRequest request, Long ownerUserId, BusinessSource businessSource) {
         // User-created businesses begin in draft mode and are claimed by their creator.
         return Business.builder()
                 .ownerUserId(ownerUserId)
@@ -89,8 +88,8 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
                 .profileImageUrl(request.getProfileImageUrl())
                 .bannerImageUrl(request.getBannerImageUrl())
                 .status(BusinessStatus.PUBLISHED)
-                .source(BusinessSource.USER_REGISTERED)
-                .isClaimed(true)
+                .source(businessSource)
+                .isClaimed(!businessSource.equals(BusinessSource.ADMIN_SEEDED))
                 .averageRating(BigDecimal.ZERO)
                 .reviewCount(0)
                 .businessSummary("")
