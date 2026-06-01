@@ -79,7 +79,7 @@ class BusinessOnboardingServiceImplTest {
             return business;
         });
 
-        Long businessId = businessOnboardingService.createBusiness(request);
+        Long businessId = businessOnboardingService.createBusiness(request, BusinessSource.USER_REGISTERED);
 
         assertEquals(1001L, businessId);
 

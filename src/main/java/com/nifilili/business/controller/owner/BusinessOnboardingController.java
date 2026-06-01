@@ -4,6 +4,7 @@ import com.nifilili.business.dto.request.*;
 import com.nifilili.business.dto.response.*;
 import com.nifilili.business.service.*;
 import com.nifilili.core.constants.SwaggerConstants;
+import com.nifilili.core.enums.business.BusinessSource;
 import com.nifilili.core.enums.business.BusinessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -83,7 +84,7 @@ public class BusinessOnboardingController {
     @Operation(summary = "Step 1: Create Business", description = "Creates a draft business record and returns onboarding id.")
     @PostMapping
     public ResponseEntity<CreateBusinessResponse> createBusiness(@Valid @RequestBody CreateBusinessRequest request) {
-        Long businessId = businessOnboardingService.createBusiness(request);
+        Long businessId = businessOnboardingService.createBusiness(request, BusinessSource.USER_REGISTERED);
 
         CreateBusinessResponse response = new CreateBusinessResponse(businessId, BusinessStatus.PUBLISHED, "Business created successfully. Continue with profile completion.");
 
