@@ -1,14 +1,14 @@
 // FILE: com.nifilili.search.query.BusinessSearchQueryBuilder
 package com.nifilili.search.query;
 
-import com.nifilili.search.strategy.SortStrategy;
-import com.nifilili.search.util.GeoCalculationUtils;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.nifilili.search.strategy.SortStrategy;
+import com.nifilili.search.util.GeoCalculationUtils;
 
 /**
  * Fluent builder for constructing native PostgreSQL search queries dynamically.
@@ -41,65 +41,118 @@ public class BusinessSearchQueryBuilder {
     // SQL FRAGMENT CONSTANTS
     // ──────────────────────────────────────────────
 
-    /** Base SELECT clause with all required columns for result mapping. */
+    /**
+     * Handle very short keywords separately.
+     * Example:
+     * a,
+     * ab,
+     * pi
+     */
+    private static final String SHORT_SEARCH_CONDITION =
+            " AND lower(b.name) ILIKE lower(:keywordPrefix)";
+
+    private static final int MIN_FTS_LENGTH = 2;
+
+    /**
+     * Base SELECT clause with all required columns for result mapping.
+     */
     private static final String BASE_SELECT =
-            "SELECT b.id, b.name, b.vertical_id, b.average_rating, b.review_count, " +
-            "b.is_kyc_verified, b.status, b.profile_image_url, " +
-            "b.address_field_1, b.address_field_2, b.municipality_id, " +
-            "b.business_hours, b.tole_name, b.ward_number";
+            "SELECT b.id, b.name, b.vertical_id, b.average_rating, b.review_count, "
+                    + "b.is_kyc_verified, b.status, b.profile_image_url, "
+                    + "b.address_field_1, b.address_field_2, b.municipality_id, "
+                    + "b.business_hours, b.tole_name, b.ward_number";
 
-    /** Full-text search rank column using ts_rank. */
-    private static final String FTS_RANK_SELECT =
-            ", ts_rank(b.search_vector, plainto_tsquery('english', :keyword)) AS search_rank";
+    /**
+     * Combined search score:
+     *
+     * 1. Full text rank
+     * 2. Word similarity for typo tolerance
+     *
+     * Examples:
+     * pizza  -> Pizza Palace
+     * piza   -> Pizza Palace
+     * plumber -> ABC Plumbers
+     */
+    private static final String SEARCH_RANK_SELECT =
+            ", ("
+                    + " ts_rank(b.search_vector, plainto_tsquery('english', :keyword))"
+                    + " + (word_similarity(lower(b.name), lower(:keyword)) * 0.30)"
+                    + " ) AS search_rank";
 
-    /** Default search rank when no keyword is provided. */
-    private static final String DEFAULT_RANK_SELECT =
-            ", 0.0 AS search_rank";
+    /**
+     * Search condition:
+     *
+     * - Full text search
+     * - Typo tolerant matching
+     */
+    private static final String SEARCH_CONDITION =
+            " AND ("
+                    + " b.search_vector @@ plainto_tsquery('english', :keyword)"
+                    + " OR word_similarity(lower(b.name), lower(:keyword)) > 0.35"
+                    + " )";
 
-    /** Haversine distance computation column. */
+    /**
+     * Default search rank when no keyword is provided.
+     */
+    private static final String DEFAULT_RANK_SELECT = ", 0.0 AS search_rank";
+
+    /**
+     * Haversine distance computation column.
+     */
     private static final String DISTANCE_SELECT =
-            ", (6371 * acos(" +
-            "cos(radians(:userLat)) * cos(radians(b.latitude::float)) * " +
-            "cos(radians(b.longitude::float) - radians(:userLng)) + " +
-            "sin(radians(:userLat)) * sin(radians(b.latitude::float))" +
-            ")) AS distance_km";
+            ", (6371 * acos("
+                    + "cos(radians(:userLat)) * cos(radians(b.latitude::float)) * "
+                    + "cos(radians(b.longitude::float) - radians(:userLng)) + "
+                    + "sin(radians(:userLat)) * sin(radians(b.latitude::float))" + ")) AS distance_km";
 
-    /** Default distance column when user location is not provided. */
-    private static final String DEFAULT_DISTANCE_SELECT =
-            ", NULL::float AS distance_km";
+    /**
+     * Default distance column when user location is not provided.
+     */
+    private static final String DEFAULT_DISTANCE_SELECT = ", NULL::float AS distance_km";
 
-    /** Base FROM clause. */
+    /**
+     * Base FROM clause.
+     */
     private static final String BASE_FROM = " FROM business_master b";
 
-    /** Base WHERE clause ensuring only published businesses are searchable. */
+    /**
+     * Base WHERE clause ensuring only published businesses are searchable.
+     */
     private static final String BASE_WHERE = " WHERE b.status = 'PUBLISHED'";
 
-    /** FTS keyword match condition using tsvector and plainto_tsquery. */
-    private static final String FTS_CONDITION =
-            " AND (b.search_vector @@ plainto_tsquery('english', :keyword)" +
-            " OR b.name % :keyword)";
-
-    /** Bounding box latitude filter for geo queries (uses B-tree index). */
+    /**
+     * Bounding box latitude filter for geo queries (uses B-tree index).
+     */
     private static final String GEO_BOUNDING_BOX_LAT =
             " AND b.latitude BETWEEN :latMin AND :latMax";
 
-    /** Bounding box longitude filter for geo queries (uses B-tree index). */
+    /**
+     * Bounding box longitude filter for geo queries (uses B-tree index).
+     */
     private static final String GEO_BOUNDING_BOX_LNG =
             " AND b.longitude BETWEEN :lngMin AND :lngMax";
 
-    /** Municipality ID filter condition. */
+    /**
+     * Municipality ID filter condition.
+     */
     private static final String MUNICIPALITY_CONDITION =
             " AND b.municipality_id = :municipalityId";
 
-    /** KYC verification filter condition. */
+    /**
+     * KYC verification filter condition.
+     */
     private static final String VERIFIED_CONDITION =
             " AND b.is_kyc_verified = true";
 
-    /** Minimum rating filter condition. */
+    /**
+     * Minimum rating filter condition.
+     */
     private static final String RATING_CONDITION =
             " AND b.average_rating >= :minRating";
 
-    /** JSONB vertical attribute filter condition template. */
+    /**
+     * JSONB vertical attribute filter condition template.
+     */
     private static final String VERTICAL_ATTR_CONDITION_TEMPLATE =
             " AND b.business_hours IS NOT NULL";
 
@@ -116,25 +169,45 @@ public class BusinessSearchQueryBuilder {
     private boolean hasKeyword;
     private boolean hasGeoFilter;
 
-    /**
-     * Adds keyword-based search conditions (FTS + trigram).
-     * <p>
-     * If the context has a keyword, adds full-text search ranking and
-     * trigram similarity conditions. Otherwise, uses a default rank of 0.
-     * </p>
-     *
-     * @param context the filter context containing the keyword
-     * @return this builder for fluent chaining
-     */
     public BusinessSearchQueryBuilder withKeyword(SearchFilterContext context) {
-        if (context.hasKeyword()) {
-            this.hasKeyword = true;
-            selectClauses.add(FTS_RANK_SELECT);
-            whereClauses.add(FTS_CONDITION);
-            parameters.put("keyword", context.getKeyword().trim());
-        } else {
+        if (!context.hasKeyword()) {
             selectClauses.add(DEFAULT_RANK_SELECT);
+            return this;
         }
+
+        String keyword = context.getKeyword().trim();
+
+        if (keyword.isBlank()) {
+            selectClauses.add(DEFAULT_RANK_SELECT);
+            return this;
+        }
+        this.hasKeyword = true;
+
+        /*
+         * Single-character searches:
+         *
+         * a
+         * p
+         * e
+         *
+         * FTS ignores many of these because they are stop words.
+         * Trigram similarity is also ineffective.
+         *
+         * Use wildcard matching instead.
+         */
+        if (keyword.length() <= MIN_FTS_LENGTH) {
+            selectClauses.add(DEFAULT_RANK_SELECT);
+            whereClauses.add(SHORT_SEARCH_CONDITION);
+            parameters.put("keywordPrefix", "%" + keyword + "%");
+            return this;
+        }
+
+        /*
+         * Full text search + typo tolerance
+         */
+        selectClauses.add(SEARCH_RANK_SELECT);
+        whereClauses.add(SEARCH_CONDITION);
+        parameters.put("keyword", keyword);
         return this;
     }
 
@@ -158,10 +231,7 @@ public class BusinessSearchQueryBuilder {
 
             // Compute bounding box in Java
             double[] boundingBox = GeoCalculationUtils.computeBoundingBox(
-                    userLat.doubleValue(),
-                    userLng.doubleValue(),
-                    distanceKm.doubleValue()
-            );
+                    userLat.doubleValue(), userLng.doubleValue(), distanceKm.doubleValue());
 
             // Add Haversine distance to SELECT
             selectClauses.add(DISTANCE_SELECT);
@@ -257,8 +327,7 @@ public class BusinessSearchQueryBuilder {
             for (int i = 0; i < attrValues.size(); i++) {
                 String paramName = "vertAttr_" + attrIndex + "_" + i;
                 valueConditions.add(
-                        "b.business_hours->'" + attrKey + "' @> ('\"' || :" + paramName + " || '\"')::jsonb"
-                );
+                        "b.business_hours->'" + attrKey + "' @> ('\"' || :" + paramName + " || '\"')::jsonb");
                 parameters.put(paramName, attrValues.get(i));
             }
 
@@ -339,10 +408,6 @@ public class BusinessSearchQueryBuilder {
         parameters.put("limit", limit);
         parameters.put("offset", offset);
 
-        return new SearchQueryResult(
-                dataSql.toString(),
-                countSql.toString(),
-                parameters
-        );
+        return new SearchQueryResult(dataSql.toString(), countSql.toString(), parameters);
     }
 }
