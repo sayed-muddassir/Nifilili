@@ -35,9 +35,9 @@ public class SearchFilters {
     @Schema(description = "Maximum distance in km from user location. Requires userLat and userLng to be set.", example = "10.0")
     private BigDecimal distanceKm;
 
-    /** When true, only return businesses currently open. Evaluated in-memory against businessHours JSONB. */
-    @Schema(description = "When true, only return businesses that are currently open", example = "false")
-    private Boolean openNow;
+//    /** When true, only return businesses currently open. Evaluated in-memory against businessHours JSONB. */
+//    @Schema(description = "When true, only return businesses that are currently open", example = "false")
+//    private Boolean openNow; TODO
 
     /** When true, only return KYC-verified businesses. */
     @Schema(description = "When true, only return KYC-verified businesses", example = "false")
@@ -49,9 +49,9 @@ public class SearchFilters {
     @Schema(description = "Minimum average rating (inclusive)", example = "4.0")
     private BigDecimal minRating;
 
-    /** Filter by municipality ID. */
-    @Schema(description = "Filter by municipality ID", example = "101")
-    private Long municipalityId;
+//    /** Filter by municipality ID. */
+//    @Schema(description = "Filter by municipality ID", example = "101")
+//    private Long municipalityId; TODO
 
     /** User's latitude for distance-based filtering and sorting. */
     @DecimalMin(value = "-90.0", message = "Latitude must be between -90 and 90")
@@ -65,15 +65,15 @@ public class SearchFilters {
     @Schema(description = "User's longitude for distance calculations", example = "85.3240")
     private BigDecimal userLng;
 
-    /**
-     * Vertical-specific attribute filters as key-value pairs.
-     * <p>Example: {"cuisine": ["italian", "chinese"], "priceRange": ["$$"]}</p>
-     */
-    @Schema(
-            description = "Vertical-specific attribute filters. Keys are attribute names, values are lists of acceptable values.",
-            example = "{\"cuisine\": [\"italian\", \"chinese\"], \"priceRange\": [\"$$\"]}"
-    )
-    private Map<String, List<String>> verticalAttributes;
+//    /**
+//     * Vertical-specific attribute filters as key-value pairs.
+//     * <p>Example: {"cuisine": ["italian", "chinese"], "priceRange": ["$$"]}</p>
+//     */
+//    @Schema(
+//            description = "Vertical-specific attribute filters. Keys are attribute names, values are lists of acceptable values.",
+//            example = "{\"cuisine\": [\"italian\", \"chinese\"], \"priceRange\": [\"$$\"]}"
+//    )
+//    private Map<String, List<String>> verticalAttributes; TODO
 
     // EXTENSIBILITY: Add new filter fields here.
     // Example: private Boolean hasParking;

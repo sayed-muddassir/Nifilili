@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 /**
@@ -27,6 +28,7 @@ public class SearchRequest {
     /** Search criteria containing keyword and future search parameters. */
     @Valid
     @Schema(description = "Search criteria containing keyword and search parameters")
+    @NotNull(message = "Search criteria must not be null")
     private SearchCriteria criteria;
 
     /** Optional filters to narrow down results. */
@@ -42,6 +44,7 @@ public class SearchRequest {
     /** Zero-based page number. */
     @Min(value = 0, message = "Page number must be zero or positive")
     @Schema(description = "Zero-based page number", example = "0", defaultValue = "0")
+    @NotNull
     @Builder.Default
     private int page = 0;
 
@@ -49,6 +52,7 @@ public class SearchRequest {
     @Min(value = 1, message = "Page size must be at least 1")
     @Max(value = 100, message = "Page size must not exceed 100")
     @Schema(description = "Number of results per page", example = "20", defaultValue = "20")
+    @NotNull
     @Builder.Default
     private int size = 20;
 }

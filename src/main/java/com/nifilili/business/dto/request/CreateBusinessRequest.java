@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -76,4 +77,10 @@ public class CreateBusinessRequest {
     @NotNull
     @NotEmpty
     private List<Long> categoryIds;
+
+    @Schema(description = "Latitude coordinate of the business location.", example = "27.7172")
+    private BigDecimal latitude;
+
+    @Schema(description = "Longitude coordinate of the business location.", example = "85.3240")
+    private BigDecimal longitude;
 }
