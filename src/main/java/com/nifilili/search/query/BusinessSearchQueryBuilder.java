@@ -94,22 +94,42 @@ public class BusinessSearchQueryBuilder {
     /**
      * Default search rank when no keyword is provided.
      */
-    private static final String DEFAULT_RANK_SELECT = ", 0.0 AS search_rank";
+    private static final String DEFAULT_RANK_SELECT = ", (1000 - ASCII(UPPER(LEFT(b.name, 1)))) AS search_rank";
 
     /**
      * Haversine distance computation column.
      */
     private static final String DISTANCE_SELECT =
-            ", (6371 * acos("
-                    + "cos(radians(:userLat)) * cos(radians(b.latitude::float)) * "
-                    + "cos(radians(b.longitude::float) - radians(:userLng)) + "
-                    + "sin(radians(:userLat)) * sin(radians(b.latitude::float))" + ")) AS distance_km";
+            """
+                    , (
+                        6371 * acos(
+                            cos(radians(:userLat))
+                            * cos(radians(b.latitude::float))
+                            * cos(radians(b.longitude::float) - radians(:userLng))
+                            + sin(radians(:userLat))
+                            * sin(radians(b.latitude::float))
+                        )
+                    ) AS distance_km
+                    """;
 
     /**
      * Default distance column when user location is not provided.
      */
     private static final String DEFAULT_DISTANCE_SELECT = ", NULL::float AS distance_km";
 
+    private static final String DISTANCE_FILTER =
+            """
+                    
+                    AND (
+                        6371 * acos(
+                            cos(radians(:userLat))
+                            * cos(radians(b.latitude::float))
+                            * cos(radians(b.longitude::float) - radians(:userLng))
+                            + sin(radians(:userLat))
+                            * sin(radians(b.latitude::float))
+                        )
+                    ) <= :distanceKm
+                    """;
     /**
      * Base FROM clause.
      */
@@ -239,6 +259,7 @@ public class BusinessSearchQueryBuilder {
             // Add bounding box WHERE conditions
             whereClauses.add(GEO_BOUNDING_BOX_LAT);
             whereClauses.add(GEO_BOUNDING_BOX_LNG);
+            whereClauses.add(DISTANCE_FILTER);
 
             parameters.put("userLat", userLat.doubleValue());
             parameters.put("userLng", userLng.doubleValue());
@@ -246,6 +267,7 @@ public class BusinessSearchQueryBuilder {
             parameters.put("latMax", boundingBox[1]);
             parameters.put("lngMin", boundingBox[2]);
             parameters.put("lngMax", boundingBox[3]);
+            parameters.put("distanceKm", distanceKm.doubleValue());
         } else {
             selectClauses.add(DEFAULT_DISTANCE_SELECT);
         }
