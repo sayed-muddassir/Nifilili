@@ -103,11 +103,11 @@ public class BusinessSearchService {
             builder.distanceKm(filters.getDistanceKm())
                     .userLat(filters.getUserLat())
                     .userLng(filters.getUserLng())
-                    .openNow(filters.getOpenNow())
+//                    .openNow(filters.getOpenNow())
                     .verifiedOnly(filters.getVerifiedOnly())
-                    .minRating(filters.getMinRating())
-                    .municipalityId(filters.getMunicipalityId())
-                    .verticalAttributes(filters.getVerticalAttributes());
+                    .minRating(filters.getMinRating());
+//                    .municipalityId(filters.getMunicipalityId())
+//                    .verticalAttributes(filters.getVerticalAttributes());
         }
 
         return builder.build();

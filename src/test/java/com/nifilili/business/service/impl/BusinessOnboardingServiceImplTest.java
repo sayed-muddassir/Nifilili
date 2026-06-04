@@ -70,6 +70,8 @@ class BusinessOnboardingServiceImplTest {
         request.setContacts(Map.of("phone", "1234567890", "email", "nifilili.com"));
         request.setBusinessHours(Map.of("Timings", "9 AM - 9 PM"));
         request.setCategoryIds(List.of(1L));
+        request.setLongitude(new BigDecimal("0"));
+        request.setLatitude(new BigDecimal("0"));
 
         SecurityContextTestUtil.setAuthenticatedUser(99L);
 
