@@ -105,8 +105,8 @@ public class BusinessSearchService {
                     .userLng(filters.getUserLng())
 //                    .openNow(filters.getOpenNow())
                     .verifiedOnly(filters.getVerifiedOnly())
-                    .minRating(filters.getMinRating());
-//                    .municipalityId(filters.getMunicipalityId())
+                    .minRating(filters.getMinRating())
+                    .municipalityId(filters.getMunicipalityId());
 //                    .verticalAttributes(filters.getVerticalAttributes());
         }
 

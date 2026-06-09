@@ -49,9 +49,9 @@ public class SearchFilters {
     @Schema(description = "Minimum average rating (inclusive)", example = "4.0")
     private BigDecimal minRating;
 
-//    /** Filter by municipality ID. */
-//    @Schema(description = "Filter by municipality ID", example = "101")
-//    private Long municipalityId; TODO
+    /** Filter by municipality ID. */
+    @Schema(description = "Filter by municipality ID", example = "101")
+    private Long municipalityId;
 
     /** User's latitude for distance-based filtering and sorting. */
     @DecimalMin(value = "-90.0", message = "Latitude must be between -90 and 90")
