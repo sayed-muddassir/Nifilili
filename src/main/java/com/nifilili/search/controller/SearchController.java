@@ -72,14 +72,13 @@ public class SearchController {
      */
     @GetMapping("/suggest")
     @Operation(
-            hidden = true,
             summary = "Auto-suggest",
             description = "Returns type-ahead suggestions for businesses and categories " +
                     "based on trigram similarity and ILIKE matching."
     )
     public ResponseEntity<ApiResponse<AutoSuggestResponse>> autoSuggest(
             @Parameter(description = "Partial search query", required = true, example = "piz")
-            @RequestParam("q")
+            @RequestParam("query")
             @NotBlank(message = "Query must not be blank")
             @Size(min = 1, max = 100, message = "Query must be between 1 and 100 characters")
             String query,
@@ -97,7 +96,7 @@ public class SearchController {
             BigDecimal userLng,
 
             @Parameter(description = "Maximum number of suggestions", example = "8")
-            @RequestParam(value = "limit", defaultValue = "8")
+            @RequestParam(value = "limit", required = false, defaultValue = "8")
             @Min(value = 1, message = "Limit must be at least 1")
             @Max(value = 20, message = "Limit must not exceed 20")
             int limit

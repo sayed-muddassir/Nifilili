@@ -58,14 +58,13 @@ public class AutoSuggestRepository {
             "LIMIT :limit";
 
     /**
-     * Category/vertical name suggestion query using ILIKE.
-     * Searches the vertical name for partial matches.
+     * Category name suggestion query using ILIKE.
      */
     private static final String CATEGORY_SUGGEST_SQL =
-            "SELECT v.id, v.name " +
-            "FROM business_vertical v " +
-            "WHERE v.name ILIKE :pattern " +
-            "ORDER BY v.name ASC " +
+            "SELECT c.id, c.name " +
+            "FROM categories c " +
+            "WHERE c.name ILIKE :pattern " +
+            "ORDER BY c.name ASC " +
             "LIMIT :limit";
 
     /** Default limit for business suggestions within auto-suggest. */
