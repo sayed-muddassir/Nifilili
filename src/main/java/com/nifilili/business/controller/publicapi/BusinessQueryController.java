@@ -3,6 +3,7 @@ package com.nifilili.business.controller.publicapi;
 import com.nifilili.business.dto.response.BusinessResponse;
 import com.nifilili.business.service.BusinessQueryService;
 import com.nifilili.core.constants.SwaggerConstants;
+import com.nifilili.core.enums.business.BusinessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class BusinessQueryController {
     @Operation(summary = "Step 1: List Published Businesses", description = "Returns paginated published businesses with sections and attributes.")
     @GetMapping
     public Page<BusinessResponse> getAllBusinesses(@ParameterObject Pageable pageable) {
-        return businessQueryService.getAllBusinesses(pageable);
+        return businessQueryService.getAllBusinessesByStatus(pageable, BusinessStatus.PUBLISHED);
     }
 
     @Operation(summary = "Step 2: Get Business Details", description = "Returns full details for one published business id.")

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ public class BusinessOnboardingController {
     private final AttributeDefinitionService attributeDefinitionService;
     private final DocumentDefinitionService documentDefinitionService;
     private final BusinessPublishService businessPublishService;
+    private final BusinessQueryService businessQueryService;
 
     @Operation(summary = "Step 0.1: Get Active Verticals", description = "Loads active verticals to start onboarding.")
     @GetMapping("/verticals/active")
@@ -147,5 +149,11 @@ public class BusinessOnboardingController {
     public ResponseEntity<Void> claimBusiness(@PathVariable Long businessId) {
         businessPublishService.claimBusiness(businessId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @Operation(summary = "Step 9: List claim under progress Businesses for logged in user", description = "Returns paginated claim under progressed businesses with sections and attributes.")
+    @GetMapping
+    public ResponseEntity<Page<BusinessResponse>> getAllClaimUnderProgressBusinesses(@ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(businessQueryService.getAllBusinessesByClaimUnderProgress(pageable, BusinessStatus.CLAIM_UNDER_PROGRESS));
     }
 }
