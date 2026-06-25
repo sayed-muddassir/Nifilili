@@ -10,4 +10,6 @@ public interface BusinessRepository extends JpaRepository<Business, Long> {
     Page<Business> findByStatus(BusinessStatus status, Pageable pageable);
 
     Page<Business> findByOwnerUserId(Long ownerUserId, Pageable pageable);
+
+    Page<Business> findByClaimedByUserIdAndStatus(Long claimedByUserId, BusinessStatus businessStatus, Pageable pageable);
 }

@@ -36,6 +36,7 @@ public class BusinessKycEventListener {
     @Transactional
     public void onKycApproved(KycApprovedEvent event) {
         Business business = findBusiness(event.businessId());
+        business.setClaimed(true);
         business.setKycVerified(true);
         businessRepository.save(business);
         log.info("Business id='{}' saved after KYC approval", event.businessId());
@@ -46,6 +47,9 @@ public class BusinessKycEventListener {
     public void onKycRejected(KycRejectedEvent event) {
         Business business = findBusiness(event.businessId());
         business.setStatus(BusinessStatus.DRAFT);
+        business.setClaimedByUserId(null);
+        business.setOwnerUserId(null);
+        business.setClaimed(false);
         business.setKycVerified(false);
         businessRepository.save(business);
         log.info("Business id='{}' status set to DRAFT after KYC rejection", event.businessId());

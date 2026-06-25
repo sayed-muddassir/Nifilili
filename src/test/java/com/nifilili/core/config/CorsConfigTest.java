@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
@@ -60,7 +59,7 @@ class CorsConfigTest {
 
     @BeforeEach
     void setUp() {
-        when(businessQueryService.getAllBusinesses(org.mockito.ArgumentMatchers.any()))
+        when(businessQueryService.getAllBusinessesByStatus(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
                 .thenReturn(new PageImpl<>(List.of()));
         given(jwtTokenProvider.validateToken(org.mockito.ArgumentMatchers.anyString())).willReturn(false);
     }

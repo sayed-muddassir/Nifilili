@@ -2,6 +2,7 @@ package com.nifilili.business.controller.publicapi;
 
 import com.nifilili.business.dto.response.BusinessResponse;
 import com.nifilili.business.service.BusinessQueryService;
+import com.nifilili.core.enums.business.BusinessStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +30,8 @@ class BusinessQueryControllerTest {
     void getAllBusinesses_WhenServiceReturnsPage_ShouldReturnSamePage() {
         PageRequest pageRequest = PageRequest.of(0, 10);
         Page<BusinessResponse> responsePage = new PageImpl<>(List.of(BusinessResponse.builder().build()));
-        when(businessQueryService.getAllBusinesses(pageRequest)).thenReturn(responsePage);
+        when(businessQueryService.getAllBusinessesByStatus(pageRequest, BusinessStatus.PUBLISHED))
+                .thenReturn(responsePage);
 
         assertSame(responsePage, businessQueryController.getAllBusinesses(pageRequest));
     }

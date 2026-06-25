@@ -107,6 +107,6 @@ class BusinessQueryServiceImplTest {
         when(businessDataRepository.findByBusinessId(1L)).thenReturn(List.of());
         when(businessAttributeRepository.findByBusinessId(1L)).thenReturn(List.of());
 
-        assertEquals(1, businessQueryService.getAllBusinesses(PageRequest.of(0, 10)).getTotalElements());
+        assertEquals(1, businessQueryService.getAllBusinessesByStatus(PageRequest.of(0, 10), BusinessStatus.PUBLISHED).getTotalElements());
     }
 }

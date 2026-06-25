@@ -138,6 +138,7 @@ public class KycServiceImpl implements KycService {
 
         BusinessKyc kyc = new BusinessKyc();
         kyc.setBusinessId(businessId);
+        kyc.setAdminMessage("Business Claim process started, documents need to be submitted");
         kyc.setKycStatus(KycStatus.NOT_STARTED);
         kyc.setSubmissionCount(0);
         kyc.setCreatedAt(Instant.now());

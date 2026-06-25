@@ -11,6 +11,7 @@ import com.nifilili.business.repository.*;
 import com.nifilili.business.service.BusinessQueryService;
 import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.ResourceNotFoundException;
+import com.nifilili.core.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,9 +37,6 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
     private final SectionRepository sectionRepository;
     private final AttributeDefinitionRepository attributeDefinitionRepository;
 
-    /* ---------------------------------------------------
-       API 1: GET BUSINESS BY ID
-       --------------------------------------------------- */
     @Override
     public BusinessResponse getBusinessById(Long businessId) {
 
@@ -64,13 +62,9 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
         return mapToResponse(business, categoryIds, sections, attributes);
     }
 
-    /* ---------------------------------------------------
-       API 2: GET ALL BUSINESSES (PAGINATED)
-       --------------------------------------------------- */
     @Override
-    public Page<BusinessResponse> getAllBusinesses(Pageable pageable) {
-
-        return businessRepository.findByStatus(BusinessStatus.PUBLISHED, pageable)
+    public Page<BusinessResponse> getAllBusinessesByStatus(Pageable pageable, BusinessStatus businessStatus) {
+        return businessRepository.findByStatus(businessStatus, pageable)
                 .map(business -> {
                     List<Long> categoryIds =
                             businessCategoryRepository
@@ -89,9 +83,27 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                 });
     }
 
-    /* ---------------------------------------------------
-       INTERNAL HELPERS
-       --------------------------------------------------- */
+    @Override
+    public Page<BusinessResponse> getAllBusinessesByClaimUnderProgress(Pageable pageable, BusinessStatus businessStatus) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        return businessRepository.findByClaimedByUserIdAndStatus(userId, businessStatus, pageable)
+                .map(business -> {
+                    List<Long> categoryIds =
+                            businessCategoryRepository
+                                    .findByBusinessId(business.getId())
+                                    .stream()
+                                    .map(BusinessCategory::getCategoryId)
+                                    .toList();
+
+                    List<SectionResponse> sections =
+                            buildSectionResponses(business.getId());
+
+                    List<BusinessAttributeResponse> attributes =
+                            buildAttributeResponses(business.getId());
+
+                    return mapToResponse(business, categoryIds, sections, attributes);
+                });
+    }
 
     private List<SectionResponse> buildSectionResponses(Long businessId) {
 

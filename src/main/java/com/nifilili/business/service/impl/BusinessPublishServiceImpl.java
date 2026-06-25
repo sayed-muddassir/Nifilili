@@ -9,6 +9,7 @@ import com.nifilili.business.events.BusinessPublishRequestedEvent;
 import com.nifilili.business.repository.BusinessRepository;
 import com.nifilili.business.service.BusinessPublishService;
 import com.nifilili.core.enums.business.BusinessSource;
+import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.InvalidBusinessStateException;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.core.security.SecurityUtil;
@@ -47,6 +48,9 @@ public class BusinessPublishServiceImpl implements BusinessPublishService {
         if (business.getSource() != BusinessSource.ADMIN_SEEDED) {
             throw new InvalidBusinessStateException("Only admin-seeded businesses can be claimed");
         }
+        if (business.getStatus() == BusinessStatus.CLAIM_UNDER_PROGRESS) {
+            throw new InvalidBusinessStateException("Cannot claim a business that is already under claim");
+        }
         if (business.isClaimed()) {
             throw new InvalidBusinessStateException("Business is already claimed");
         }
@@ -55,7 +59,7 @@ public class BusinessPublishServiceImpl implements BusinessPublishService {
 
         business.setClaimedByUserId(userId);
         business.setOwnerUserId(userId);
-        business.setClaimed(true);
+        business.setStatus(BusinessStatus.CLAIM_UNDER_PROGRESS);
         businessRepository.save(business);
 
         publisher.publishEvent(new BusinessClaimedEvent(businessId, userId));
@@ -68,7 +72,7 @@ public class BusinessPublishServiceImpl implements BusinessPublishService {
 
         Long authenticatedUserId = SecurityUtil.getCurrentUserId();
         if (business.getOwnerUserId() == null || !business.getOwnerUserId().equals(authenticatedUserId)) {
-            throw new InvalidBusinessStateException("Unauthorized access");
+            throw new InvalidBusinessStateException("Unauthorized access, logged in user does not owns this business");
         }
     }
 }

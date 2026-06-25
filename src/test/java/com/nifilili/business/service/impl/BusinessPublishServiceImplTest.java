@@ -92,7 +92,7 @@ class BusinessPublishServiceImplTest {
 
         assertEquals(77L, business.getOwnerUserId());
         assertEquals(77L, business.getClaimedByUserId());
-        assertTrue(business.isClaimed());
+        assertFalse(business.isClaimed());// Because the isClaimed flag is only set to true after KYC approval, not immediately upon claiming.
         verify(businessRepository).save(business);
 
         ArgumentCaptor<BusinessClaimedEvent> eventCaptor = ArgumentCaptor.forClass(BusinessClaimedEvent.class);
