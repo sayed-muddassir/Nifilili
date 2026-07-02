@@ -12,6 +12,7 @@ import com.nifilili.core.enums.business.BusinessSource;
 import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -81,10 +84,10 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
                 .toleName(request.getToleName())
                 .addressField1(request.getAddressField1())
                 .addressField2(request.getAddressField2())
-                .postalCode(request.getPostalCode())
+                .postalCode(Optional.ofNullable(request.getPostalCode()).orElse(StringUtils.EMPTY))
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .website(request.getWebsite())
+                .website(Optional.ofNullable(request.getWebsite()).orElse(StringUtils.EMPTY))
                 .profileImageUrl(request.getProfileImageUrl())
                 .bannerImageUrl(request.getBannerImageUrl())
                 .status(BusinessStatus.PUBLISHED)
@@ -92,10 +95,10 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
                 .isClaimed(!businessSource.equals(BusinessSource.ADMIN_SEEDED))
                 .averageRating(BigDecimal.ZERO)
                 .reviewCount(0)
-                .businessSummary("")
+                .businessSummary(StringUtils.EMPTY)
                 .registrationDate(Date.valueOf(LocalDate.now()))
                 .contacts(request.getContacts())
-                .businessHours(request.getBusinessHours())
+                .businessHours(Optional.ofNullable(request.getBusinessHours()).orElse(Map.of()))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
