@@ -41,6 +41,7 @@ public class BusinessPublishServiceImpl implements BusinessPublishService {
 
     @Override
     @Transactional
+    // After claiming the business, User needs to upload KYC documents and submit for verification.
     public void claimBusiness(Long businessId) {
         Business business = businessRepository.findById(businessId)
                 .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
@@ -62,6 +63,8 @@ public class BusinessPublishServiceImpl implements BusinessPublishService {
         business.setStatus(BusinessStatus.CLAIM_UNDER_PROGRESS);
         businessRepository.save(business);
 
+        // This event is consumed by KYC module, will initiate KYC record with NOT STARTED, upload document and submit for review will move it to PENDING
+        // Based KYC ADMIN Approval or Rejection will move the business to PUBLISHED or DRAFT
         publisher.publishEvent(new BusinessClaimedEvent(businessId, userId));
         log.info("Business id='{}' claimed by user='{}'", businessId, userId);
     }

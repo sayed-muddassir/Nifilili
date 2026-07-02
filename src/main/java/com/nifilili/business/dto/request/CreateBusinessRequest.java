@@ -48,12 +48,10 @@ public class CreateBusinessRequest {
     @Schema(description = "Secondary address line such as landmark or floor.", example = "2nd Floor, Opposite City Mall", nullable = true)
     private String addressField2;
 
-    @Schema(description = "Postal code for the business address.", example = "44600")
-    @NotBlank
+    @Schema(description = "Postal code for the business address.", example = "44600", nullable = true)
     private String postalCode;
 
-    @Schema(description = "Official website URL of the business.", example = "https://www.nifilili.com")
-    @NotBlank
+    @Schema(description = "Official website URL of the business.", example = "https://www.nifilili.com", nullable = true)
     private String website;
 
     @Schema(description = "URL of the business profile image.", example = "https://example.com/profile.jpg", nullable = true)
@@ -67,7 +65,6 @@ public class CreateBusinessRequest {
     private Map<String, Object> contacts;
 
     @Schema(description = "Business operating hours keyed by day or schedule block.", example = "{\"monday\":\"09:00-18:00\",\"tuesday\":\"09:00-18:00\"}", nullable = true)
-    @NotNull
     private Map<String, Object> businessHours;
 
     @ArraySchema(
