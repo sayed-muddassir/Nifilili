@@ -2,6 +2,8 @@ package com.nifilili.business.service.impl;
 
 import java.util.List;
 
+import com.nifilili.business.domain.MunicipalityImageMaster;
+import com.nifilili.business.repository.MunicipalityImageMasterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import com.nifilili.core.exception.ResourceNotFoundException;
 public class MunicipalityAdminServiceImpl implements MunicipalityAdminService {
 
     private final MunicipalityMasterRepository municipalityMasterRepository;
+    private final MunicipalityImageMasterRepository municipalityImageMasterRepository;
     private final DistrictMasterRepository districtMasterRepository;
     private final BusinessLocationReferenceRepository businessLocationReferenceRepository;
 
@@ -35,8 +38,18 @@ public class MunicipalityAdminServiceImpl implements MunicipalityAdminService {
                 .districtId(request.getDistrictId())
                 .name(request.getName())
                 .type(request.getType())
+                .description(request.getDescription())
                 .build();
         MunicipalityMaster savedMunicipality = municipalityMasterRepository.save(municipality);
+
+        savedMunicipality.setImages(request.getImageUrls() != null ? request.getImageUrls().stream()
+                .map(url -> {
+                    var image = new com.nifilili.business.domain.MunicipalityImageMaster();
+                    image.setMunicipalityId(savedMunicipality.getId());
+                    image.setImageUrl(url);
+                    return image;
+                }).toList() : List.of());
+
         log.info("Created municipality master record id={}", savedMunicipality.getId());
         return toResponse(savedMunicipality);
     }
@@ -49,6 +62,19 @@ public class MunicipalityAdminServiceImpl implements MunicipalityAdminService {
         municipality.setDistrictId(request.getDistrictId());
         municipality.setName(request.getName());
         municipality.setType(request.getType());
+        municipality.setDescription(request.getDescription());
+
+        municipalityImageMasterRepository.deleteAllByMunicipalityId(municipality.getId());
+        List<MunicipalityImageMaster> imageMasterList = municipalityImageMasterRepository.saveAll(request.getImageUrls() != null ? request.getImageUrls().stream()
+                .map(url -> {
+                    var image = new MunicipalityImageMaster();
+                    image.setMunicipalityId(municipality.getId());
+                    image.setImageUrl(url);
+                    return image;
+                }).toList() : List.of());
+
+        municipality.setImages(imageMasterList);
+
         MunicipalityMaster savedMunicipality = municipalityMasterRepository.save(municipality);
         log.info("Updated municipality master record id={}", savedMunicipality.getId());
         return toResponse(savedMunicipality);
@@ -100,6 +126,10 @@ public class MunicipalityAdminServiceImpl implements MunicipalityAdminService {
         response.setDistrictId(municipality.getDistrictId());
         response.setName(municipality.getName());
         response.setType(municipality.getType());
+        response.setDescription(municipality.getDescription());
+        response.setImageUrls(municipality.getImages() != null ? municipality.getImages().stream()
+                .map(com.nifilili.business.domain.MunicipalityImageMaster::getImageUrl)
+                .toList() : List.of());
         return response;
     }
 }

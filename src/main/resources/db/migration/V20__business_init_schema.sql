@@ -22,7 +22,16 @@ CREATE TABLE "municipality_master" (
     "id" BIGINT PRIMARY KEY,
     "district_id" BIGINT NOT NULL,
     "name" VARCHAR(255) NOT NULL,
-    "type" VARCHAR(255) NOT NULL
+    "type" VARCHAR(255) NOT NULL,
+    "description" VARCHAR(255)
+);
+
+CREATE TABLE "municipality_image_master" (
+    "id" BIGINT PRIMARY KEY,
+    "municipality_id" BIGINT NOT NULL,
+    "image_url" VARCHAR(255) NOT NULL,
+    CONSTRAINT "fk_municipality_images_municipality"
+        FOREIGN KEY ("municipality_id") REFERENCES "municipality_master" ("id")
 );
 
 CREATE TABLE "categories" (
