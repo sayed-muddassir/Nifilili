@@ -13,6 +13,7 @@ import com.nifilili.core.enums.business.BusinessStatus;
 import com.nifilili.core.exception.ResourceNotFoundException;
 import com.nifilili.core.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class BusinessQueryServiceImpl implements BusinessQueryService {
 
@@ -160,8 +162,43 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
         return responses;
     }
 
-    private BusinessResponse mapToResponse(
-            Business business,
+    @Override
+    public List<BusinessResponse> getTopNByVerticalAndMunicipality(Long verticalId, Long municipalityId, int limit) {
+        if (verticalId == null || verticalId <= 0) {
+            throw new IllegalArgumentException("verticalId must be a positive number");
+        }
+        if (municipalityId == null || municipalityId <= 0) {
+            throw new IllegalArgumentException("municipalityId must be a positive number");
+        }
+        if (limit < 1 || limit > 100) {
+            throw new IllegalArgumentException("limit must be between 1 and 100");
+        }
+
+        log.debug("Fetching top {} businesses for verticalId={}, municipalityId={}", limit, verticalId, municipalityId);
+
+        List<Business> businesses = businessRepository.findTopNByVerticalAndMunicipalityAndStatus(
+            verticalId, municipalityId, limit
+        );
+
+        log.info("Found {} published businesses for verticalId={}, municipalityId={}", businesses.size(), verticalId, municipalityId);
+
+        return businesses.stream()
+            .map(business -> {
+                List<Long> categoryIds = businessCategoryRepository
+                    .findByBusinessId(business.getId())
+                    .stream()
+                    .map(BusinessCategory::getCategoryId)
+                    .toList();
+
+                List<SectionResponse> sections = buildSectionResponses(business.getId());
+                List<BusinessAttributeResponse> attributes = buildAttributeResponses(business.getId());
+
+                return mapToResponse(business, categoryIds, sections, attributes);
+            })
+            .toList();
+    }
+
+    private BusinessResponse mapToResponse (Business business,
             List<Long> categoryIds,
             List<SectionResponse> sections,
             List<BusinessAttributeResponse> attributes

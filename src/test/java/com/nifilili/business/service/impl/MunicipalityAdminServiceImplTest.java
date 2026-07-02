@@ -1,8 +1,10 @@
 package com.nifilili.business.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.nifilili.business.repository.MunicipalityImageMasterRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +34,9 @@ class MunicipalityAdminServiceImplTest {
 
     @Mock
     private MunicipalityMasterRepository municipalityMasterRepository;
+
+    @Mock
+    private MunicipalityImageMasterRepository municipalityImageMasterRepository;
 
     @Mock
     private DistrictMasterRepository districtMasterRepository;
@@ -91,6 +96,7 @@ class MunicipalityAdminServiceImplTest {
         when(districtMasterRepository.existsById(2L)).thenReturn(true);
         when(municipalityMasterRepository.findById(22L)).thenReturn(Optional.of(existing));
         when(municipalityMasterRepository.save(existing)).thenReturn(existing);
+//        when(municipalityImageMasterRepository.deleteAllByMunicipalityId(22L))
 
         var response = service.update(22L, request);
 
