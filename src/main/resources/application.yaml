@@ -18,6 +18,11 @@ spring:
   flyway:
     enabled: true
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
+
 logging:
   level:
     org.flywaydb: INFO
@@ -28,6 +33,11 @@ app:
   jwt-refresh-expiration-ms: 2592000000
   business-files:
     base-path: /tmp/nifilili/files
+    storage-provider: local  # 'local' | 'aws-s3' | 'gcs' - select storage backend
+    path-strategy: flat      # 'flat' | 'dated' | 'by-module' - configurable folder structure
+    max-file-size: 10428800  # 10MB in bytes
+    allowed-extensions: .pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip
+    retention-policy: keep-all  # 'keep-all' | 'keep-latest-5'
   cors:
     allowed-origins:
       - http://localhost:3000
