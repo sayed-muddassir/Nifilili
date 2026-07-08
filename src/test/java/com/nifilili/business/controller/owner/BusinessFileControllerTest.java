@@ -32,7 +32,7 @@ class BusinessFileControllerTest {
     @Test
     void uploadFile_WhenValidRequest_ShouldReturnCreated() {
         MockMultipartFile file = new MockMultipartFile("file", "registration.pdf", "application/pdf", "abc".getBytes());
-        BusinessFileUploadResponse payload = new BusinessFileUploadResponse("uuid-registration.pdf", "uuid-registration.pdf", "application/pdf", 3L);
+        BusinessFileUploadResponse payload = new BusinessFileUploadResponse("uuid-registration.pdf", "uuid-registration.pdf", "application/pdf", 3L, "uuid-registration.pdf", 1, "123213qs");
         when(businessFileService.uploadFile(file)).thenReturn(payload);
 
         ResponseEntity<BusinessFileUploadResponse> response = businessFileController.uploadFile(file);

@@ -14,10 +14,10 @@ import lombok.NoArgsConstructor;
 )
 public class BusinessFileUploadResponse {
 
-    @Schema(description = "Exact stored file path on server.", example = "/tmp/nifilili/business-files/abc123.pdf")
+    @Schema(description = "Relative path after basePath on server.", example = "registration.pdf")
     private String relativePath;
 
-    @Schema(description = "Stored file name.", example = "registration.pdf")
+    @Schema(description = "Stored file name (may include version suffix).", example = "registration_v1.pdf")
     private String fileName;
 
     @Schema(description = "Detected or provided content type.", example = "application/pdf")
@@ -25,4 +25,13 @@ public class BusinessFileUploadResponse {
 
     @Schema(description = "Stored file size in bytes.", example = "204800")
     private Long size;
+
+    @Schema(description = "Original filename as uploaded.", example = "registration.pdf")
+    private String originalFileName;
+
+    @Schema(description = "Version number (0 for first upload, incremented for duplicates).", example = "0")
+    private Integer version;
+
+    @Schema(description = "SHA-256 hash of file content for duplicate detection.", example = "abc123def456...")
+    private String contentHash;
 }
