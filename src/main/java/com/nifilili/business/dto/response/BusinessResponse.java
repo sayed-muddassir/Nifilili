@@ -95,4 +95,10 @@ public class BusinessResponse {
 
     @Schema(description = "KYC verification status of the business.", example = "true")
     private boolean isKycVerified;
+
+    @Schema(description = "URL of the business profile image.", example = "https://example.com/profile.jpg", nullable = true)
+    private String profileImageUrl;
+
+    @Schema(description = "URL of the business banner image.", example = "https://example.com/banner.jpg", nullable = true)
+    private String bannerImageUrl;
 }

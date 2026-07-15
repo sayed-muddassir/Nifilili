@@ -228,6 +228,8 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
                 .sections(sections)
                 .attributes(attributes)
                 .isKycVerified(business.isKycVerified())
+                .profileImageUrl(business.getProfileImageUrl())
+                .bannerImageUrl(business.getBannerImageUrl())
                 .build();
     }
 }

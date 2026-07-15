@@ -53,7 +53,7 @@ public class BusinessCategoryServiceImpl implements BusinessCategoryService {
 
         Long authenticatedUserId = SecurityUtil.getCurrentUserId();
         if (business.getOwnerUserId() == null || !business.getOwnerUserId().equals(authenticatedUserId)) {
-            throw new InvalidBusinessStateException("Unauthorized access");
+            throw new InvalidBusinessStateException("Unauthorized access, user does not own this business");
         }
         return business;
     }
