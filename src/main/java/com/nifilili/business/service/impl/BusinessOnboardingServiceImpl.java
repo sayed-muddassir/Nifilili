@@ -80,8 +80,10 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
                 .name(request.getName())
                 .legalName(request.getLegalName())
                 .municipalityId(request.getMunicipalityId())
-                .wardNumber(request.getWardNumber())
-                .toleName(request.getToleName())
+                // Hard coding because of DB mandate
+                .wardNumber(Optional.ofNullable(request.getWardNumber()).orElse(0))
+                // Hard coding because of DB mandate
+                .toleName(StringUtils.isBlank(request.getToleName()) ? StringUtils.EMPTY : request.getToleName())
                 .addressField1(request.getAddressField1())
                 .addressField2(request.getAddressField2())
                 .postalCode(Optional.ofNullable(request.getPostalCode()).orElse(StringUtils.EMPTY))
