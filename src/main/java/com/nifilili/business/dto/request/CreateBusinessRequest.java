@@ -33,12 +33,10 @@ public class CreateBusinessRequest {
     @NotNull
     private Long municipalityId;
 
-    @Schema(description = "Municipality ward number for the business address.", example = "5", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
+    @Schema(description = "Municipality ward number for the business address.", example = "5")
     private Integer wardNumber;
 
-    @Schema(description = "Tole or locality name for the address.", example = "Putalisadak", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @Schema(description = "Tole or locality name for the address.", example = "Putalisadak")
     private String toleName;
 
     @Schema(description = "Primary address line for the business location.", example = "Bagbazar Main Road", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -60,8 +58,7 @@ public class CreateBusinessRequest {
     @Schema(description = "URL of the business banner image.", example = "https://example.com/banner.jpg", nullable = true)
     private String bannerImageUrl;
 
-    @Schema(description = "Contact metadata such as phone, email, or social handles.", example = "{\"phone\":\"+977-9800000000\",\"email\":\"hello@nifilili.com\"}", nullable = true)
-    @NotNull
+    @Schema(description = "Contact metadata such as phone, email, or social handles.", example = "{\"phone\":\"+977-9800000000\",\"email\":\"hello@nifilili.com\"}")
     private Map<String, Object> contacts;
 
     @Schema(description = "Business operating hours keyed by day or schedule block.", example = "{\"monday\":\"09:00-18:00\",\"tuesday\":\"09:00-18:00\"}", nullable = true)
