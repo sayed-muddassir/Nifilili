@@ -4,7 +4,11 @@ import com.nifilili.business.domain.Business;
 import com.nifilili.business.domain.BusinessAttribute;
 import com.nifilili.business.domain.BusinessCategory;
 import com.nifilili.business.domain.BusinessSectionData;
+import com.nifilili.business.domain.CategoryDefinition;
+import com.nifilili.business.domain.MunicipalityMaster;
+import com.nifilili.business.domain.VerticalDefinition;
 import com.nifilili.business.dto.response.BusinessAttributeResponse;
+import com.nifilili.business.dto.response.BusinessDetailsResponse;
 import com.nifilili.business.dto.response.BusinessResponse;
 import com.nifilili.business.dto.response.SectionResponse;
 import com.nifilili.business.repository.*;
@@ -32,12 +36,15 @@ import java.util.stream.Collectors;
 public class BusinessQueryServiceImpl implements BusinessQueryService {
 
     private final BusinessRepository businessRepository;
+    private final VerticalRepository verticalRepository;
+    private final CategoryRepository categoryRepository;
     private final BusinessCategoryRepository businessCategoryRepository;
     private final BusinessSectionDataRepository businessDataRepository;
     private final BusinessAttributeRepository businessAttributeRepository;
 
     private final SectionRepository sectionRepository;
     private final AttributeDefinitionRepository attributeDefinitionRepository;
+    private final MunicipalityMasterRepository municipalityMasterRepository;
 
     @Override
     public BusinessResponse getBusinessById(Long businessId) {
@@ -61,7 +68,14 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
         List<BusinessAttributeResponse> attributes =
                 buildAttributeResponses(businessId);
 
-        return mapToResponse(business, categoryIds, sections, attributes);
+        BusinessDetailsResponse businessDetails = buildBusinessDetails(business.getVerticalId(),
+                categoryIds, business.getMunicipalityId());
+
+        BusinessResponse businessResponse = mapToResponse(business, categoryIds, sections, attributes);
+
+        businessResponse.setBusinessDetails(businessDetails);
+
+        return businessResponse;
     }
 
     @Override
@@ -177,31 +191,49 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
         log.debug("Fetching top {} businesses for verticalId={}, municipalityId={}", limit, verticalId, municipalityId);
 
         List<Business> businesses = businessRepository.findTopNByVerticalAndMunicipalityAndStatus(
-            verticalId, municipalityId, limit
+                verticalId, municipalityId, limit
         );
 
         log.info("Found {} published businesses for verticalId={}, municipalityId={}", businesses.size(), verticalId, municipalityId);
 
         return businesses.stream()
-            .map(business -> {
-                List<Long> categoryIds = businessCategoryRepository
-                    .findByBusinessId(business.getId())
-                    .stream()
-                    .map(BusinessCategory::getCategoryId)
-                    .toList();
+                .map(business -> {
+                    List<Long> categoryIds = businessCategoryRepository
+                            .findByBusinessId(business.getId())
+                            .stream()
+                            .map(BusinessCategory::getCategoryId)
+                            .toList();
 
-                List<SectionResponse> sections = buildSectionResponses(business.getId());
-                List<BusinessAttributeResponse> attributes = buildAttributeResponses(business.getId());
+                    List<SectionResponse> sections = buildSectionResponses(business.getId());
+                    List<BusinessAttributeResponse> attributes = buildAttributeResponses(business.getId());
 
-                return mapToResponse(business, categoryIds, sections, attributes);
-            })
-            .toList();
+                    return mapToResponse(business, categoryIds, sections, attributes);
+                })
+                .toList();
     }
 
-    private BusinessResponse mapToResponse (Business business,
-            List<Long> categoryIds,
-            List<SectionResponse> sections,
-            List<BusinessAttributeResponse> attributes
+    private BusinessDetailsResponse buildBusinessDetails(Long verticalId, List<Long> categoryIds, Long municipalityId) {
+        // Implementation for building business details response
+        VerticalDefinition vertical = verticalRepository.findById(verticalId).orElse(null);
+
+        List<String> categoryNameList = categoryIds.stream().map(id -> {
+            CategoryDefinition categoryDefinition = categoryRepository.findById(id).orElse(null);
+            return categoryDefinition != null ? categoryDefinition.getName() : null;
+        }).toList();
+
+        MunicipalityMaster municipality = municipalityMasterRepository.findById(municipalityId).orElse(null);
+
+        return BusinessDetailsResponse.builder()
+                .verticalName(vertical != null ? vertical.getName() : null)
+                .categoryNames(categoryNameList)
+                .municipalityName(municipality != null ? municipality.getName() : null)
+                .build();
+    }
+
+    private BusinessResponse mapToResponse(Business business,
+                                           List<Long> categoryIds,
+                                           List<SectionResponse> sections,
+                                           List<BusinessAttributeResponse> attributes
     ) {
 
         return BusinessResponse.builder()

@@ -101,4 +101,10 @@ public class BusinessResponse {
 
     @Schema(description = "URL of the business banner image.", example = "https://example.com/banner.jpg", nullable = true)
     private String bannerImageUrl;
+
+    @Schema(description = "Detailed information about the business.",
+            example = "{\"verticalName\":\"Retail\",\"categoryNames\":[\"Clothing\",\"Accessories\"]," +
+                    "\"municipalityName\":\"Kathmandu\",\"wardName\":\"Ward 1\"}",
+            nullable = true)
+    private BusinessDetailsResponse businessDetails;
 }
