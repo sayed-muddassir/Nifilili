@@ -148,4 +148,12 @@ public class BusinessAdminController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @Operation(summary = "Step 8.0: Add Businesses in Bulk (Admin Seed)", description = "Creates a admin seeded bulk business records and returns count of success and error count")
+    @PostMapping("/businesses/bulk")
+    public ResponseEntity<BulkCreateBusinessResponse> createBusinesses(@Valid @RequestBody List<CreateBusinessRequest> requests) {
+        BulkCreateBusinessResponse bulkCreateBusinessResponse = businessOnboardingService.bulkCreateBusinesses(requests, BusinessSource.ADMIN_SEEDED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(bulkCreateBusinessResponse);
+    }
+
 }

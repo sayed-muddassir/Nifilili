@@ -2,6 +2,7 @@ package com.nifilili.business.service.impl;
 
 import com.nifilili.business.domain.Business;
 import com.nifilili.business.dto.request.CreateBusinessRequest;
+import com.nifilili.business.dto.response.BulkCreateBusinessResponse;
 import com.nifilili.business.dto.response.UserCreatedBusinessResponse;
 import com.nifilili.business.events.BusinessCreatedEvent;
 import com.nifilili.business.mapper.BusinessMapper;
@@ -55,6 +56,23 @@ public class BusinessOnboardingServiceImpl implements BusinessOnboardingService 
         publisher.publishEvent(new BusinessCreatedEvent(business.getId()));
 
         return business.getId();
+    }
+
+    @Override
+    public BulkCreateBusinessResponse bulkCreateBusinesses(List<CreateBusinessRequest> requests, BusinessSource businessSource) {
+        int successCount = 0;
+        int errorCount = 0;
+
+        for (CreateBusinessRequest request : requests) {
+            try {
+                createBusiness(request, businessSource);
+                successCount++;
+            } catch (Exception e) {
+                errorCount++;
+            }
+        }
+
+        return new BulkCreateBusinessResponse(successCount, errorCount);
     }
 
     @Override
