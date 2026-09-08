@@ -35,7 +35,6 @@ public class SectionDefinitionServiceImpl implements SectionDefinitionService {
         validateSectionCategoryConsistency(request.getVerticalId(), request.getCategoryId());
 
         SectionDefinition sectionToPersist = sectionMapper.toEntity(request);
-        sectionToPersist.setPrompt(request.getPromptText());
 
         SectionDefinition saved = sectionRepository.save(sectionToPersist);
         return sectionMapper.toResponse(saved);

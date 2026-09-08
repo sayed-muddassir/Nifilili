@@ -49,6 +49,8 @@ public class BusinessAdminController {
         return verticalDefinitionService.update(verticalId, request);
     }
 
+    // TODO Delete Vertical
+
     @Operation(summary = "Step 2.0: List Categories by Vertical", description = "Loads categories under selected vertical.")
     @GetMapping("/vertical/{verticalId}/categories")
     public List<CategoryResponse> getCategoriesByVertical(@PathVariable Long verticalId) {
@@ -66,6 +68,8 @@ public class BusinessAdminController {
     public CategoryResponse updateCategory(@PathVariable Long categoryId, @Valid @RequestBody CreateCategoryRequest request) {
         return categoryDefinitionService.update(categoryId, request);
     }
+
+    // TODO Delete Category
 
     @Operation(summary = "Step 3.0: List Sections by Vertical", description = "Loads sections for selected vertical.")
     @GetMapping("/vertical/{verticalId}/sections")
@@ -85,6 +89,8 @@ public class BusinessAdminController {
         return sectionDefinitionService.updateSection(sectionId, request);
     }
 
+    // TODO Delete Section
+
     @Operation(summary = "Step 4.0: List Section Fields", description = "Loads field definitions for a selected section.")
     @GetMapping("/sections/{sectionId}/fields")
     public List<SectionFieldResponse> getSectionFields(@PathVariable Long sectionId) {
@@ -102,6 +108,8 @@ public class BusinessAdminController {
     public SectionFieldResponse updateSectionField(@PathVariable Long fieldId, @Valid @RequestBody CreateSectionFieldRequest request) {
         return sectionDefinitionService.updateField(fieldId, request);
     }
+
+    // TODO Delete Section Field
 
     @Operation(summary = "Step 5.0: List Attributes by Vertical", description = "Loads attribute definitions for selected vertical.")
     @GetMapping("/vertical/{verticalId}/attributes")
@@ -121,6 +129,8 @@ public class BusinessAdminController {
         return attributeDefinitionService.update(attributeId, request);
     }
 
+    // TODO Delete Attribute
+
     @Operation(summary = "Step 6.0: List Documents by Vertical", description = "Loads required KYC documents for selected vertical.")
     @GetMapping("/vertical/{verticalId}/documents")
     public List<DocumentDefinitionResponse> getDocumentByVertical(@PathVariable Long verticalId) {
@@ -138,6 +148,8 @@ public class BusinessAdminController {
     public DocumentDefinitionResponse updateDocument(@PathVariable Long documentDefinitionId, @Valid @RequestBody CreateDocumentDefinitionRequest request) {
         return documentDefinitionService.update(documentDefinitionId, request);
     }
+
+    // TODO Delete Document
 
     @Operation(summary = "Step 7.0: Create Business (Admin Seed)", description = "Creates a admin seeded business record and returns onboarding id.")
     @PostMapping("/businesses")
