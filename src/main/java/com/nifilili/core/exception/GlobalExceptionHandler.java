@@ -3,6 +3,7 @@ package com.nifilili.core.exception;
 import com.nifilili.core.dto.ErrorDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -205,6 +206,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDto> handleNoResourceFound(NoResourceFoundException ex, HttpServletRequest request) {
         log.warn("No resource found for '{}'", request.getRequestURI());
         return buildError(HttpStatus.NOT_FOUND, "URL not found", request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleDatabaseException(DataAccessException ex, HttpServletRequest request) {
+        log.warn("Database exception occurred '{}'", ex.getMessage());
+        String message = "Database error occurred: " + ex.getLocalizedMessage();
+        return buildError(HttpStatus.CONFLICT, message, request);
     }
 
     @ExceptionHandler

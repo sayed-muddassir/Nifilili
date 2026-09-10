@@ -44,7 +44,7 @@ CREATE TABLE "categories" (
     "icon_url" VARCHAR(255) NOT NULL,
     "active_status" BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT "fk_categories_vertical"
-        FOREIGN KEY ("business_vertical_id") REFERENCES "business_verticals" ("id")
+        FOREIGN KEY ("business_vertical_id") REFERENCES "business_verticals" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "business_master" (
@@ -96,7 +96,7 @@ CREATE TABLE "sections" (
     "allow_multiple" BOOLEAN NOT NULL,
     "groupable" BOOLEAN NOT NULL,
     CONSTRAINT "fk_sections_category"
-        FOREIGN KEY ("category_id") REFERENCES "categories" ("id")
+        FOREIGN KEY ("category_id") REFERENCES "categories" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "section_fields" (
@@ -109,7 +109,7 @@ CREATE TABLE "section_fields" (
     "required" BOOLEAN NOT NULL,
     "allow_multiple" BOOLEAN NOT NULL,
     CONSTRAINT "fk_section_fields_section"
-        FOREIGN KEY ("section_id") REFERENCES "sections" ("id")
+        FOREIGN KEY ("section_id") REFERENCES "sections" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "section_groups" (
@@ -120,7 +120,7 @@ CREATE TABLE "section_groups" (
     CONSTRAINT "fk_section_groups_business"
         FOREIGN KEY ("business_id") REFERENCES "business_master" ("id"),
     CONSTRAINT "fk_section_groups_section"
-        FOREIGN KEY ("section_id") REFERENCES "sections" ("id")
+        FOREIGN KEY ("section_id") REFERENCES "sections" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "business_data" (
@@ -132,7 +132,7 @@ CREATE TABLE "business_data" (
     CONSTRAINT "fk_business_data_business"
         FOREIGN KEY ("business_id") REFERENCES "business_master" ("id"),
     CONSTRAINT "fk_business_data_section"
-        FOREIGN KEY ("section_id") REFERENCES "sections" ("id"),
+        FOREIGN KEY ("section_id") REFERENCES "sections" ("id") ON DELETE CASCADE,
     CONSTRAINT "fk_business_data_section_group"
         FOREIGN KEY ("section_group_id") REFERENCES "section_groups" ("id")
 );
@@ -145,7 +145,7 @@ CREATE TABLE "business_category_mapping" (
     CONSTRAINT "fk_business_category_business"
         FOREIGN KEY ("business_id") REFERENCES "business_master" ("id"),
     CONSTRAINT "fk_business_category_category"
-        FOREIGN KEY ("category_id") REFERENCES "categories" ("id")
+        FOREIGN KEY ("category_id") REFERENCES "categories" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "document_definitions" (
@@ -159,7 +159,7 @@ CREATE TABLE "document_definitions" (
     "created_at" TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
     "updated_at" TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT "fk_document_definitions_vertical"
-        FOREIGN KEY ("vertical_id") REFERENCES "business_verticals" ("id")
+        FOREIGN KEY ("vertical_id") REFERENCES "business_verticals" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "business_documents" (
@@ -177,7 +177,7 @@ CREATE TABLE "business_documents" (
     CONSTRAINT "fk_business_documents_business"
         FOREIGN KEY ("business_id") REFERENCES "business_master" ("id"),
     CONSTRAINT "fk_business_documents_definition"
-        FOREIGN KEY ("document_definition_id") REFERENCES "document_definitions" ("id"),
+        FOREIGN KEY ("document_definition_id") REFERENCES "document_definitions" ("id") ON DELETE CASCADE,
     CONSTRAINT "fk_business_documents_reviewed_by"
         FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users" ("id")
 );
@@ -219,7 +219,7 @@ CREATE TABLE "attribute_definitions" (
     "created_at" TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
     "updated_at" TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT "fk_attribute_definitions_vertical"
-        FOREIGN KEY ("vertical_id") REFERENCES "business_verticals" ("id")
+        FOREIGN KEY ("vertical_id") REFERENCES "business_verticals" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "business_attributes" (
@@ -232,7 +232,7 @@ CREATE TABLE "business_attributes" (
     CONSTRAINT "fk_business_attributes_business"
         FOREIGN KEY ("business_id") REFERENCES "business_master" ("id"),
     CONSTRAINT "fk_business_attributes_definition"
-        FOREIGN KEY ("attribute_id") REFERENCES "attribute_definitions" ("id")
+        FOREIGN KEY ("attribute_id") REFERENCES "attribute_definitions" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "business_configurations" (

@@ -48,4 +48,12 @@ public class DocumentDefinitionServiceImpl implements DocumentDefinitionService 
                 .map(mapper::toResponse)
                 .toList();
     }
+
+    @Override
+    public void delete(Long documentDefinitionId) {
+        DocumentDefinition existing = repository.findById(documentDefinitionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Document definition not found"));
+
+        repository.delete(existing);
+    }
 }

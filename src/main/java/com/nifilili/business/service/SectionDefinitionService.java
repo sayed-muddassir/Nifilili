@@ -18,4 +18,7 @@ public interface SectionDefinitionService {
     List<SectionResponse> getByVertical(Long verticalId);
 
     List<SectionFieldResponse> getFields(Long sectionId);
+
+    void delete(Long sectionId);
+    void deleteField(Long fieldId);
 }
