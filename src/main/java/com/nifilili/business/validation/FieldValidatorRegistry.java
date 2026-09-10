@@ -16,6 +16,8 @@ public class FieldValidatorRegistry {
         VALIDATORS.put(FieldType.DROPDOWN, new DropdownFieldValidator());
         VALIDATORS.put(FieldType.CHECKBOX, new CheckboxFieldValidator());
         VALIDATORS.put(FieldType.MEDIA_URL, new MediaUrlValidator());
+        VALIDATORS.put(FieldType.DATE, new DateFieldValidator());
+        VALIDATORS.put(FieldType.TIME, new TimeFieldValidator());
     }
 
     public static FieldValidator get(FieldType type) {

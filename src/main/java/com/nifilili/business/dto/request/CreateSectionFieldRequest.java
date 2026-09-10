@@ -25,7 +25,7 @@ public class CreateSectionFieldRequest {
     private String label;
 
     @NotNull
-    @Schema(description = "Field type such as text, number, checkbox, dropdown, or media_url.")
+    @Schema(description = "Field type such as text, number, checkbox, dropdown, media_url, date, or time.")
     private BusinessSectionFieldType type;
 
     @NotNull
