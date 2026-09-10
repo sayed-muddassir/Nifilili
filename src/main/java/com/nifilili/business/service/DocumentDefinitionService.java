@@ -11,4 +11,6 @@ public interface DocumentDefinitionService {
     DocumentDefinitionResponse update(Long documentDefinitionId, CreateDocumentDefinitionRequest request);
 
     List<DocumentDefinitionResponse> getByVertical(Long verticalId);
+
+    void delete(Long documentDefinitionId);
 }

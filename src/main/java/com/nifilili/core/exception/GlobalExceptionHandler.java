@@ -1,8 +1,10 @@
 package com.nifilili.core.exception;
 
+import com.nifilili.business.validation.SectionValidationException;
 import com.nifilili.core.dto.ErrorDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -105,12 +107,6 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ErrorDto> handleSqlException(SQLException ex, HttpServletRequest request) {
-        log.error("SQL error: {}", ex.getMessage());
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
-    }
-
     // TODO : Replace with custom exceptions for specific cases (e.g. duplicate application, invalid job status transition, etc.)
     @ExceptionHandler
     public ResponseEntity<ErrorDto> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
@@ -205,6 +201,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDto> handleNoResourceFound(NoResourceFoundException ex, HttpServletRequest request) {
         log.warn("No resource found for '{}'", request.getRequestURI());
         return buildError(HttpStatus.NOT_FOUND, "URL not found", request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleDatabaseException(DataAccessException ex, HttpServletRequest request) {
+        log.warn("Database exception occurred '{}'", ex.getMessage());
+        String message = "Database error occurred: " + ex.getLocalizedMessage();
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, message, request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorDto> handleUnhandledException(SectionValidationException ex, HttpServletRequest request) {
+        log.error("Section field value validation error for '{}': {}", request.getRequestURI(), ex.getMessage(), ex);
+        String error = ex.getErrors().toString();
+        return buildError(HttpStatus.BAD_REQUEST, error, request);
     }
 
     @ExceptionHandler

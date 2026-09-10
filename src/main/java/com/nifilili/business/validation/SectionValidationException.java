@@ -1,7 +1,10 @@
 package com.nifilili.business.validation;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public class SectionValidationException extends RuntimeException {
 
     private final List<String> errors;
@@ -11,7 +14,4 @@ public class SectionValidationException extends RuntimeException {
         this.errors = errors;
     }
 
-    public List<String> getErrors() {
-        return errors;
-    }
 }

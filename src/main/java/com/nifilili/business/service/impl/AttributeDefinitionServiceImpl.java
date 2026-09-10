@@ -52,4 +52,12 @@ public class AttributeDefinitionServiceImpl
                 .map(mapper::toResponse)
                 .toList();
     }
+
+    @Override
+    public void delete(Long attributeId) {
+        AttributeDefinition existing = repository.findById(attributeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attribute definition not found"));
+
+        repository.delete(existing);
+    }
 }

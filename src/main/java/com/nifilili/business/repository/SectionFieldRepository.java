@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SectionFieldRepository extends JpaRepository<SectionField, Long> {
     List<SectionField> findBySectionId(Long sectionId);
+    void deleteAllBySectionId(Long sectionId);
 }

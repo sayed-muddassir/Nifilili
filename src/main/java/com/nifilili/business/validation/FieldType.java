@@ -5,5 +5,7 @@ public enum FieldType {
     NUMBER,
     DROPDOWN,
     CHECKBOX,
-    MEDIA_URL
+    MEDIA_URL,
+    DATE,
+    TIME
 }

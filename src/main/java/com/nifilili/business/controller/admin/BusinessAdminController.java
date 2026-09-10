@@ -49,7 +49,11 @@ public class BusinessAdminController {
         return verticalDefinitionService.update(verticalId, request);
     }
 
-    // TODO Delete Vertical
+    @Operation(summary = "Step 1.3: Delete Vertical", description = "Deletes an existing vertical.")
+    @DeleteMapping("/verticals/{verticalId}")
+    public void deleteVertical(@PathVariable Long verticalId) {
+        verticalDefinitionService.delete(verticalId);
+    }
 
     @Operation(summary = "Step 2.0: List Categories by Vertical", description = "Loads categories under selected vertical.")
     @GetMapping("/vertical/{verticalId}/categories")
@@ -69,7 +73,11 @@ public class BusinessAdminController {
         return categoryDefinitionService.update(categoryId, request);
     }
 
-    // TODO Delete Category
+    @Operation(summary = "Step 2.3: Delete Category", description = "Deletes an existing category.")
+    @DeleteMapping("/categories/{categoryId}")
+    public void deleteCategory(@PathVariable Long categoryId) {
+        categoryDefinitionService.delete(categoryId);
+    }
 
     @Operation(summary = "Step 3.0: List Sections by Vertical", description = "Loads sections for selected vertical.")
     @GetMapping("/vertical/{verticalId}/sections")
@@ -89,7 +97,11 @@ public class BusinessAdminController {
         return sectionDefinitionService.updateSection(sectionId, request);
     }
 
-    // TODO Delete Section
+    @Operation(summary = "Step 3.3: Delete Section", description = "Deletes an existing section.")
+    @DeleteMapping("/sections/{sectionId}")
+    public void deleteSection(@PathVariable Long sectionId) {
+        sectionDefinitionService.delete(sectionId);
+    }
 
     @Operation(summary = "Step 4.0: List Section Fields", description = "Loads field definitions for a selected section.")
     @GetMapping("/sections/{sectionId}/fields")
@@ -109,7 +121,11 @@ public class BusinessAdminController {
         return sectionDefinitionService.updateField(fieldId, request);
     }
 
-    // TODO Delete Section Field
+    @Operation(summary = "Step 4.3: Delete Section Field", description = "Delete an existing section field.")
+    @DeleteMapping("/sections/fields/{fieldId}")
+    public void deleteSectionField(@PathVariable Long fieldId) {
+        sectionDefinitionService.deleteField(fieldId);
+    }
 
     @Operation(summary = "Step 5.0: List Attributes by Vertical", description = "Loads attribute definitions for selected vertical.")
     @GetMapping("/vertical/{verticalId}/attributes")
@@ -129,7 +145,11 @@ public class BusinessAdminController {
         return attributeDefinitionService.update(attributeId, request);
     }
 
-    // TODO Delete Attribute
+    @Operation(summary = "Step 5.3: Delete Attribute", description = "Deletes an existing attribute definition.")
+    @DeleteMapping("/attributes/{attributeId}")
+    public void deleteAttribute(@PathVariable Long attributeId) {
+        attributeDefinitionService.delete(attributeId);
+    }
 
     @Operation(summary = "Step 6.0: List Documents by Vertical", description = "Loads required KYC documents for selected vertical.")
     @GetMapping("/vertical/{verticalId}/documents")
@@ -149,7 +169,11 @@ public class BusinessAdminController {
         return documentDefinitionService.update(documentDefinitionId, request);
     }
 
-    // TODO Delete Document
+    @Operation(summary = "Step 6.3: Delete Document Definition", description = "Deletes an existing KYC document requirement definition.")
+    @DeleteMapping("/documents/{documentDefinitionId}")
+    public void deleteDocument(@PathVariable Long documentDefinitionId) {
+        documentDefinitionService.delete(documentDefinitionId);
+    }
 
     @Operation(summary = "Step 7.0: Create Business (Admin Seed)", description = "Creates a admin seeded business record and returns onboarding id.")
     @PostMapping("/businesses")

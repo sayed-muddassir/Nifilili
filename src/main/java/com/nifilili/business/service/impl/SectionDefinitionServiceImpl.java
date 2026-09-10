@@ -97,6 +97,26 @@ public class SectionDefinitionServiceImpl implements SectionDefinitionService {
                 .toList();
     }
 
+    @Override
+    public void delete(Long sectionId) {
+        SectionDefinition existing = sectionRepository.findById(sectionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Section not found"));
+
+        // Delete associated fields first
+        fieldRepository.deleteAllBySectionId(sectionId);
+
+        // Then delete the section
+        sectionRepository.delete(existing);
+    }
+
+    @Override
+    public void deleteField(Long fieldId) {
+        SectionField existing = fieldRepository.findById(fieldId)
+                .orElseThrow(() -> new ResourceNotFoundException("Section field not found"));
+
+        fieldRepository.delete(existing);
+    }
+
     private void validateSectionCategoryConsistency(Long verticalId, Long categoryId) {
         if (categoryId == null) {
             return;

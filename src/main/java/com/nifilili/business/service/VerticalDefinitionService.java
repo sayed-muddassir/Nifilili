@@ -11,4 +11,5 @@ public interface VerticalDefinitionService {
     VerticalResponse create(CreateVerticalRequest request);
     VerticalResponse update(Long verticalId, CreateVerticalRequest request);
     List<VerticalResponse> getAllActive();
+    void delete(Long verticalId);
 }

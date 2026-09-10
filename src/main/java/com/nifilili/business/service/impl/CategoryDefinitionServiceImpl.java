@@ -56,4 +56,11 @@ public class CategoryDefinitionServiceImpl implements CategoryDefinitionService 
                 .map(mapper::toResponse)
                 .toList();
     }
+
+    @Override
+    public void delete(Long categoryId) {
+        CategoryDefinition existing = repository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        repository.delete(existing);
+    }
 }

@@ -55,4 +55,11 @@ public class VerticalDefinitionServiceImpl implements VerticalDefinitionService 
                 .map(mapper::toResponse)
                 .toList();
     }
+
+    @Override
+    public void delete(Long verticalId) {
+        VerticalDefinition existing = repository.findById(verticalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vertical not found"));
+        repository.delete(existing);
+    }
 }
