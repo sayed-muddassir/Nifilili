@@ -13,4 +13,6 @@ public interface AttributeDefinitionService {
     List<AttributeDefinitionResponse> getByVertical(Long verticalId);
 
     void delete(Long attributeId);
+
+    AttributeDefinitionResponse getById(Long attributeId);
 }

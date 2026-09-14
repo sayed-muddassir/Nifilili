@@ -56,4 +56,11 @@ public class DocumentDefinitionServiceImpl implements DocumentDefinitionService 
 
         repository.delete(existing);
     }
+
+    @Override
+    public DocumentDefinitionResponse getById(Long documentId) {
+        DocumentDefinition existing = repository.findById(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Document definition not found"));
+        return mapper.toResponse(existing);
+    }
 }

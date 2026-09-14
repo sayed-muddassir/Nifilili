@@ -63,4 +63,11 @@ public class CategoryDefinitionServiceImpl implements CategoryDefinitionService 
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         repository.delete(existing);
     }
+
+    @Override
+    public CategoryResponse getById(Long categoryId) {
+        CategoryDefinition existing = repository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        return mapper.toResponse(existing);
+    }
 }

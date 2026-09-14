@@ -60,4 +60,11 @@ public class AttributeDefinitionServiceImpl
 
         repository.delete(existing);
     }
+
+    @Override
+    public AttributeDefinitionResponse getById(Long attributeId) {
+        AttributeDefinition existing = repository.findById(attributeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attribute definition not found"));
+        return mapper.toResponse(existing);
+    }
 }
