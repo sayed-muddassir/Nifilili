@@ -117,6 +117,21 @@ public class SectionDefinitionServiceImpl implements SectionDefinitionService {
         fieldRepository.delete(existing);
     }
 
+    @Override
+    public SectionResponse getById(Long sectionId) {
+        SectionDefinition existing = sectionRepository.findById(sectionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Section not found"));
+
+        return sectionMapper.toResponse(existing);
+    }
+
+    @Override
+    public SectionFieldResponse getFieldById(Long fieldId) {
+        SectionField existing = fieldRepository.findById(fieldId)
+                .orElseThrow(() -> new ResourceNotFoundException("Section field not found"));
+        return fieldMapper.toResponse(existing);
+    }
+
     private void validateSectionCategoryConsistency(Long verticalId, Long categoryId) {
         if (categoryId == null) {
             return;

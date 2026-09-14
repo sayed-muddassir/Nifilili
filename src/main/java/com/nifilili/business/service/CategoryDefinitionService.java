@@ -14,4 +14,6 @@ public interface CategoryDefinitionService {
     List<CategoryResponse> getAll();
 
     void delete(Long categoryId);
+
+    CategoryResponse getById(Long categoryId);
 }

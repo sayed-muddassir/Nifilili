@@ -62,4 +62,11 @@ public class VerticalDefinitionServiceImpl implements VerticalDefinitionService 
                 .orElseThrow(() -> new ResourceNotFoundException("Vertical not found"));
         repository.delete(existing);
     }
+
+    @Override
+    public VerticalResponse getById(Long verticalId) {
+        VerticalDefinition existing = repository.findById(verticalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vertical not found"));
+        return mapper.toResponse(existing);
+    }
 }

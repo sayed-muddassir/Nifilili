@@ -21,4 +21,8 @@ public interface SectionDefinitionService {
 
     void delete(Long sectionId);
     void deleteField(Long fieldId);
+
+    SectionResponse getById(Long sectionId);
+
+    SectionFieldResponse getFieldById(Long fieldId);
 }

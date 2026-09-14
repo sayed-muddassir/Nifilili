@@ -55,6 +55,12 @@ public class BusinessAdminController {
         verticalDefinitionService.delete(verticalId);
     }
 
+    @Operation(summary = "Step 1.4: Get Vertical by ID", description = "Retrieves a specific business vertical by its ID.")
+    @GetMapping("/verticals/{verticalId}")
+    public VerticalResponse getVerticalById(@PathVariable Long verticalId) {
+        return verticalDefinitionService.getById(verticalId);
+    }
+
     @Operation(summary = "Step 2.0: List Categories by Vertical", description = "Loads categories under selected vertical.")
     @GetMapping("/vertical/{verticalId}/categories")
     public List<CategoryResponse> getCategoriesByVertical(@PathVariable Long verticalId) {
@@ -77,6 +83,12 @@ public class BusinessAdminController {
     @DeleteMapping("/categories/{categoryId}")
     public void deleteCategory(@PathVariable Long categoryId) {
         categoryDefinitionService.delete(categoryId);
+    }
+
+    @Operation(summary = "Step 2.4: Get Category by ID", description = "Retrieves a specific category by its ID.")
+    @GetMapping("/categories/{categoryId}")
+    public CategoryResponse getCategoryById(@PathVariable Long categoryId) {
+        return categoryDefinitionService.getById(categoryId);
     }
 
     @Operation(summary = "Step 3.0: List Sections by Vertical", description = "Loads sections for selected vertical.")
@@ -103,6 +115,12 @@ public class BusinessAdminController {
         sectionDefinitionService.delete(sectionId);
     }
 
+    @Operation(summary = "Step 3.4: Get Section by ID", description = "Retrieves a specific section by its ID.")
+    @GetMapping("/sections/{sectionId}")
+    public SectionResponse getSectionById(@PathVariable Long sectionId) {
+        return sectionDefinitionService.getById(sectionId);
+    }
+
     @Operation(summary = "Step 4.0: List Section Fields", description = "Loads field definitions for a selected section.")
     @GetMapping("/sections/{sectionId}/fields")
     public List<SectionFieldResponse> getSectionFields(@PathVariable Long sectionId) {
@@ -125,6 +143,12 @@ public class BusinessAdminController {
     @DeleteMapping("/sections/fields/{fieldId}")
     public void deleteSectionField(@PathVariable Long fieldId) {
         sectionDefinitionService.deleteField(fieldId);
+    }
+
+    @Operation(summary = "Step 4.4: Get Section Field by ID", description = "Retrieves a specific section field by its ID.")
+    @GetMapping("/sections/fields/{fieldId}")
+    public SectionFieldResponse getSectionFieldById(@PathVariable Long fieldId) {
+        return sectionDefinitionService.getFieldById(fieldId);
     }
 
     @Operation(summary = "Step 5.0: List Attributes by Vertical", description = "Loads attribute definitions for selected vertical.")
@@ -151,6 +175,12 @@ public class BusinessAdminController {
         attributeDefinitionService.delete(attributeId);
     }
 
+    @Operation(summary = "Step 5.4: Get Attribute by ID", description = "Retrieves a specific attribute by its ID.")
+    @GetMapping("/attributes/{attributeId}")
+    public AttributeDefinitionResponse getAttributeById(@PathVariable Long attributeId) {
+        return attributeDefinitionService.getById(attributeId);
+    }
+
     @Operation(summary = "Step 6.0: List Documents by Vertical", description = "Loads required KYC documents for selected vertical.")
     @GetMapping("/vertical/{verticalId}/documents")
     public List<DocumentDefinitionResponse> getDocumentByVertical(@PathVariable Long verticalId) {
@@ -173,6 +203,12 @@ public class BusinessAdminController {
     @DeleteMapping("/documents/{documentDefinitionId}")
     public void deleteDocument(@PathVariable Long documentDefinitionId) {
         documentDefinitionService.delete(documentDefinitionId);
+    }
+
+    @Operation(summary = "Step 6.4: Get Document by ID", description = "Retrieves a specific document by its ID.")
+    @GetMapping("/documents/{documentId}")
+    public DocumentDefinitionResponse getDocumentById(@PathVariable Long documentId) {
+        return documentDefinitionService.getById(documentId);
     }
 
     @Operation(summary = "Step 7.0: Create Business (Admin Seed)", description = "Creates a admin seeded business record and returns onboarding id.")

@@ -13,4 +13,6 @@ public interface DocumentDefinitionService {
     List<DocumentDefinitionResponse> getByVertical(Long verticalId);
 
     void delete(Long documentDefinitionId);
+
+    DocumentDefinitionResponse getById(Long documentId);
 }
